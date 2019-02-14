@@ -798,26 +798,48 @@ Fl_Preferences::Name::~Name() {
 //-----------------------------------------------------------------------------
 // internal methods, do not modify or use as they will change without notice
 //
+// RootNode is the root of every database. A RootNode manges reading and
+// writing files on disk. It holds the data in a tree of Node elements.
+//
 
 int Fl_Preferences::Node::lastEntrySet = -1;
 
-// create the root node
-// - construct the name of the file that will hold our preferences
+/** \internal
+ \brief Create the root node using a company name and an app name.
+ The system driver constructs the name of the file that will hold our
+ preferences. It will then try to read that file and construct a tree of Nodes.
+
+ \param prefs link back to the Fl_Preferences user representation.
+ \param root USER or SYSTEM, to make these prefs user only or system wide
+ \param vendor unique company or organsation name, preferable a url like "fltk.org"
+ \param application uniqe name for this app
+ */
 Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, Root root, const char *vendor, const char *application )
 : prefs_(prefs),
   filename_(0L),
   vendor_(0L),
-  application_(0L) {
-
+  application_(0L)
+{
   char *filename = Fl::system_driver()->preference_rootnode(prefs, root, vendor, application);
-    filename_    = filename ? strdup(filename) : 0L;
+  filename_    = filename ? strdup(filename) : 0L;
   vendor_      = strdup(vendor);
   application_ = strdup(application); 
   read();
 }
 
-// create the root node
-// - construct the name of the file that will hold our preferences
+/** \internal
+ \brief Create the root node using a given path and possibly filename.
+ The system driver constructs the name of the file that will hold our
+ preferences. It will then try to read that file and construct a tree of Nodes.
+
+ \param prefs link back to the Fl_Preferences user representation.
+ \param path use this path to create the filename and path
+ \param vendor unique company or organsation name, preferable a url like "fltk.org"
+ \param application uniqe name for this app; if this is \c NULL, FLTK assumes
+    that \c path contains the filename as well, and no substitutions to the
+    filename will be made. Otherwise, the filename will be concatenated as
+    <tt><i>path</i>/<i>application</i>.prefs</tt> .
+ */
 Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, const char *path, const char *vendor, const char *application )
 : prefs_(prefs),
   filename_(0L),
@@ -839,8 +861,15 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, const char *path, con
   read();
 }
 
-// create a root node that exists only on RAM and can not be read or written to
-// a file
+/** \internal
+ \brief Create a root node that exists only in memory.
+
+ There exists exactly one Fl_Preferences database in memory. The content of
+ the database can be created, read, and written at runtime, but can not be
+ stored in or retreived from a file.
+
+ This database can be useful to manage plugins and other temporary data.
+ */
 Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs )
 : prefs_(prefs),
   filename_(0L),
@@ -848,7 +877,9 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs )
   application_(0L) {
 }
 
-// destroy the root node and all depending nodes
+/** \internal
+ \brief Destroy the root node and all depending nodes.
+ */
 Fl_Preferences::RootNode::~RootNode() {
   if ( prefs_->node->dirty() )
     write();
@@ -868,7 +899,10 @@ Fl_Preferences::RootNode::~RootNode() {
   prefs_->node = 0L;
 }
 
-// read a preferences file and construct the group tree and with all entry leafs
+/** \internal
+ \brief Read a preferences file and construct the group tree and with all
+    entry leafs.
+ */
 int Fl_Preferences::RootNode::read() {
   if (!filename_)   // RUNTIME preferences
     return -1; 
@@ -905,7 +939,9 @@ int Fl_Preferences::RootNode::read() {
   return 0;
 }
 
-// write the group tree and all entry leafs
+/** \internal
+ \brief Write the group tree and all entry leafs.
+ */
 int Fl_Preferences::RootNode::write() {
   if (!filename_)   // RUNTIME preferences
     return -1;
@@ -935,9 +971,13 @@ int Fl_Preferences::RootNode::write() {
   return 0;
 }
 
-// get the path to the preferences directory
-// - copy the path into the buffer at "path"
-// - if the resulting path is longer than "pathlen", it will be cropped
+/** \internal
+ \brief Get the path to the preferences directory.
+
+ \param path copy the path into the buffer at \c path
+ \param pathlen if the resulting path is longer than "pathlen", it will
+    be cropped.
+ */
 char Fl_Preferences::RootNode::getPath( char *path, int pathlen ) {
   if (!filename_)   // RUNTIME preferences
     return 1; // return 1 (not -1) to be consistent with fl_make_path()
@@ -986,8 +1026,18 @@ char Fl_Preferences::RootNode::getPath( char *path, int pathlen ) {
   return ret;
 }
 
-// create a node that represents a group
-// - path must be a single word, prferable alnum(), dot and underscore only. Space is ok.
+//-----------------------------------------------------------------------------
+
+/** \internal
+ \brief Create a node that represents a group of name/value pairs.
+
+ One or more \c Fl_Preferences instances can link to a Node, providing an
+ interface to the user to add or delete subgnodes, and to get or set name/value
+ pairs.
+
+ \param path must be a single word, preferable alnum(), dot and underscore only.
+    Space is ok.
+ */
 Fl_Preferences::Node::Node( const char *path ) {
   if ( path ) path_ = strdup( path ); else path_ = 0;
   child_ = 0; next_ = 0; parent_ = 0;
@@ -1000,6 +1050,9 @@ Fl_Preferences::Node::Node( const char *path ) {
   nIndex_ = NIndex_ = 0;
 }
 
+/** \internal
+ \brief Delete all child nodes in this node.
+ */
 void Fl_Preferences::Node::deleteAllChildren() {
   Node *nx;
   for ( Node *nd = child_; nd; nd = nx ) {
@@ -1011,6 +1064,9 @@ void Fl_Preferences::Node::deleteAllChildren() {
   updateIndex();
 }
 
+/** \internal
+ \brief Delete all name/value pairs in this node.
+ */
 void Fl_Preferences::Node::deleteAllEntries() {
   if ( entry_ ) {
     for ( int i = 0; i < nEntry_; i++ ) {
@@ -1031,7 +1087,9 @@ void Fl_Preferences::Node::deleteAllEntries() {
   dirty_ = 1;
 }
 
-// delete this and all depending nodes
+/** \internal
+ \brief Delete this and all depending nodes.
+ */
 Fl_Preferences::Node::~Node() {
   deleteAllChildren();
   deleteAllEntries();
@@ -1044,7 +1102,12 @@ Fl_Preferences::Node::~Node() {
   parent_ = 0L;
 }
 
-// recursively check if any entry is dirty (was changed after loading a fresh prefs file)
+/** \internal
+ \brief Recursively check if any entry is dirty.
+
+ A node is dirty if it was created or modified after reading or writing the
+ preferences file.
+ */
 char Fl_Preferences::Node::dirty() {
   if ( dirty_ ) return 1;
   if ( next_ && next_->dirty() ) return 1;
@@ -1052,7 +1115,9 @@ char Fl_Preferences::Node::dirty() {
   return 0;
 }
 
-// recursively clear all dirty flags
+/** \internal
+ \brief Recursively clear all dirty flags.
+ */
 void Fl_Preferences::Node::clearDirtyFlags() {
   Fl_Preferences::Node *nd = this;
   while (nd) {
@@ -1062,9 +1127,10 @@ void Fl_Preferences::Node::clearDirtyFlags() {
   }
 }
 
-// write this node (recursively from the last neighbor back to this)
-// write all entries
-// write all children
+/** \internal
+ \brief Write this node (recursively from the last neighbor back to this)
+ \param f output stream
+ */
 int Fl_Preferences::Node::write( FILE *f ) {
   if ( next_ ) next_->write( f );
   fprintf( f, "\n[%s]\n\n", path_ );
@@ -1095,7 +1161,10 @@ int Fl_Preferences::Node::write( FILE *f ) {
   return 0;
 }
 
-// set the parent node and create the full path
+/** \internal
+ \brief Set the parent node and create the full path.
+ \param pn make pn the parent node of this node
+ */
 void Fl_Preferences::Node::setParent( Node *pn ) {
   parent_ = pn;
   next_ = pn->child_;
@@ -1105,7 +1174,10 @@ void Fl_Preferences::Node::setParent( Node *pn ) {
   path_ = strdup( nameBuffer );
 }
 
-// find the corresponding root node
+/** \internal
+ \brief Find the corresponding root node.
+ \return the root node for this node
+ */
 Fl_Preferences::RootNode *Fl_Preferences::Node::findRoot() {
   Node *n = this;
   do {
@@ -1116,7 +1188,11 @@ Fl_Preferences::RootNode *Fl_Preferences::Node::findRoot() {
   return 0L;
 }
 
-// add a child to this node and set its path (try to find it first...)
+/** \internal
+ \brief Add a child to this node and set its path (try to find it first...).
+ \param path name of the new child node
+ \return apointer to the new node
+ */
 Fl_Preferences::Node *Fl_Preferences::Node::addChild( const char *path ) {
   sprintf( nameBuffer, "%s/%s", path_, path );
   char *name = strdup( nameBuffer );
@@ -1126,7 +1202,11 @@ Fl_Preferences::Node *Fl_Preferences::Node::addChild( const char *path ) {
   return nd;
 }
 
-// create and set, or change an entry within this node
+/** \internal
+ \brief Create and set, or change an entry within this node.
+ \param name this is the name part of the name/value pair
+ \param value a text string as the value
+ */
 void Fl_Preferences::Node::set( const char *name, const char *value )
 {
   for ( int i=0; i<nEntry_; i++ ) {
@@ -1153,7 +1233,10 @@ void Fl_Preferences::Node::set( const char *name, const char *value )
   dirty_ = 1;
 }
 
-// create or set a value (or annotation) from a single line in the file buffer
+/** \internal
+ \brief Create or set a value (or annotation) from a single line in the file buffer
+ \param line a line as read form the current file
+ */
 void Fl_Preferences::Node::set( const char *line ) {
   // hmm. If we assume that we always read this file in the beginning,
   // we can handle the dirty flag 'quick and dirty'
@@ -1175,8 +1258,14 @@ void Fl_Preferences::Node::set( const char *line ) {
   dirty_ = dirt;
 }
 
-// Append data to an existing node. This is only used in read operations when
-// a single entry stretches over multiple lines in the prefs file.
+/** \internal
+ \brief Append data to an existing node.
+
+ This is only used in read operations when a single entry stretches over
+ multiple lines in the prefs file.
+
+ \param line another line for the input stream
+ */
 void Fl_Preferences::Node::add( const char *line ) {
   if ( lastEntrySet<0 || lastEntrySet>=nEntry_ ) return;
   char *&dst = entry_[ lastEntrySet ].value;
@@ -1186,13 +1275,21 @@ void Fl_Preferences::Node::add( const char *line ) {
   memcpy( dst+a, line, b+1 );
 }
 
-// get the value for a name, returns 0 if no such name
+/** \internal
+ \brief Get the value for a name.
+ \param name the name of the entry that we want to query
+ \return returns a pointer to the value, or \c NULL if no such name
+ */
 const char *Fl_Preferences::Node::get( const char *name ) {
   int i = getEntry( name );
   return i>=0 ? entry_[i].value : 0 ;
 }
 
-// find the index of an entry, returns -1 if no such entry
+/** \internal
+ \brief Find the index of an entry.
+ \param name the name of the entry we want to find
+ \return the index, starting a 0, or -1 if no such entry
+ */
 int Fl_Preferences::Node::getEntry( const char *name ) {
   for ( int i=0; i<nEntry_; i++ ) {
     if ( strcmp( name, entry_[i].name ) == 0 ) {
@@ -1202,7 +1299,11 @@ int Fl_Preferences::Node::getEntry( const char *name ) {
   return -1;
 }
 
-// remove one entry form this group
+/** \internal
+ \brief Remove one entry form this group
+ \name the name of the entry we want to delete
+ \return 1 if the entry was found and deleted, 0 otherwise.
+ */
 char Fl_Preferences::Node::deleteEntry( const char *name ) {
   int ix = getEntry( name );
   if ( ix == -1 ) return 0;
@@ -1212,9 +1313,13 @@ char Fl_Preferences::Node::deleteEntry( const char *name ) {
   return 1;
 }
 
-// find a group somewhere in the tree starting here
-// - this method will always return a valid node (except for memory allocation problems)
-// - if the node was not found, 'find' will create the required branch
+/** \internal
+ \brief Find a group somewhere in the tree starting here.
+ This method will always return a valid node (except for memory allocation
+ problems). If the node was not found, 'find' will create the required branch.
+ \param path a path that can contain forward slashes.
+ \return an existing, if found, or a new node to match the path
+ */
 Fl_Preferences::Node *Fl_Preferences::Node::find( const char *path ) {
   int len = (int) strlen( path_ );
   if ( strncmp( path, path_, len ) == 0 ) {
@@ -1239,12 +1344,15 @@ Fl_Preferences::Node *Fl_Preferences::Node::find( const char *path ) {
   return 0;
 }
 
-// find a group somewhere in the tree starting here
-// caller must not set 'offset' argument
-// - if the node does not exist, 'search' returns NULL
-// - if the pathname is "." (current node) return this node
-// - if the pathname is "./" (root node) return the topmost node
-// - if the pathname starts with "./", start the search at the root node instead
+/** \internal
+ \brief Find a group somewhere in the tree starting here.
+ \param path a path that can contain forward slashes
+ \param offset user must not set \c offset argument
+ \return if the node does not exist, 'search' returns \c NULL
+ \return if the pathname is "." (current node) return this node
+ \return if the pathname is "./" (root node) return the topmost node
+ \return if the pathname starts with "./", start the search at the root node
+ */
 Fl_Preferences::Node *Fl_Preferences::Node::search( const char *path, int offset ) { 
   if ( offset == 0 ) {
     if ( path[0] == '.' ) {
@@ -1278,7 +1386,9 @@ Fl_Preferences::Node *Fl_Preferences::Node::search( const char *path, int offset
   return 0;
 }
 
-// return the number of child nodes (groups)
+/** \internal
+ \brief Return the number of child nodes (groups).
+ */
 int Fl_Preferences::Node::nChildren() {
   if (indexed_) {
     return nIndex_;
@@ -1290,7 +1400,9 @@ int Fl_Preferences::Node::nChildren() {
   }
 }
 
-// return the node name
+/** \internal
+ \brief Return the node name
+ */
 const char *Fl_Preferences::Node::name() {
   if ( path_ ) {
     char *r = strrchr( path_, '/' );
@@ -1300,7 +1412,9 @@ const char *Fl_Preferences::Node::name() {
   }
 }
 
-// return the n'th child node's name
+/** \internal
+ \brief Return the n'th child node's name.
+ */
 const char *Fl_Preferences::Node::child( int ix ) {
   Node *nd = childNode( ix );
   if ( nd )
@@ -1309,7 +1423,9 @@ const char *Fl_Preferences::Node::child( int ix ) {
     return 0L ;
 }
 
-// return the n'th child node
+/** \internal
+ \brief Return the n'th child node.
+ */
 Fl_Preferences::Node *Fl_Preferences::Node::childNode( int ix ) {
   createIndex();
   if (indexed_) {
@@ -1328,7 +1444,9 @@ Fl_Preferences::Node *Fl_Preferences::Node::childNode( int ix ) {
   }
 }
 
-// remove myself from the list and delete me (and all children)
+/** \internal
+ \brief Remove myself from the list and delete me (and all children).
+ */
 char Fl_Preferences::Node::remove() {
   Node *nd = 0, *np;
   if ( parent() ) {
@@ -1349,12 +1467,15 @@ char Fl_Preferences::Node::remove() {
   return ( nd != 0 );
 }
 
+/** \internal
+ \brief Create an array for fast indexed access to child nodes.
+ */
 void Fl_Preferences::Node::createIndex() {
   if (indexed_) return;
   int n = nChildren();
   if (n>NIndex_) {
     NIndex_ = n + 16;
-    index_ = (Node**)realloc(index_, NIndex_*sizeof(Node**));
+    index_ = (Node**)realloc(index_, NIndex_*sizeof(Node*));
   }
   Node *nd;
   int i = 0;
@@ -1365,16 +1486,27 @@ void Fl_Preferences::Node::createIndex() {
   indexed_ = 1;
 }
 
+/** \internal
+ \brief Mark the index as invalid.
+ */
 void Fl_Preferences::Node::updateIndex() {
   indexed_ = 0;
 }
 
+/** \internal
+ \brief Remove the index array alltogehter.
+ */
 void Fl_Preferences::Node::deleteIndex() {
   if (index_) free(index_);
   NIndex_ = nIndex_ = 0;
   index_ = 0;
   indexed_ = 0;
 }
+
+//------------------------------------------------------------------------------
+//
+// Plugins
+//
 
 /**
  \brief Create a plugin.
