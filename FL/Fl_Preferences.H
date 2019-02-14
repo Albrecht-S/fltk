@@ -29,13 +29,14 @@
    \brief Fl_Preferences provides methods to store user
    settings between application starts.
 
-   It is similar to the
-   Registry on Windows and Preferences on MacOS, and provides a
-   simple configuration mechanism for UNIX.
+   Fl_Preferences are similar to the Registry on Windows and Preferences on
+   MacOS, and provides a simple database mechanism for UNIX.
 
-   Fl_Preferences uses a hierarchy to store data. It
-   bundles similar data into groups and manages entries into those
-   groups as name/value pairs.
+   Fl_Preferences uses a hierarchy to store data. This hierarchy consists of
+   \em groups (sometimes called \em nodes, similar to \em elements in XML) that
+   can again contain groups. Groups can also contain \em entries (also
+   called \em "name/value pairs", or \em attributes in XML). Groups and entries
+   must have a unique name within their scope.
 
    Preferences are stored in text files that can be edited
    manually. The file format is easy to read and relatively
@@ -65,6 +66,26 @@
    be in UTF-8 encoding. Previous databases were stored in the
    current character set or code page which renders them incompatible
    for text entries using international characters.
+
+   \note When creating the initial Fl_Preferences instance, the contents of the
+   entire \c .prefs file is read and stored in a hierarchy of <tt>Node</tt>s
+   in memory.
+   Only when this initial instance is destroyed again, the contents of the
+   hierarchy is written back to the \c .prefs file. There is no locking
+   mechanism that will keep to separate tasks from reading and writing the same
+   file. It is therefore recommended that the initial Fl_Preferences instance
+   should only exist for a short time.
+
+   \note Instances of Fl_Preferences are just bookmarks, pointing to nodes
+   in memory. Multiple Fl_Preferences can point to the same node. The user
+   needs to manage creation and deletion of Fl_Preferences. Delting an
+   Fl_Prefrences instance will only delete that bookmark, but not the node.
+   Nodes are deleted using Fl_Preferences::deleteGroup(). If a node is deleted,
+   all bookmarks to the deleted node will continue to exist, but will no longer
+   serve any purpose.
+
+   \note It is entirely up to the user to create and delete Fl_Preferences
+   instances.
  */
 class FL_EXPORT Fl_Preferences {
 
@@ -197,18 +218,18 @@ private:
 public:  // older Sun compilers need this (public definition of the following classes)
   class RootNode;
   
-  class FL_EXPORT Node {	// a node contains a list to all its entries 
-            			// and all means to manage the tree structure
+    /** \internal
+     \brief A node contains a list to all its entries and all means to manage
+        the tree structure.
+     */
+  class FL_EXPORT Node {
     Node *child_, *next_;
-    union { 			// these two are mutually exclusive
-      Node *parent_;   		// top_ bit clear
-      RootNode *root_; 		// top_ bit set
-    };
+    Node *parent_;   		// top_ bit clear
+    RootNode *root_; 		// top_ bit set
     char *path_;
     Entry *entry_;
     int nEntry_, NEntry_;
     unsigned char dirty_:1;
-    unsigned char top_:1;
     unsigned char indexed_:1;
     // indexing routines
     Node **index_;
@@ -216,8 +237,6 @@ public:  // older Sun compilers need this (public definition of the following cl
     void createIndex();
     void updateIndex();
     void deleteIndex();
-  public:
-    static int lastEntrySet;
   public:
     Node( const char *path );
     ~Node();
@@ -230,9 +249,9 @@ public:  // older Sun compilers need this (public definition of the following cl
     Node *childNode( int ix );
     Node *addChild( const char *path );
     void setParent( Node *parent );
-    Node *parent() { return top_?0L:parent_; }
-    void setRoot(RootNode *r) { root_ = r; top_ = 1; }
-    RootNode *findRoot();
+    Node *parent() { return parent_; }
+    void setRoot(RootNode *r) { root_ = r; }
+      RootNode *root() { return root_; }
     char remove();
     char dirty();
     void clearDirtyFlags();
@@ -256,6 +275,7 @@ public:  // older Sun compilers need this (public definition of the following cl
     Fl_Preferences *prefs_;
     char *filename_;
     char *vendor_, *application_;
+    int lastEntrySet_;
   public:
     RootNode( Fl_Preferences *, Root root, const char *vendor, const char *application );
     RootNode( Fl_Preferences *, const char *path, const char *vendor, const char *application );
@@ -264,6 +284,8 @@ public:  // older Sun compilers need this (public definition of the following cl
     int read();
     int write();
     char getPath( char *path, int pathlen );
+    void lastEntrySet(int e) { lastEntrySet_ = e; }
+    int lastEntrySet() { return lastEntrySet_; }
   };
   friend class RootNode;
 

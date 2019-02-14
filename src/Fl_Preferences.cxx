@@ -185,7 +185,7 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, int groupIndex ) {
  */
 Fl_Preferences::Fl_Preferences( Fl_Preferences::ID id ) {
   node = (Node*)id;
-  rootNode = node->findRoot();
+  rootNode = node->root();
 }
 
 /**
@@ -802,8 +802,6 @@ Fl_Preferences::Name::~Name() {
 // writing files on disk. It holds the data in a tree of Node elements.
 //
 
-int Fl_Preferences::Node::lastEntrySet = -1;
-
 /** \internal
  \brief Create the root node using a company name and an app name.
  The system driver constructs the name of the file that will hold our
@@ -818,12 +816,14 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, Root root, const char
 : prefs_(prefs),
   filename_(0L),
   vendor_(0L),
-  application_(0L)
+  application_(0L),
+  lastEntrySet_(-1)
 {
   char *filename = Fl::system_driver()->preference_rootnode(prefs, root, vendor, application);
   filename_    = filename ? strdup(filename) : 0L;
   vendor_      = strdup(vendor);
-  application_ = strdup(application); 
+  application_ = strdup(application);
+  prefs->node->setRoot(this);
   read();
 }
 
@@ -844,7 +844,9 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, const char *path, con
 : prefs_(prefs),
   filename_(0L),
   vendor_(0L),
-  application_(0L) {
+  application_(0L),
+  lastEntrySet_(-1)
+{
 
   if (!vendor)
     vendor = "unknown";
@@ -858,6 +860,7 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, const char *path, con
   }
   vendor_      = strdup(vendor);
   application_ = strdup(application); 
+  prefs->node->setRoot(this);
   read();
 }
 
@@ -874,7 +877,10 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs )
 : prefs_(prefs),
   filename_(0L),
   vendor_(0L),
-  application_(0L) {
+  application_(0L),
+  lastEntrySet_(-1)
+{
+  if (prefs->node) prefs->node->setRoot(this);
 }
 
 /** \internal
@@ -896,7 +902,7 @@ Fl_Preferences::RootNode::~RootNode() {
     application_ = 0L;
   }
   delete prefs_->node;
-  prefs_->node = 0L;
+  prefs_->node = NULL;
 }
 
 /** \internal
@@ -1038,16 +1044,36 @@ char Fl_Preferences::RootNode::getPath( char *path, int pathlen ) {
  \param path must be a single word, preferable alnum(), dot and underscore only.
     Space is ok.
  */
-Fl_Preferences::Node::Node( const char *path ) {
-  if ( path ) path_ = strdup( path ); else path_ = 0;
-  child_ = 0; next_ = 0; parent_ = 0;
-  entry_ = 0;
-  nEntry_ = NEntry_ = 0;
-  dirty_ = 0;
-  top_ = 0;
-  indexed_ = 0;
-  index_ = 0;
-  nIndex_ = NIndex_ = 0;
+Fl_Preferences::Node::Node( const char *path )
+: child_(NULL), next_(NULL),
+  parent_(NULL),
+  root_(NULL),
+  path_(NULL),
+  entry_(NULL),
+  nEntry_(0), NEntry_(0),
+  dirty_(0),
+  indexed_(0),
+  index_(NULL),
+  nIndex_(0), NIndex_(0)
+{
+  if ( path ) path_ = strdup( path );
+}
+
+/** \internal
+ \brief Delete this node.
+ This unlinks all child nodes from this node, then deletes all entries and
+ all other allocated data.
+ */
+Fl_Preferences::Node::~Node() {
+  deleteAllChildren();
+  deleteAllEntries();
+  deleteIndex();
+  if ( path_ ) {
+    free( path_ );
+    path_ = 0L;
+  }
+  next_ = 0L;
+  parent_ = 0L;
 }
 
 /** \internal
@@ -1085,21 +1111,6 @@ void Fl_Preferences::Node::deleteAllEntries() {
     NEntry_ = 0;
   }
   dirty_ = 1;
-}
-
-/** \internal
- \brief Delete this and all depending nodes.
- */
-Fl_Preferences::Node::~Node() {
-  deleteAllChildren();
-  deleteAllEntries();
-  deleteIndex();
-  if ( path_ ) {
-    free( path_ );
-    path_ = 0L;
-  }
-  next_ = 0L;
-  parent_ = 0L;
 }
 
 /** \internal
@@ -1168,24 +1179,11 @@ int Fl_Preferences::Node::write( FILE *f ) {
 void Fl_Preferences::Node::setParent( Node *pn ) {
   parent_ = pn;
   next_ = pn->child_;
+  root_ = pn->root_;
   pn->child_ = this;
   sprintf( nameBuffer, "%s/%s", pn->path_, path_ );
   free( path_ );
   path_ = strdup( nameBuffer );
-}
-
-/** \internal
- \brief Find the corresponding root node.
- \return the root node for this node
- */
-Fl_Preferences::RootNode *Fl_Preferences::Node::findRoot() {
-  Node *n = this;
-  do {
-    if (n->top_)
-      return n->root_;
-    n = n->parent();
-  } while (n);
-  return 0L;
 }
 
 /** \internal
@@ -1218,7 +1216,7 @@ void Fl_Preferences::Node::set( const char *name, const char *value )
 	entry_[i].value = strdup( value );
 	dirty_ = 1;
       }
-      lastEntrySet = i;
+      root_->lastEntrySet(i);
       return;
     }
   }
@@ -1228,7 +1226,7 @@ void Fl_Preferences::Node::set( const char *name, const char *value )
   }
   entry_[ nEntry_ ].name = strdup( name );
   entry_[ nEntry_ ].value = value?strdup( value ):0;
-  lastEntrySet = nEntry_;
+  root_->lastEntrySet(nEntry_);
   nEntry_++;
   dirty_ = 1;
 }
@@ -1267,8 +1265,9 @@ void Fl_Preferences::Node::set( const char *line ) {
  \param line another line for the input stream
  */
 void Fl_Preferences::Node::add( const char *line ) {
-  if ( lastEntrySet<0 || lastEntrySet>=nEntry_ ) return;
-  char *&dst = entry_[ lastEntrySet ].value;
+  int activeEntry = root()->lastEntrySet();
+  if ( activeEntry<0 || activeEntry>=nEntry_ ) return;
+  char *&dst = entry_[activeEntry].value;
   size_t a = strlen( dst );
   size_t b = strlen( line );
   dst = (char*)realloc( dst, a+b+1 );
