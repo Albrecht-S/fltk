@@ -79,6 +79,7 @@ Fl_Preferences::Fl_Preferences( Root root, const char *vendor, const char *appli
   node = new Node( "." );
   rootNode = new RootNode( this, root, vendor, application );
   node->setRoot(rootNode);
+  /* int err = */ rootNode->read();
 }
 
 /**
@@ -97,6 +98,7 @@ Fl_Preferences::Fl_Preferences( const char *path, const char *vendor, const char
   node = new Node( "." );
   rootNode = new RootNode( this, path, vendor, application );
   node->setRoot(rootNode);
+  /* int err = */ rootNode->read();
 }
 
 /**
@@ -131,6 +133,7 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, const char *group ) {
       runtimePrefs->node = new Node( "." );
       runtimePrefs->rootNode = new RootNode( runtimePrefs );
       runtimePrefs->node->setRoot(rootNode);
+      /* int err = */ runtimePrefs->rootNode->read();
     }
     parent = runtimePrefs;
   }
@@ -805,7 +808,7 @@ Fl_Preferences::Name::~Name() {
 /** \internal
  \brief Create the root node using a company name and an app name.
  The system driver constructs the name of the file that will hold our
- preferences. It will then try to read that file and construct a tree of Nodes.
+ preferences.
 
  \param prefs link back to the Fl_Preferences user representation.
  \param root USER or SYSTEM, to make these prefs user only or system wide
@@ -823,14 +826,12 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, Root root, const char
   filename_    = filename ? strdup(filename) : 0L;
   vendor_      = strdup(vendor);
   application_ = strdup(application);
-  prefs->node->setRoot(this);
-  read();
 }
 
 /** \internal
  \brief Create the root node using a given path and possibly filename.
  The system driver constructs the name of the file that will hold our
- preferences. It will then try to read that file and construct a tree of Nodes.
+ preferences.
 
  \param prefs link back to the Fl_Preferences user representation.
  \param path use this path to create the filename and path
@@ -860,8 +861,6 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, const char *path, con
   }
   vendor_      = strdup(vendor);
   application_ = strdup(application); 
-  prefs->node->setRoot(this);
-  read();
 }
 
 /** \internal
@@ -880,7 +879,6 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs )
   application_(0L),
   lastEntrySet_(-1)
 {
-  if (prefs->node) prefs->node->setRoot(this);
 }
 
 /** \internal
