@@ -82,7 +82,7 @@ const char *Fl_Preferences::newUUID() {
  \todo Verify me.
 */
 Fl_Preferences::Fl_Preferences( Root root, const char *vendor, const char *application ) {
-  node = new Node( "." );
+  node = new Node( Node::ROOT );
   node->ref();
   rootNode = new RootNode( this, root, vendor, application );
   node->setRoot(rootNode);
@@ -105,7 +105,7 @@ Fl_Preferences::Fl_Preferences( Root root, const char *vendor, const char *appli
  \todo Verify me.
 */
 Fl_Preferences::Fl_Preferences( const char *path, const char *vendor, const char *application ) {
-  node = new Node( "." );
+  node = new Node( Node::ROOT );
   node->ref();
   rootNode = new RootNode( this, path, vendor, application );
   node->setRoot(rootNode);
@@ -147,7 +147,7 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, const char *group ) {
   if (parent==0) {
     if (!runtimePrefs) {
       runtimePrefs = new Fl_Preferences();
-      runtimePrefs->node = new Node( "." );
+      runtimePrefs->node = new Node( Node::ROOT );
       runtimePrefs->rootNode = new RootNode( runtimePrefs );
       runtimePrefs->node->setRoot(rootNode);
       /* int err = */ runtimePrefs->rootNode->read();
@@ -255,7 +255,8 @@ Fl_Preferences &Fl_Preferences::operator=(const Fl_Preferences &rhs) {
  \todo Verify me.
  */
 Fl_Preferences::~Fl_Preferences() {
-  if (node && !node->parent()) delete rootNode;
+  fprintf(stderr, "Deleting Fl_Preferences(%s)\n", node->path()); fflush(stderr);
+  if (node && node->isRoot()) delete rootNode;
   // DO NOT delete nodes! The root node will do that after writing the preferences
   // zero all pointer to avoid memory errors, even though
   // Valgrind does not complain (Cygwin does though)
@@ -1146,6 +1147,9 @@ char Fl_Preferences::RootNode::getPath( char *path, int pathlen ) {
 
 //-----------------------------------------------------------------------------
 
+
+char const *Fl_Preferences::Node::ROOT = ".";
+
 /** \internal
  \brief Create a node that represents a group of name/value pairs.
 
@@ -1169,15 +1173,14 @@ Fl_Preferences::Node::Node( const char *name )
   dirty_(0),
   indexed_(0),
   zombie_(0),
+  isRoot_(name==ROOT),
   index_(NULL),
   nIndex_(0), NIndex_(0),
   refCount_(0)
 {
   // we must always have a name
   name_ = ::strdup( name );
-  // if this is the root node, also set the path
-  if (name[0]=='.' && name[1]==0)
-    path_ = ::strdup(name);
+  if (isRoot_) path_ = ::strdup(name);
 }
 
 /** \internal

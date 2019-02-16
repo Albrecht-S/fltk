@@ -233,6 +233,7 @@ public:  // older Sun compilers need this (public definition of the following cl
     unsigned char dirty_:1;
     unsigned char indexed_:1;
     unsigned char zombie_:1;
+    unsigned char isRoot_:1;
     // indexing routines
     Node **index_;
     int nIndex_, NIndex_;
@@ -258,6 +259,7 @@ public:  // older Sun compilers need this (public definition of the following cl
     void setRoot(RootNode *r) { root_ = r; }
     const char *name() { return name_; }
     const char *path() { return path_; }
+    int isRoot() { return isRoot_; }
 
     // more complex methods
     Node *find( const char *path );
@@ -282,6 +284,8 @@ public:  // older Sun compilers need this (public definition of the following cl
     void deleteAllEntries();
     int nEntry() { return nEntry_; }
     Entry &entry(int i) { return entry_[i]; }
+
+    static const char *ROOT;
   };
   friend class Node;
 

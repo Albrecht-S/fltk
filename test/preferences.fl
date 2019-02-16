@@ -56,6 +56,8 @@ terminal->append("Unit test running...\\n");
   Fl_Preferences b(a, "b");
   Fl_Preferences c(b, "c");
   Fl_Preferences d(c, "d");
+  Fl_Preferences xyz(c, "x/y/z");
+  Fl_Preferences jkl(c, "./j/k/l");
 
   // Test 2: deleting groups
   Fl_Preferences groupDeleteTest(prefs, "groupDeleteTest");
@@ -66,6 +68,7 @@ terminal->append("Unit test running...\\n");
   // TODO: check ID system
   // TODO: check access by index
 }
+fprintf(stderr, "Test prefrences written\\n");
 
 // Read test data back
 {
@@ -75,9 +78,15 @@ terminal->append("Unit test running...\\n");
 
   // Test 1: deep data
   if (!prefs.groupExists("./a/b/c/d")) {
-    terminal->append("Test 1 failed: deep data\\n"); err++;  
+      terminal->append("Test 1.1 failed: deep data\\n"); err++;
   }
-  
+  if (!prefs.groupExists("./a/b/c/x/y/z")) {
+      terminal->append("Test 1.2 failed: deep data\\n"); err++;
+  }
+  if (!prefs.groupExists("./j/k/l")) {
+      terminal->append("Test 1.3 failed: deep data\\n"); err++;
+  }
+
   // Test 2: deleting groups
   if (!prefs.groupExists("./groupDeleteTest")) {
     terminal->append("Test 2 failed: group should exist\\n"); err++;  
@@ -100,6 +109,7 @@ terminal->append("Unit test running...\\n");
     terminal->append("Test 2 failed: deleted node must not return values.\\n"); err++;  
   }
 }
+fprintf(stderr, "Test prefrences excercised\\n");
 
 // test 1
 
