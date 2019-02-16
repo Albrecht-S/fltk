@@ -24,11 +24,20 @@ matrix:
     os: linux
     compiler: clang
     env: ANALYZE=true DOC=true
+  # test: reduce the amount of builds (use Linux/clang only)
+  # FIXME: remove the next 3 lines (exclude, os, compiler)
+  exclude:
+    os: osx
+    compiler: gcc
 
 branches:
   only:
   - master
-  - /^feature.*$/
+  - branch-1.3
+  - /^feature-.*/
+  - /^fix-.*/
+  - /^issue-.*/
+  - /^str-.*/
 
 before_script:
   - |
