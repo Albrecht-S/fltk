@@ -60,6 +60,11 @@ terminal->append("Unit test running...\\n");
   // Test 2: deleting groups
   Fl_Preferences groupDeleteTest(prefs, "groupDeleteTest");
   groupDeleteTest.set("x", 32);
+
+  // TODO: check operator=
+  // TODO: check copy constructor
+  // TODO: check ID system
+  // TODO: check access by index
 }
 
 // Read test data back

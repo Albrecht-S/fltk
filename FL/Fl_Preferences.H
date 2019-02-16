@@ -125,7 +125,7 @@ public:
   
   /** Remove the group with this ID from a database.
    */
-  static char remove(ID id_) { return ((Node*)id_)->remove(); }
+  static char remove(ID id_) { ((Node*)id_)->remove(); return 0; }
 
   /** Return the name of this entry.
    */
@@ -224,42 +224,56 @@ public:  // older Sun compilers need this (public definition of the following cl
      */
   class FL_EXPORT Node {
     Node *child_, *next_;
-    Node *parent_;   		// top_ bit clear
-    RootNode *root_; 		// top_ bit set
+    Node *parent_;
+    RootNode *root_;
+    char *name_;
     char *path_;
     Entry *entry_;
     int nEntry_, NEntry_;
     unsigned char dirty_:1;
     unsigned char indexed_:1;
+    unsigned char zombie_:1;
     // indexing routines
     Node **index_;
     int nIndex_, NIndex_;
+    int refCount_;
     void createIndex();
-    void updateIndex();
+    void invalidateIndex();
     void deleteIndex();
-  public:
-    Node( const char *path );
     ~Node();
-    // node methods
-    int write( FILE *f );
-    const char *name();
+  public:
+    // low level stuff
+    Node( const char *path );
+    void ref();
+    void unref();
+    void unlink();
+    void addChild(Node *nd);
+    void removeChild(Node *nd);
+
+    // access to member variables
+    Node *firstChild() { return child_; }
+    Node *next() { return next_; }
+    Node *parent() { return parent_; }
+    RootNode *root() { return root_; }
+    void setRoot(RootNode *r) { root_ = r; }
+    const char *name() { return name_; }
     const char *path() { return path_; }
+
+    // more complex methods
     Node *find( const char *path );
     Node *search( const char *path, int offset=0 );
     Node *childNode( int ix );
     Node *addChild( const char *path );
-    void setParent( Node *parent );
-    Node *parent() { return parent_; }
-    void setRoot(RootNode *r) { root_ = r; }
-      RootNode *root() { return root_; }
-    char remove();
+    void remove();
     char dirty();
     void clearDirtyFlags();
     void deleteAllChildren();
+    int write( FILE *f );
+
     // entry methods
     int nChildren();
     const char *child( int ix );
-    void set( const char *name, const char *value );
+    int set( const char *name, const char *value );
     void set( const char *line );
     void add( const char *line );
     const char *get( const char *name );

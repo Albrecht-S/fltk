@@ -43,11 +43,15 @@ Fl_Preferences *Fl_Preferences::runtimePrefs = 0;
 
  \return a pointer to a static buffer containing the new UUID in ASCII format.
          The buffer is overwritten during every call to this function!
+
+ \todo Verify me.
  */
 const char *Fl_Preferences::newUUID() {
   Fl::system_driver()->newUUID(uuidBuffer);
   return uuidBuffer;
 }
+
+// -----------------------------------------------------------------------------
 
 /**
    The constructor creates a group that manages name/value pairs and
@@ -74,11 +78,15 @@ const char *Fl_Preferences::newUUID() {
               preferences
    \param[in] vendor unique text describing the company or author of this file
    \param[in] application unique text describing the application
+
+ \todo Verify me.
 */
 Fl_Preferences::Fl_Preferences( Root root, const char *vendor, const char *application ) {
   node = new Node( "." );
+  node->ref();
   rootNode = new RootNode( this, root, vendor, application );
   node->setRoot(rootNode);
+  node->ref();
   /* int err = */ rootNode->read();
 }
 
@@ -93,11 +101,15 @@ Fl_Preferences::Fl_Preferences( Root root, const char *vendor, const char *appli
    \param[in] path path to the directory that contains the preferences file
    \param[in] vendor unique text describing the company or author of this file
    \param[in] application unique text describing the application
- */
+
+ \todo Verify me.
+*/
 Fl_Preferences::Fl_Preferences( const char *path, const char *vendor, const char *application ) {
   node = new Node( "." );
+  node->ref();
   rootNode = new RootNode( this, path, vendor, application );
   node->setRoot(rootNode);
+  node->ref();
   /* int err = */ rootNode->read();
 }
 
@@ -110,10 +122,13 @@ Fl_Preferences::Fl_Preferences( const char *path, const char *vendor, const char
 
    \param[in] parent reference object for the new group
    \param[in] group name of the group to access (may contain '/'s)
+
+ \todo Verify me.
  */
 Fl_Preferences::Fl_Preferences( Fl_Preferences &parent, const char *group ) {
   rootNode = parent.rootNode;
   node = parent.node->addChild( group );
+  node->ref();
 }
 
 /**
@@ -125,6 +140,8 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences &parent, const char *group ) {
               data indexes by strings.
    \param[in] group a group name that is used as a key into the database
    \see Fl_Preferences( Fl_Preferences&, const char *group )
+
+ \todo Verify me.
  */
 Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, const char *group ) {
   if (parent==0) {
@@ -139,6 +156,7 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, const char *group ) {
   }
   rootNode = parent->rootNode;
   node = parent->node->addChild( group );
+  node->ref();
 }
 
 /**
@@ -153,6 +171,8 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, const char *group ) {
 
  \param[in] parent reference object for the new group
  \param[in] groupIndex zero based index into child groups
+
+ \todo Verify me.
  */
 Fl_Preferences::Fl_Preferences( Fl_Preferences &parent, int groupIndex ) {
   rootNode = parent.rootNode;
@@ -161,10 +181,13 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences &parent, int groupIndex ) {
   } else {
     node = parent.node->childNode( groupIndex );
   }
+  node->ref();
 }
 
 /**
  \see Fl_Preferences( Fl_Preferences&, int groupIndex )
+
+ \todo Verify me.
  */
 Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, int groupIndex ) {
   rootNode = parent->rootNode;
@@ -173,6 +196,7 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, int groupIndex ) {
   } else {
     node = parent->node->childNode( groupIndex );
   }
+  node->ref();
 }
 
 /**
@@ -185,22 +209,31 @@ Fl_Preferences::Fl_Preferences( Fl_Preferences *parent, int groupIndex ) {
 
  ID's can be very helpful when put into the <tt>user_data()</tt> field of
  widget callbacks.
+
+ \todo Verify me.
  */
 Fl_Preferences::Fl_Preferences( Fl_Preferences::ID id ) {
   node = (Node*)id;
   rootNode = node->root();
+  node->ref();
 }
 
 /**
  Create another reference to a Preferences group.
+
+ \todo Verify me.
  */
 Fl_Preferences::Fl_Preferences(const Fl_Preferences &rhs)
 : node(rhs.node),
   rootNode(rhs.rootNode)
-{ }
+{
+  node->ref();
+}
 
 /**
  Assign another reference to a Preference group.
+
+ \todo Verify me.
  */
 Fl_Preferences &Fl_Preferences::operator=(const Fl_Preferences &rhs) {
   if (&rhs != this) {
@@ -218,13 +251,18 @@ Fl_Preferences &Fl_Preferences::operator=(const Fl_Preferences &rhs) {
 
    The destructor does not remove any data from the database. It merely
    deletes your reference to the database.
+
+ \todo Verify me.
  */
 Fl_Preferences::~Fl_Preferences() {
   if (node && !node->parent()) delete rootNode;
   // DO NOT delete nodes! The root node will do that after writing the preferences
   // zero all pointer to avoid memory errors, even though
   // Valgrind does not complain (Cygwin does though)
-  node = 0L;
+  if (node) {
+    node->unref();
+    node = 0L;
+  }
   rootNode = 0L;
 }
 
@@ -232,6 +270,8 @@ Fl_Preferences::~Fl_Preferences() {
    Returns the number of groups that are contained within a group.
 
    \return 0 for no groups at all
+
+ \todo Verify me.
  */
 int Fl_Preferences::groups() {
   return node->nChildren();
@@ -244,6 +284,8 @@ int Fl_Preferences::groups() {
 
    \param[in] num_group number indexing the requested group
    \return 'C' string pointer to the group name
+
+ \todo Verify me.
  */
 const char *Fl_Preferences::group( int num_group ) {
   return node->child( num_group );
@@ -257,6 +299,8 @@ const char *Fl_Preferences::group( int num_group ) {
 
    \param[in] key name of group that is searched for
    \return 0 if no group by that name was found
+
+ \todo Verify me.
  */
 char Fl_Preferences::groupExists( const char *key ) {
   return node->search( key ) ? 1 : 0 ;
@@ -270,15 +314,19 @@ char Fl_Preferences::groupExists( const char *key ) {
 
    \param[in] group name of the group to delete
    \return 0 if call failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::deleteGroup( const char *group ) {
   Node *nd = node->search( group );
-  if ( nd ) return nd->remove();
+  if ( nd ) nd->remove();
   return 0;
 }
 
 /**
  Delete all groups.
+
+ \todo Verify me.
  */
 char Fl_Preferences::deleteAllGroups() {
   node->deleteAllChildren();
@@ -289,6 +337,8 @@ char Fl_Preferences::deleteAllGroups() {
    Returns the number of entries (name/value pairs) in a group.
 
    \return number of entries
+
+ \todo Verify me.
  */
 int Fl_Preferences::entries() {
   return node->nEntry();
@@ -301,6 +351,8 @@ int Fl_Preferences::entries() {
 
    \param[in] index number indexing the requested entry
    \return pointer to value cstring
+
+ \todo Verify me.
  */
 const char *Fl_Preferences::entry( int index ) {
   return node->entry(index).name;
@@ -311,6 +363,8 @@ const char *Fl_Preferences::entry( int index ) {
 
    \param[in] key name of entry that is searched for
    \return 0 if entry was not found
+
+ \todo Verify me.
  */
 char Fl_Preferences::entryExists( const char *key ) {
   return node->getEntry( key )>=0 ? 1 : 0 ;
@@ -323,6 +377,8 @@ char Fl_Preferences::entryExists( const char *key ) {
 
    \param[in] key name of entry to delete
    \return 0 if deleting the entry failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::deleteEntry( const char *key ) {
   return node->deleteEntry( key );
@@ -330,6 +386,8 @@ char Fl_Preferences::deleteEntry( const char *key ) {
 
 /**
  Delete all entries.
+
+ \todo Verify me.
  */
 char Fl_Preferences::deleteAllEntries() {
   node->deleteAllEntries();
@@ -338,6 +396,8 @@ char Fl_Preferences::deleteAllEntries() {
 
 /**
  Delete all groups and all entries.
+
+ \todo Verify me.
  */
 char Fl_Preferences::clear() {
   char ret1 = deleteAllGroups();
@@ -354,6 +414,8 @@ char Fl_Preferences::clear() {
  \param[out] value returned from preferences or default value if none was set
  \param[in] defaultValue default value to be used if no preference was set
  \return 0 if the default value was used
+
+ \todo Verify me.
  */
 char Fl_Preferences::get( const char *key, int &value, int defaultValue ) {
   const char *v = node->get( key );
@@ -370,6 +432,8 @@ char Fl_Preferences::get( const char *key, int &value, int defaultValue ) {
  \param[in] key name of entry
  \param[in] value set this entry to \p value
  \return 0 if setting the value failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::set( const char *key, int value ) {
   sprintf( nameBuffer, "%d", value );
@@ -386,6 +450,8 @@ char Fl_Preferences::set( const char *key, int value ) {
  \param[out] value returned from preferences or default value if none was set
  \param[in] defaultValue default value to be used if no preference was set
  \return 0 if the default value was used
+
+ \todo Verify me.
  */
 char Fl_Preferences::get( const char *key, float &value, float defaultValue ) {
   const char *v = node->get( key );
@@ -402,6 +468,8 @@ char Fl_Preferences::get( const char *key, float &value, float defaultValue ) {
  \param[in] key name of entry
  \param[in] value set this entry to \p value
  \return 0 if setting the value failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::set( const char *key, float value ) {
   sprintf( nameBuffer, "%g", value );
@@ -419,6 +487,8 @@ char Fl_Preferences::set( const char *key, float value ) {
  \param[in] value set this entry to \p value
  \param[in] precision number of decimal digits to represent value
  \return 0 if setting the value failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::set( const char *key, float value, int precision ) {
   sprintf( nameBuffer, "%.*g", precision, value );
@@ -435,6 +505,8 @@ char Fl_Preferences::set( const char *key, float value, int precision ) {
  \param[out] value returned from preferences or default value if none was set
  \param[in] defaultValue default value to be used if no preference was set
  \return 0 if the default value was used
+
+ \todo Verify me.
  */
 char Fl_Preferences::get( const char *key, double &value, double defaultValue ) {
   const char *v = node->get( key );
@@ -451,6 +523,8 @@ char Fl_Preferences::get( const char *key, double &value, double defaultValue ) 
  \param[in] key name of entry
  \param[in] value set this entry to \p value
  \return 0 if setting the value failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::set( const char *key, double value ) {
   sprintf( nameBuffer, "%g", value );
@@ -468,6 +542,8 @@ char Fl_Preferences::set( const char *key, double value ) {
  \param[in] value set this entry to \p value
  \param[in] precision number of decimal digits to represent value
  \return 0 if setting the value failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::set( const char *key, double value, int precision ) {
   sprintf( nameBuffer, "%.*g", precision, value );
@@ -517,6 +593,8 @@ static char *decodeText( const char *src ) {
  \param[in] defaultValue default value to be used if no preference was set
  \param[in] maxSize maximum length of value plus one byte for a trailing zero
  \return 0 if the default value was used
+
+ \todo Verify me.
  */
 char Fl_Preferences::get( const char *key, char *text, const char *defaultValue, int maxSize ) {
   const char *v = node->get( key );
@@ -543,6 +621,8 @@ char Fl_Preferences::get( const char *key, char *text, const char *defaultValue,
  \param[out] text returned from preferences or default value if none was set
  \param[in] defaultValue default value to be used if no preference was set
  \return 0 if the default value was used
+
+ \todo Verify me.
  */
 char Fl_Preferences::get( const char *key, char *&text, const char *defaultValue ) {
   const char *v = node->get( key );
@@ -567,6 +647,8 @@ char Fl_Preferences::get( const char *key, char *&text, const char *defaultValue
  \param[in] key name of entry
  \param[in] text set this entry to \p value
  \return 0 if setting the value failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::set( const char *key, const char *text ) {
   const char *s = text ? text : "";
@@ -623,6 +705,8 @@ static void *decodeHex( const char *src, int &size ) {
  \return 0 if the default value was used
 
  \todo maxSize should receive the number of bytes that were read.
+
+ \todo Verify me.
  */
 char Fl_Preferences::get( const char *key, void *data, const void *defaultValue, int defaultSize, int maxSize ) {
   const char *v = node->get( key );
@@ -650,6 +734,8 @@ char Fl_Preferences::get( const char *key, void *data, const void *defaultValue,
  \param[in] defaultValue default value to be used if no preference was set
  \param[in] defaultSize size of default value array
  \return 0 if the default value was used
+
+ \todo Verify me.
  */
 char Fl_Preferences::get( const char *key, void *&data, const void *defaultValue, int defaultSize ) {
   const char *v = node->get( key );
@@ -677,6 +763,8 @@ char Fl_Preferences::get( const char *key, void *&data, const void *defaultValue
  \param[in] data set this entry to \p value
  \param[in] dsize size of data array
  \return 0 if setting the value failed
+
+ \todo Verify me.
  */
 char Fl_Preferences::set( const char *key, const void *data, int dsize ) {
   char *buffer = (char*)malloc( dsize*2+1 ), *d = buffer;;
@@ -698,6 +786,8 @@ char Fl_Preferences::set( const char *key, const void *data, int dsize ) {
 
  \param[in] key name of entry
  \return size of value
+
+ \todo Verify me.
  */
 int Fl_Preferences::size( const char *key ) {
   const char *v = node->get( key );
@@ -730,6 +820,8 @@ int Fl_Preferences::size( const char *key ) {
  \param[out] path buffer for user data path
  \param[in] pathlen size of path buffer (should be at least \c FL_PATH_MAX)
  \return 0 if path was not created or pathname can't fit into buffer
+
+ \todo Verify me.
  */
 char Fl_Preferences::getUserdataPath( char *path, int pathlen ) {
   if ( rootNode )
@@ -741,6 +833,8 @@ char Fl_Preferences::getUserdataPath( char *path, int pathlen ) {
  Writes all preferences to disk. This function works only with
  the base preferences group. This function is rarely used as
  deleting the base preferences flushes automatically.
+
+ \todo Verify me.
  */
 void Fl_Preferences::flush() {
   if ( rootNode && node->dirty() )
@@ -763,6 +857,8 @@ void Fl_Preferences::flush() {
      for ( i=0; i<n; i++ )
        prev.get( Fl_Preferences::Name(i), prevFile[i], "" );
    \endcode
+
+ \todo Verify me.
  */
 Fl_Preferences::Name::Name( unsigned int n ) {
   data_ = (char*)malloc(20);
@@ -781,6 +877,8 @@ Fl_Preferences::Name::Name( unsigned int n ) {
      for ( i=0; i<n; i++ )
        prev.get( Fl_Preferences::Name( "File%d", i ), prevFile[i], "" );
     \endcode
+
+ \todo Verify me.
  */
 Fl_Preferences::Name::Name( const char *format, ... ) {
   data_ = (char*)malloc(1024);
@@ -790,7 +888,10 @@ Fl_Preferences::Name::Name( const char *format, ... ) {
   va_end(args);
 }
 
-// delete the name
+/** Delete the name.
+
+ \todo Verify me.
+*/
 Fl_Preferences::Name::~Name() {
   if (data_) {
     free(data_);
@@ -814,6 +915,8 @@ Fl_Preferences::Name::~Name() {
  \param root USER or SYSTEM, to make these prefs user only or system wide
  \param vendor unique company or organsation name, preferable a url like "fltk.org"
  \param application uniqe name for this app
+
+ \todo Verify me.
  */
 Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, Root root, const char *vendor, const char *application )
 : prefs_(prefs),
@@ -840,6 +943,8 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, Root root, const char
     that \c path contains the filename as well, and no substitutions to the
     filename will be made. Otherwise, the filename will be concatenated as
     <tt><i>path</i>/<i>application</i>.prefs</tt> .
+
+ \todo Verify me.
  */
 Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, const char *path, const char *vendor, const char *application )
 : prefs_(prefs),
@@ -871,6 +976,8 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs, const char *path, con
  stored in or retreived from a file.
 
  This database can be useful to manage plugins and other temporary data.
+
+ \todo Verify me.
  */
 Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs )
 : prefs_(prefs),
@@ -883,6 +990,8 @@ Fl_Preferences::RootNode::RootNode( Fl_Preferences *prefs )
 
 /** \internal
  \brief Destroy the root node and all depending nodes.
+
+ \todo Verify me.
  */
 Fl_Preferences::RootNode::~RootNode() {
   if ( prefs_->node->dirty() )
@@ -899,13 +1008,14 @@ Fl_Preferences::RootNode::~RootNode() {
     free( application_ );
     application_ = 0L;
   }
-  delete prefs_->node;
-  prefs_->node = NULL;
+  prefs_->node->unref();
 }
 
 /** \internal
  \brief Read a preferences file and construct the group tree and with all
     entry leafs.
+
+ \todo Verify me.
  */
 int Fl_Preferences::RootNode::read() {
   if (!filename_)   // RUNTIME preferences
@@ -945,6 +1055,8 @@ int Fl_Preferences::RootNode::read() {
 
 /** \internal
  \brief Write the group tree and all entry leafs.
+
+ \todo Verify me.
  */
 int Fl_Preferences::RootNode::write() {
   if (!filename_)   // RUNTIME preferences
@@ -981,6 +1093,8 @@ int Fl_Preferences::RootNode::write() {
  \param path copy the path into the buffer at \c path
  \param pathlen if the resulting path is longer than "pathlen", it will
     be cropped.
+
+ \todo Verify me.
  */
 char Fl_Preferences::RootNode::getPath( char *path, int pathlen ) {
   if (!filename_)   // RUNTIME preferences
@@ -1041,55 +1155,170 @@ char Fl_Preferences::RootNode::getPath( char *path, int pathlen ) {
 
  \param path must be a single word, preferable alnum(), dot and underscore only.
     Space is ok.
+
+ \todo Verify me.
  */
-Fl_Preferences::Node::Node( const char *path )
+Fl_Preferences::Node::Node( const char *name )
 : child_(NULL), next_(NULL),
   parent_(NULL),
   root_(NULL),
+  name_(NULL),
   path_(NULL),
   entry_(NULL),
   nEntry_(0), NEntry_(0),
   dirty_(0),
   indexed_(0),
+  zombie_(0),
   index_(NULL),
-  nIndex_(0), NIndex_(0)
+  nIndex_(0), NIndex_(0),
+  refCount_(0)
 {
-  if ( path ) path_ = strdup( path );
+  // we must always have a name
+  name_ = ::strdup( name );
+  // if this is the root node, also set the path
+  if (name[0]=='.' && name[1]==0)
+    path_ = ::strdup(name);
 }
 
 /** \internal
  \brief Delete this node.
- This unlinks all child nodes from this node, then deletes all entries and
- all other allocated data.
+ Never call this directly. When no longer referencing this node, call unref().
+ If removing this node from the hierarchy, call unlink().
+
+ \todo Verify me.
  */
 Fl_Preferences::Node::~Node() {
   deleteAllChildren();
   deleteAllEntries();
   deleteIndex();
-  if ( path_ ) {
-    free( path_ );
-    path_ = 0L;
-  }
+  if (name_) ::free( name_ );
+  if (path_) ::free( path_ );
   next_ = 0L;
   parent_ = 0L;
 }
 
 /** \internal
+ \brief Increment the number of entities referencing this node.
+
+ \todo Verify me.
+ */
+void Fl_Preferences::Node::ref() {
+  refCount_++;
+}
+
+/** \internal
+ \brief Decrement the number of entities referencing this node.
+ The node will delete itself it is no longer referenced.
+
+ \todo Verify me.
+ */
+void Fl_Preferences::Node::unref() {
+  refCount_--;
+#ifdef DEBUG
+#error
+  if (refCount_<0) {
+    fprintf(stderr, "ERROR: Internal reference count is zero at %s:%d\n", __FILE__, __LINE__);
+  }
+#endif
+  if (refCount_==0) {
+    delete this;
+  }
+}
+
+/* \internal
+ \brief The only method to add a child to this node.
+ This adds a child to the begining of the list of children.
+ */
+void Fl_Preferences::Node::addChild(Node *nd)
+{
+  // set all pointers and flags in the child node
+  nd->next_ = child_;
+  nd->parent_ = this;
+  nd->root_ = root_;
+  nd->zombie_ = 0;
+
+  // set all pointers and flags in this node
+  child_ = nd;
+  dirty_ = 1;
+  invalidateIndex();
+
+  // store the full path for this node
+  int np = strlen(path_);
+  int nn = strlen(nd->name_);
+  char *path = (char*)malloc(np+nn+2);
+  memcpy(path, path_, np);
+  path[np] = '/';
+  memcpy(path+np+1, nd->name_, nn+1);
+  if (nd->path_) ::free(nd->path_);
+  nd->path_ = path;
+
+  // mark the child node as part of the hierarchy
+  nd->ref();
+}
+
+/* \internal
+ \brief The only method to remove a child from this node.
+ This removes a child from the node's list of children.
+ It will also delete the child if there are no more references to if.
+ */
+void Fl_Preferences::Node::removeChild(Node *nd)
+{
+  if (nd == child_) {
+    child_ = nd->next_;
+  } else {
+    Node *p = child_;
+    for (; p; p=p->next_) {
+      if (p->next_==nd) {
+        p->next_ = nd->next_;
+        break;
+      }
+    }
+    if (p==0L) {
+#ifdef DEBUG
+      fprintf(stderr, "ERROR: node not in list at %s:%d\n", __FILE__, __LINE__);
+#endif
+      return;
+    }
+  }
+  nd->next_ = 0L;
+  nd->parent_ = 0L;
+  nd->root_ = 0L;
+  ::free(nd->path_);
+  nd->path_ = 0L;
+
+  dirty_ = 1;
+  invalidateIndex();
+
+  nd->unlink();
+}
+
+
+/** \internal
+ \brief Let the node know that it is no longer part of the hierarchy.
+ The node will be declared a zombie. A zombie node may still have Fl_Preferences
+ pointing at it, but no longer stores or provides data.
+ The node will delete itself it is no longer referenced.
+
+ \todo Verify me.
+ */
+void Fl_Preferences::Node::unlink() {
+  zombie_ = 1;
+  unref();
+}
+
+/** \internal
  \brief Delete all child nodes in this node.
+
+ \todo Verify me.
  */
 void Fl_Preferences::Node::deleteAllChildren() {
-  Node *nx;
-  for ( Node *nd = child_; nd; nd = nx ) {
-    nx = nd->next_;
-    delete nd;
-  }
-  child_ = 0L;
-  dirty_ = 1;
-  updateIndex();
+  while (firstChild()) removeChild(firstChild());
 }
 
 /** \internal
  \brief Delete all name/value pairs in this node.
+
+ \todo Verify me.
  */
 void Fl_Preferences::Node::deleteAllEntries() {
   if ( entry_ ) {
@@ -1116,11 +1345,13 @@ void Fl_Preferences::Node::deleteAllEntries() {
 
  A node is dirty if it was created or modified after reading or writing the
  preferences file.
+
+ \todo Verify me.
  */
 char Fl_Preferences::Node::dirty() {
   if ( dirty_ ) return 1;
-  if ( next_ && next_->dirty() ) return 1;
-  if ( child_ && child_->dirty() ) return 1;
+  if ( next() && next()->dirty() ) return 1;
+  if ( firstChild() && firstChild()->dirty() ) return 1;
   return 0;
 }
 
@@ -1131,17 +1362,19 @@ void Fl_Preferences::Node::clearDirtyFlags() {
   Fl_Preferences::Node *nd = this;
   while (nd) {
     nd->dirty_ = 0;
-    if ( nd->child_ ) nd->child_->clearDirtyFlags();
-    nd = nd->next_;
+    if ( nd->firstChild() ) nd->firstChild()->clearDirtyFlags();
+    nd = nd->next();
   }
 }
 
 /** \internal
  \brief Write this node (recursively from the last neighbor back to this)
  \param f output stream
+
+ \todo Verify me.
  */
 int Fl_Preferences::Node::write( FILE *f ) {
-  if ( next_ ) next_->write( f );
+  if ( next() ) next()->write( f );
   fprintf( f, "\n[%s]\n\n", path_ );
   for ( int i = 0; i < nEntry_; i++ ) {
     char *src = entry_[i].value;
@@ -1165,7 +1398,7 @@ int Fl_Preferences::Node::write( FILE *f ) {
     else
       fprintf( f, "%s\n", entry_[i].name );
   }
-  if ( child_ ) child_->write( f );
+  if ( firstChild() ) firstChild()->write( f );
   dirty_ = 0;
   return 0;
 }
@@ -1173,28 +1406,32 @@ int Fl_Preferences::Node::write( FILE *f ) {
 /** \internal
  \brief Set the parent node and create the full path.
  \param pn make pn the parent node of this node
+
+ \todo Verify me.
  */
-void Fl_Preferences::Node::setParent( Node *pn ) {
-  parent_ = pn;
-  next_ = pn->child_;
-  root_ = pn->root_;
-  pn->child_ = this;
-  sprintf( nameBuffer, "%s/%s", pn->path_, path_ );
-  free( path_ );
-  path_ = strdup( nameBuffer );
-}
+//void Fl_Preferences::Node::setParent( Node *pn ) {
+//  parent_ = pn;
+//  next_ = pn->child_;
+//  root_ = pn->root_;
+//  pn->child_ = this;
+//  sprintf( nameBuffer, "%s/%s", pn->path_, path_ );
+//  free( path_ );
+//  path_ = strdup( nameBuffer );
+//}
 
 /** \internal
  \brief Add a child to this node and set its path (try to find it first...).
  \param path name of the new child node
  \return apointer to the new node
+
+ \todo Verify me.
  */
 Fl_Preferences::Node *Fl_Preferences::Node::addChild( const char *path ) {
   sprintf( nameBuffer, "%s/%s", path_, path );
   char *name = strdup( nameBuffer );
   Node *nd = find( name );
   free( name );
-  updateIndex();
+  invalidateIndex();
   return nd;
 }
 
@@ -1202,12 +1439,19 @@ Fl_Preferences::Node *Fl_Preferences::Node::addChild( const char *path ) {
  \brief Create and set, or change an entry within this node.
  \param name this is the name part of the name/value pair
  \param value a text string as the value
+
+ \return -1 if this node is invalid
+ \return 0 if the entry was newly created
+ \return 1 if the entry existed and the value was replaced
+
+ \todo Verify me.
  */
-void Fl_Preferences::Node::set( const char *name, const char *value )
+int Fl_Preferences::Node::set( const char *name, const char *value )
 {
+  if (zombie_) return 0;
   for ( int i=0; i<nEntry_; i++ ) {
     if ( strcmp( name, entry_[i].name ) == 0 ) {
-      if ( !value ) return; // annotation
+      if ( !value ) return 0; // annotation
       if ( strcmp( value, entry_[i].value ) != 0 ) {
 	if ( entry_[i].value )
 	  free( entry_[i].value );
@@ -1215,7 +1459,7 @@ void Fl_Preferences::Node::set( const char *name, const char *value )
 	dirty_ = 1;
       }
       root_->lastEntrySet(i);
-      return;
+      return 1;
     }
   }
   if ( NEntry_==nEntry_ ) {
@@ -1227,11 +1471,14 @@ void Fl_Preferences::Node::set( const char *name, const char *value )
   root_->lastEntrySet(nEntry_);
   nEntry_++;
   dirty_ = 1;
+  return 0;
 }
 
 /** \internal
  \brief Create or set a value (or annotation) from a single line in the file buffer
  \param line a line as read form the current file
+
+ \todo Verify me.
  */
 void Fl_Preferences::Node::set( const char *line ) {
   // hmm. If we assume that we always read this file in the beginning,
@@ -1261,6 +1508,8 @@ void Fl_Preferences::Node::set( const char *line ) {
  multiple lines in the prefs file.
 
  \param line another line for the input stream
+
+ \todo Verify me.
  */
 void Fl_Preferences::Node::add( const char *line ) {
   int activeEntry = root()->lastEntrySet();
@@ -1276,6 +1525,8 @@ void Fl_Preferences::Node::add( const char *line ) {
  \brief Get the value for a name.
  \param name the name of the entry that we want to query
  \return returns a pointer to the value, or \c NULL if no such name
+
+ \todo Verify me.
  */
 const char *Fl_Preferences::Node::get( const char *name ) {
   int i = getEntry( name );
@@ -1286,6 +1537,8 @@ const char *Fl_Preferences::Node::get( const char *name ) {
  \brief Find the index of an entry.
  \param name the name of the entry we want to find
  \return the index, starting a 0, or -1 if no such entry
+
+ \todo Verify me.
  */
 int Fl_Preferences::Node::getEntry( const char *name ) {
   for ( int i=0; i<nEntry_; i++ ) {
@@ -1300,6 +1553,8 @@ int Fl_Preferences::Node::getEntry( const char *name ) {
  \brief Remove one entry form this group
  \name the name of the entry we want to delete
  \return 1 if the entry was found and deleted, 0 otherwise.
+
+ \todo Verify me.
  */
 char Fl_Preferences::Node::deleteEntry( const char *name ) {
   int ix = getEntry( name );
@@ -1316,6 +1571,8 @@ char Fl_Preferences::Node::deleteEntry( const char *name ) {
  problems). If the node was not found, 'find' will create the required branch.
  \param path a path that can contain forward slashes.
  \return an existing, if found, or a new node to match the path
+
+ \todo Verify me.
  */
 Fl_Preferences::Node *Fl_Preferences::Node::find( const char *path ) {
   int len = (int) strlen( path_ );
@@ -1324,7 +1581,7 @@ Fl_Preferences::Node *Fl_Preferences::Node::find( const char *path ) {
       return this;
     if ( path[ len ] == '/' ) {
       Node *nd;
-      for ( nd = child_; nd; nd = nd->next_ ) {
+      for ( nd = firstChild(); nd; nd = nd->next() ) {
         Node *nn = nd->find( path );
         if ( nn ) return nn;
       }
@@ -1333,9 +1590,11 @@ Fl_Preferences::Node *Fl_Preferences::Node::find( const char *path ) {
       if (e) strlcpy( nameBuffer, s, e-s+1 );
       else strlcpy( nameBuffer, s, sizeof(nameBuffer));
       nd = new Node( nameBuffer );
-      nd->setParent( this );
-      dirty_ = 1;
-      return nd->find( path );
+      addChild(nd);
+      if (e)
+        return nd->find( path );
+      else
+        return nd;
     }
   }
   return 0;
@@ -1349,6 +1608,8 @@ Fl_Preferences::Node *Fl_Preferences::Node::find( const char *path ) {
  \return if the pathname is "." (current node) return this node
  \return if the pathname is "./" (root node) return the topmost node
  \return if the pathname starts with "./", start the search at the root node
+
+ \todo Verify me.
  */
 Fl_Preferences::Node *Fl_Preferences::Node::search( const char *path, int offset ) { 
   if ( offset == 0 ) {
@@ -1373,7 +1634,7 @@ Fl_Preferences::Node *Fl_Preferences::Node::search( const char *path, int offset
     if ( len > 0 && path[ len ] == 0 )
       return this;
     if ( len <= 0 || path[ len ] == '/' ) {
-      for ( Node *nd = child_; nd; nd = nd->next_ ) {
+      for ( Node *nd = firstChild(); nd; nd = nd->next() ) {
 	Node *nn = nd->search( path, offset );
 	if ( nn ) return nn;
       }
@@ -1385,32 +1646,24 @@ Fl_Preferences::Node *Fl_Preferences::Node::search( const char *path, int offset
 
 /** \internal
  \brief Return the number of child nodes (groups).
+
+ \todo Verify me.
  */
 int Fl_Preferences::Node::nChildren() {
   if (indexed_) {
     return nIndex_;
   } else {
     int cnt = 0;
-    for ( Node *nd = child_; nd; nd = nd->next_ )
+    for ( Node *nd = firstChild(); nd; nd = nd->next() )
       cnt++;
     return cnt;
   }
 }
 
 /** \internal
- \brief Return the node name
- */
-const char *Fl_Preferences::Node::name() {
-  if ( path_ ) {
-    char *r = strrchr( path_, '/' );
-    return r ? r+1 : path_ ;
-  } else {
-    return 0L ;
-  }
-}
-
-/** \internal
  \brief Return the n'th child node's name.
+
+ \todo Verify me.
  */
 const char *Fl_Preferences::Node::child( int ix ) {
   Node *nd = childNode( ix );
@@ -1422,6 +1675,8 @@ const char *Fl_Preferences::Node::child( int ix ) {
 
 /** \internal
  \brief Return the n'th child node.
+
+ \todo Verify me.
  */
 Fl_Preferences::Node *Fl_Preferences::Node::childNode( int ix ) {
   createIndex();
@@ -1433,7 +1688,7 @@ Fl_Preferences::Node *Fl_Preferences::Node::childNode( int ix ) {
     int n = nChildren();
     ix = n - ix -1;
     Node *nd;
-    for ( nd = child_; nd; nd = nd->next_ ) {
+    for ( nd = firstChild(); nd; nd = nd->next() ) {
       if ( !ix-- ) break;
       if ( !nd ) break;
     }
@@ -1443,29 +1698,20 @@ Fl_Preferences::Node *Fl_Preferences::Node::childNode( int ix ) {
 
 /** \internal
  \brief Remove myself from the list and delete me (and all children).
+
+ \todo Verify me.
  */
-char Fl_Preferences::Node::remove() {
-  Node *nd = 0, *np;
+void Fl_Preferences::Node::remove() {
+  deleteAllChildren();
   if ( parent() ) {
-    nd = parent()->child_; np = 0L;
-    for ( ; nd; np = nd, nd = nd->next_ ) {
-      if ( nd == this ) {
-	if ( np )
-	  np->next_ = nd->next_;
-	else
-	  parent()->child_ = nd->next_;
-	break;
-      }
-    }
-    parent()->dirty_ = 1;
-    parent()->updateIndex();
+    parent()->removeChild(this);
   }
-  delete this;
-  return ( nd != 0 );
 }
 
 /** \internal
  \brief Create an array for fast indexed access to child nodes.
+
+ \todo Verify me.
  */
 void Fl_Preferences::Node::createIndex() {
   if (indexed_) return;
@@ -1476,7 +1722,7 @@ void Fl_Preferences::Node::createIndex() {
   }
   Node *nd;
   int i = 0;
-  for (nd = child_; nd; nd = nd->next_, i++) {
+  for (nd = firstChild(); nd; nd = nd->next(), i++) {
     index_[n-i-1] = nd;
   }
   nIndex_ = n;
@@ -1485,13 +1731,17 @@ void Fl_Preferences::Node::createIndex() {
 
 /** \internal
  \brief Mark the index as invalid.
+
+ \todo Verify me.
  */
-void Fl_Preferences::Node::updateIndex() {
+void Fl_Preferences::Node::invalidateIndex() {
   indexed_ = 0;
 }
 
 /** \internal
  \brief Remove the index array alltogehter.
+
+ \todo Verify me.
  */
 void Fl_Preferences::Node::deleteIndex() {
   if (index_) free(index_);
