@@ -157,12 +157,12 @@ int Fl_Window_Driver::hide_common() {
   if (!shown()) return 1;
   
   // remove from the list of windows:
-  Fl_X* ip = Fl_X::i(pWindow);
+  Fl_X* ip = Fl_X::flx(pWindow);
   Fl_X** pp = &Fl_X::first;
   for (; *pp != ip; pp = &(*pp)->next) if (!*pp) return 1;
   *pp = ip->next;
   
-  pWindow->i = 0;
+  pWindow->flx = 0;
   
   // recursively remove any subwindows:
   for (Fl_X *wi = Fl_X::first; wi;) {
@@ -225,8 +225,8 @@ int Fl_Window_Driver::set_cursor(const Fl_RGB_Image*, int, int) {
 
 void Fl_Window_Driver::wait_for_expose() {
   if (!shown()) return;
-  Fl_X *i = Fl_X::i(pWindow);
-  while (!i || wait_for_expose_value) {
+  Fl_X *flx = Fl_X::flx(pWindow);
+  while (!flx || wait_for_expose_value) {
     Fl::wait();
   }
 }

@@ -649,8 +649,8 @@ Fl_Window* fl_find(Window xid) {
   it is the most recent window to get an event.
 */
 Fl_Window* Fl::first_window() {
-  Fl_X* i = Fl_X::first;
-  return i ? i->w : 0;
+  Fl_X* flx = Fl_X::first;
+  return flx ? flx->w : 0;
 }
 
 /**
@@ -659,8 +659,8 @@ Fl_Window* Fl::first_window() {
   \param[in] window must be shown and not NULL
 */
 Fl_Window* Fl::next_window(const Fl_Window* window) {
-  Fl_X* i = Fl_X::i(window)->next;
-  return i ? i->w : 0;
+  Fl_X* flx = Fl_X::flx(window)->next;
+  return flx ? flx->w : 0;
 }
 
 /**
@@ -673,14 +673,14 @@ Fl_Window* Fl::next_window(const Fl_Window* window) {
  */
 void Fl::first_window(Fl_Window* window) {
   if (!window || !window->shown()) return;
-  fl_find( Fl_X::i(window)->xid );
+  fl_find(Fl_X::flx(window)->xid);
 }
 
 /**
   Redraws all widgets.
 */
 void Fl::redraw() {
-  for (Fl_X* i = Fl_X::first; i; i = i->next) i->w->redraw();
+  for (Fl_X* flx = Fl_X::first; flx; flx = flx->next) flx->w->redraw();
 }
 
 /**
@@ -697,8 +697,8 @@ void Fl::redraw() {
 void Fl::flush() {
   if (damage()) {
     damage_ = 0;
-    for (Fl_X* i = Fl_X::first; i; i = i->next) {
-      Fl_Window* wi = i->w;
+    for (Fl_X* flx = Fl_X::first; flx; flx = flx->next) {
+      Fl_Window* wi = flx->w;
       if (Fl_Window_Driver::driver(wi)->wait_for_expose_value) {damage_ = 1; continue;}
       if (!wi->visible_r()) continue;
       if (wi->damage()) {
@@ -706,9 +706,9 @@ void Fl::flush() {
         wi->clear_damage();
       }
       // destroy damage regions for windows that don't use them:
-      if (i->region) {
-        fl_graphics_driver->XDestroyRegion(i->region);
-        i->region = 0;
+      if (flx->region) {
+        fl_graphics_driver->XDestroyRegion(flx->region);
+        flx->region = 0;
       }
     }
   }
@@ -1541,11 +1541,11 @@ void Fl_Widget::damage(uchar fl) {
     damage(fl, x(), y(), w(), h());
   } else {
     // damage entire window by deleting the region:
-    Fl_X* i = Fl_X::i((Fl_Window*)this);
-    if (!i) return; // window not mapped, so ignore it
-    if (i->region) {
-      fl_graphics_driver->XDestroyRegion(i->region);
-      i->region = 0;
+    Fl_X* flx = Fl_X::flx((Fl_Window*)this);
+    if (!flx) return; // window not mapped, so ignore it
+    if (flx->region) {
+      fl_graphics_driver->XDestroyRegion(flx->region);
+      flx->region = 0;
     }
     damage_ |= fl;
     Fl::damage(FL_DAMAGE_CHILD);
@@ -1561,8 +1561,8 @@ void Fl_Widget::damage(uchar fl, int X, int Y, int W, int H) {
     if (!wi) return;
     fl = FL_DAMAGE_CHILD;
   }
-  Fl_X* i = Fl_X::i((Fl_Window*)wi);
-  if (!i) return; // window not mapped, so ignore it
+  Fl_X* flx = Fl_X::flx((Fl_Window*)wi);
+  if (!flx) return; // window not mapped, so ignore it
 
   // clip the damage to the window and quit if none:
   if (X < 0) {W += X; X = 0;}
@@ -1579,14 +1579,14 @@ void Fl_Widget::damage(uchar fl, int X, int Y, int W, int H) {
 
   if (wi->damage()) {
     // if we already have damage we must merge with existing region:
-    if (i->region) {
-      fl_graphics_driver->add_rectangle_to_region(i->region, X, Y, W, H);
+    if (flx->region) {
+      fl_graphics_driver->add_rectangle_to_region(flx->region, X, Y, W, H);
     }
     wi->damage_ |= fl;
   } else {
     // create a new region:
-    if (i->region) fl_graphics_driver->XDestroyRegion(i->region);
-    i->region = fl_graphics_driver->XRectangleRegion(X,Y,W,H);
+    if (flx->region) fl_graphics_driver->XDestroyRegion(flx->region);
+    flx->region = fl_graphics_driver->XRectangleRegion(X,Y,W,H);
     wi->damage_ = fl;
   }
   Fl::damage(FL_DAMAGE_CHILD);
@@ -2088,7 +2088,7 @@ void fl_close_display()
 }
 
 FL_EXPORT Window fl_xid_(const Fl_Window *w) {
-  Fl_X *temp = Fl_X::i(w);
+  Fl_X *temp = Fl_X::flx(w);
   return temp ? temp->xid : 0;
 }
 /** \addtogroup group_macosx

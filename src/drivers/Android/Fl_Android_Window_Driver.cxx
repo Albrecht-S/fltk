@@ -47,14 +47,14 @@ void Fl_Android_Window_Driver::show()
   if (!shown()) {
     // make window
     fl_open_display();
-    if (pWindow->parent() && !Fl_X::i(pWindow->window())) {
+    if (pWindow->parent() && !Fl_X::flx(pWindow->window())) {
       pWindow->set_visible();
       return;
     }
     pWindow->set_visible();
     Fl_X *x = new Fl_X;
     x->w = pWindow;
-    i(x);
+    flx(x);
     x->next = Fl_X::first;
     Fl_X::first = x;
     // position window
@@ -86,7 +86,7 @@ void Fl_Android_Window_Driver::show()
 
 void Fl_Android_Window_Driver::hide()
 {
-  Fl_X* ip = Fl_X::i(pWindow);
+  Fl_X* ip = Fl_X::flx(pWindow);
   if (hide_common()) return;
   if (ip->region) {
     delete ip->region;
@@ -137,8 +137,8 @@ void Fl_Android_Window_Driver::resize(int X,int Y,int W,int H)
       pWindow->redraw();
       // only wait for exposure if this window has a size - a window
       // with no width or height will never get an exposure event
-      Fl_X *i = Fl_X::i(pWindow);
-      if (i && W > 0 && H > 0)
+      Fl_X *flx = Fl_X::flx(pWindow);
+      if (flx && W > 0 && H > 0)
         wait_for_expose_value = 1;
     }
   } else {
@@ -495,15 +495,15 @@ void Fl_WinAPI_Window_Driver::flush_double()
 {
   if (!shown()) return;
   pWindow->make_current(); // make sure fl_gc is non-zero
-  Fl_X *i = Fl_X::i(pWindow);
-  if (!i) return; // window not yet created
+  Fl_X *flx = Fl_X::flx(pWindow);
+  if (!flx) return; // window not yet created
 
   if (!other_xid) {
     other_xid = fl_create_offscreen(w(), h());
     pWindow->clear_damage(FL_DAMAGE_ALL);
   }
   if (pWindow->damage() & ~FL_DAMAGE_EXPOSE) {
-    fl_clip_region(i->region); i->region = 0;
+    fl_clip_region(flx->region); flx->region = 0;
     fl_begin_offscreen(other_xid);
     fl_graphics_driver->clip_region( 0 );
     draw();
@@ -521,8 +521,8 @@ void Fl_WinAPI_Window_Driver::flush_overlay()
 
   if (!shown()) return;
   pWindow->make_current(); // make sure fl_gc is non-zero
-  Fl_X *i = Fl_X::i(pWindow);
-  if (!i) return; // window not yet created
+  Fl_X *flx = Fl_X::flx(pWindow);
+  if (!flx) return; // window not yet created
 
   int eraseoverlay = (pWindow->damage()&FL_DAMAGE_OVERLAY);
   pWindow->clear_damage((uchar)(pWindow->damage()&~FL_DAMAGE_OVERLAY));
@@ -532,7 +532,7 @@ void Fl_WinAPI_Window_Driver::flush_overlay()
     pWindow->clear_damage(FL_DAMAGE_ALL);
   }
   if (pWindow->damage() & ~FL_DAMAGE_EXPOSE) {
-    fl_clip_region(i->region); i->region = 0;
+    fl_clip_region(flx->region); flx->region = 0;
     fl_begin_offscreen(other_xid);
     fl_graphics_driver->clip_region(0);
     draw();
@@ -558,7 +558,7 @@ void Fl_WinAPI_Window_Driver::icons(const Fl_RGB_Image *icons[], int count) {
       icon_->icons[i] = (Fl_RGB_Image*)((Fl_RGB_Image*)icons[i])->copy();
   }
   
-  if (Fl_X::i(pWindow))
+  if (Fl_X::flx(pWindow))
     set_icons();
 }
 
@@ -626,7 +626,7 @@ extern void fl_clipboard_notify_retarget(HWND wnd);
 extern void fl_update_clipboard(void);
 
 void Fl_WinAPI_Window_Driver::hide() {
-  Fl_X* ip = Fl_X::i(pWindow);
+  Fl_X* ip = Fl_X::flx(pWindow);
   // STR#3079: if there remains a window and a non-modal window, and the window is deleted,
   // the app remains running without any apparent window.
   // Bug mechanism: hiding an owner window unmaps the owned (non-modal) window(s)
@@ -761,7 +761,7 @@ void Fl_WinAPI_Window_Driver::fullscreen_off(int X, int Y, int W, int H) {
   // Remove the xid temporarily so that Fl_WinAPI_Window_Driver::fake_X_wm() behaves like it
   // does in Fl_WinAPI_Window_Driver::makeWindow().
   HWND xid = fl_xid(pWindow);
-  Fl_X::i(pWindow)->xid = NULL;
+  Fl_X::flx(pWindow)->xid = NULL;
   int wx, wy, bt, bx, by;
   switch (fake_X_wm(wx, wy, bt, bx, by)) {
     case 0:
@@ -775,7 +775,7 @@ void Fl_WinAPI_Window_Driver::fullscreen_off(int X, int Y, int W, int H) {
       }
       break;
   }
-  Fl_X::i(pWindow)->xid = xid;
+  Fl_X::flx(pWindow)->xid = xid;
   // compute window position and size in scaled units
   float s = Fl::screen_driver()->scale(screen_num());
   int scaledX = ceil(X*s), scaledY= ceil(Y*s), scaledW = ceil(W*s), scaledH = ceil(H*s);

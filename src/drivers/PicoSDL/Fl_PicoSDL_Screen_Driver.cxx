@@ -64,11 +64,11 @@ double Fl_PicoSDL_Screen_Driver::wait(double time_to_wait)
           {
             if ( !window ) break;;
             Fl_Window_Driver *wd = window->driver();
-            Fl_X *i = Fl_X::i(Fl::first_window());
+            Fl_X *flx = Fl_X::flx(Fl::first_window());
             wd->wait_for_expose_value = 0;
-            if ( i->region ) {
-              fl_graphics_driver->XDestroyRegion(i->region);
-              i->region = 0;
+            if ( flx->region ) {
+              fl_graphics_driver->XDestroyRegion(flx->region);
+              flx->region = 0;
             }
             window->clear_damage(FL_DAMAGE_ALL);
             wd->flush();

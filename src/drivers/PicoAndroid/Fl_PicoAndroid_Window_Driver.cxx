@@ -58,7 +58,7 @@ Fl_X *Fl_PicoAndroid_Window_Driver::makeWindow()
   Fl_PicoAndroid_Screen_Driver *scr = (Fl_PicoAndroid_Screen_Driver*)Fl::screen_driver();
 
   Fl_Group::current(0);
-  if (parent() && !Fl_X::i(pWindow->window())) {
+  if (parent() && !Fl_X::flx(pWindow->window())) {
     pWindow->set_visible();
     return 0L;
   }
@@ -81,7 +81,7 @@ Fl_X *Fl_PicoAndroid_Window_Driver::makeWindow()
 //  x->xid = SDL_CreateRenderer(pNativeWindow, -1, SDL_RENDERER_ACCELERATED);
   x->next = Fl_X::first;
   wait_for_expose_value = 0;
-  pWindow->i = x;
+  pWindow->flx = x;
   Fl_X::first = x;
 
   pWindow->set_visible();
@@ -99,10 +99,10 @@ void Fl_PicoAndroid_Window_Driver::flush()
 {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
-  Fl_X *i = Fl_X::i(pWindow);
-  if (!i) return;
-  fl_clip_region(i->region);
-  i->region = 0;
+  Fl_X *flx = Fl_X::flx(pWindow);
+  if (!flx) return;
+  fl_clip_region(flx->region);
+  flx->region = 0;
   pWindow->draw();
   Fl_PicoAndroid_Screen_Driver *scr = (Fl_PicoAndroid_Screen_Driver*)Fl::screen_driver();
   scr->drawFrame();

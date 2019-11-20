@@ -1380,7 +1380,7 @@ static FLWindowDelegate *flwindowdelegate_instance = nil;
       w = Fl::next_window(w);
     }
     if (w) {
-      [Fl_X::i(w)->xid makeKeyWindow];
+      [Fl_X::flx(w)->xid makeKeyWindow];
     }
   }
   fl_unlock_function();
@@ -2253,15 +2253,15 @@ static FLTextInputContext* fltextinputcontext_instance = nil;
         window->size(window->w(), window->h()); // sends message [GLcontext update]
       }
     }
-    Fl_X *i = Fl_X::i(window);
-    if ( i->region ) {
-      Fl_Graphics_Driver::default_driver().XDestroyRegion(i->region);
-      i->region = 0;
+    Fl_X *flx = Fl_X::flx(window);
+    if ( flx->region ) {
+      Fl_Graphics_Driver::default_driver().XDestroyRegion(flx->region);
+      flx->region = 0;
     }
     window->clear_damage(FL_DAMAGE_ALL);
   }
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14
-  else if (gc && aux_bitmap && ( Fl_X::i(window)->region || !(window->damage()&FL_DAMAGE_ALL)) ) {
+  else if (gc && aux_bitmap && ( Fl_X::flx(window)->region || !(window->damage()&FL_DAMAGE_ALL)) ) {
     if (CGBitmapContextGetBytesPerRow(gc) != CGBitmapContextGetBytesPerRow(aux_bitmap)) {
       // this condition (unchanged W and H but changed BytesPerRow) occurs with 10.15
       CGImageRef img = CGBitmapContextCreateImage(aux_bitmap);
@@ -2335,8 +2335,8 @@ static FLTextInputContext* fltextinputcontext_instance = nil;
 }
 - (void)resetCursorRects {
   Fl_Window *w = [(FLWindow*)[self window] getFl_Window];
-  Fl_X *i = Fl_X::i(w);
-  if (!i) return;  // fix for STR #3128
+  Fl_X *flx = Fl_X::flx(w);
+  if (!flx) return;  // fix for STR #3128
   // We have to have at least one cursor rect for invalidateCursorRectsForView
   // to work, hence the "else" clause.
   if (Fl_Cocoa_Window_Driver::driver(w)->cursor)
@@ -3054,7 +3054,7 @@ Fl_X* Fl_Cocoa_Window_Driver::makeWindow()
   }
   x->xid = cw;
   x->w = w;
-  i(x);
+  flx(x);
   wait_for_expose_value = 1;
   if (!w->parent()) {
     x->next = Fl_X::first;
@@ -3207,14 +3207,14 @@ void Fl_Cocoa_Window_Driver::use_border() {
  */
 void Fl_Cocoa_Window_Driver::size_range() {
   Fl_Window_Driver::size_range();
-  Fl_X *i = Fl_X::i(pWindow);
-  if (i && i->xid) {
+  Fl_X *flx = Fl_X::flx(pWindow);
+  if (flx && flx->xid) {
     float s = Fl::screen_driver()->scale(0);
     int bt = get_window_frame_sizes(pWindow);
     NSSize minSize = NSMakeSize(int(minw() * s +.5) , int(minh() * s +.5) + bt);
     NSSize maxSize = NSMakeSize(maxw() ? int(maxw() * s + .5):32000, maxh() ? int(maxh() * s +.5) + bt:32000);
-    [i->xid setMinSize:minSize];
-    [i->xid setMaxSize:maxSize];
+    [flx->xid setMinSize:minSize];
+    [flx->xid setMaxSize:maxSize];
   }
 }
 
@@ -3231,7 +3231,7 @@ void Fl_Cocoa_Window_Driver::wait_for_expose()
  * set the window title bar name
  */
 void Fl_Cocoa_Window_Driver::label(const char *name, const char *mininame) {
-  if (shown() || Fl_X::i(pWindow)) {
+  if (shown() || Fl_X::flx(pWindow)) {
     q_set_window_title(fl_xid(pWindow), name, mininame);
     if (fl_sys_menu_bar && Fl_Sys_Menu_Bar_Driver::window_menu_style())
       Fl_MacOS_Sys_Menu_Bar_Driver::driver()->rename_window(pWindow);
@@ -3244,18 +3244,18 @@ void Fl_Cocoa_Window_Driver::label(const char *name, const char *mininame) {
  */
 void Fl_Cocoa_Window_Driver::show() {
   Fl_X *top = NULL;
-  if (parent()) top = Fl_X::i(pWindow->top_window());
+  if (parent()) top = Fl_X::flx(pWindow->top_window());
   if (!shown() && (!parent() || (top && ![top->xid isMiniaturized]))) {
     makeWindow();
   } else {
     if ( !parent() ) {
-      Fl_X *i = Fl_X::i(pWindow);
-      if ([i->xid isMiniaturized]) {
-        i->w->redraw();
-        [i->xid deminiaturize:nil];
+      Fl_X *flx = Fl_X::flx(pWindow);
+      if ([flx->xid isMiniaturized]) {
+        flx->w->redraw();
+        [flx->xid deminiaturize:nil];
       }
       if (!fl_capture) {
-        [i->xid makeKeyAndOrderFront:nil];
+        [flx->xid makeKeyAndOrderFront:nil];
       }
     }
     else pWindow->set_visible();
@@ -3328,9 +3328,9 @@ void Fl_Cocoa_Window_Driver::resize(int X, int Y, int W, int H) {
 void Fl_Cocoa_Window_Driver::make_current()
 {
   q_release_context();
-  Fl_X *i = Fl_X::i(pWindow);
+  Fl_X *flx = Fl_X::flx(pWindow);
   //NSLog(@"region-count=%d damage=%u",i->region?i->region->count:0, pWindow->damage());
-  fl_window = i->xid;
+  fl_window = flx->xid;
   ((Fl_Quartz_Graphics_Driver&)Fl_Graphics_Driver::default_driver()).high_resolution( mapped_to_retina() );
   
   if (pWindow->as_overlay_window() && other_xid && changed_resolution()) {
@@ -4027,7 +4027,7 @@ int Fl_Cocoa_Screen_Driver::dnd(int use_selection)
   localPool = [[NSAutoreleasePool alloc] init]; 
   Fl_Widget *w = Fl::pushed();
   Fl_Window *win = w->top_window();
-  FLView *myview = (FLView*)[Fl_X::i(win)->xid contentView];
+  FLView *myview = (FLView*)[Fl_X::flx(win)->xid contentView];
   NSEvent *theEvent = [NSApp currentEvent];
   
   int width, height;

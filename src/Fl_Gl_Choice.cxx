@@ -228,11 +228,11 @@ Fl_Gl_Choice *Fl_WinAPI_Gl_Window_Driver::find(int m, const int *alistp)
 
 GLContext Fl_WinAPI_Gl_Window_Driver::create_gl_context(Fl_Window* window, const Fl_Gl_Choice* g, int layer)
 {
-  Fl_X* i = Fl_X::i(window);
+  Fl_X* flx = Fl_X::flx(window);
   HDC hdc = Fl_WinAPI_Window_Driver::driver(window)->private_dc;
   if (!hdc) {
-    hdc = Fl_WinAPI_Window_Driver::driver(window)->private_dc = GetDCEx(i->xid, 0, DCX_CACHE);
-    fl_save_dc(i->xid, hdc);
+    hdc = Fl_WinAPI_Window_Driver::driver(window)->private_dc = GetDCEx(flx->xid, 0, DCX_CACHE);
+    fl_save_dc(flx->xid, hdc);
     SetPixelFormat(hdc, g->pixelformat, (PIXELFORMATDESCRIPTOR*)(&g->pfd));
 #    if USE_COLORMAP
     if (fl_palette) SelectPalette(hdc, fl_palette, FALSE);

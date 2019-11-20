@@ -1628,9 +1628,9 @@ int fl_handle(const XEvent& thisevent)
 
     case DestroyNotify: { // an X11 window was closed externally from the program
       Fl::handle(FL_CLOSE, window);
-      Fl_X* X = Fl_X::i(window);
-      if (X) { // indicates the FLTK window was not closed
-	X->xid = (Window)0; // indicates the X11 window was already destroyed
+      Fl_X* flx = Fl_X::flx(window);
+      if (flx) { // indicates the FLTK window was not closed
+	flx->xid = (Window)0; // indicates the X11 window was already destroyed
 	window->hide();
 	int oldx = window->x(), oldy = window->y();
 	window->position(0, 0);
@@ -2335,10 +2335,10 @@ void Fl_X11_Window_Driver::activate_window() {
   Window prev = 0;
 
   if (fl_xfocus) {
-    Fl_X *x = Fl_X::i(fl_xfocus);
-    if (!x)
+    Fl_X *flx = Fl_X::flx(fl_xfocus);
+    if (!flx)
       return;
-    prev = x->xid;
+    prev = flx->xid;
   }
 
   send_wm_event(w, fl_NET_ACTIVE_WINDOW, 1 /* application */,
@@ -2399,7 +2399,7 @@ Fl_X* Fl_X::set_xid(Fl_Window* win, Window winxid) {
   Fl_X *xp = new Fl_X;
   xp->xid = winxid;
   Fl_Window_Driver::driver(win)->other_xid = 0;
-  xp->w = win; win->i = xp;
+  xp->w = win; win->flx = xp;
   xp->next = Fl_X::first;
   xp->region = 0;
   Fl_Window_Driver::driver(win)->wait_for_expose_value = 1;
@@ -2475,7 +2475,7 @@ void Fl_X::make_xid(Fl_Window* win, XVisualInfo *visual, Colormap colormap)
   // if the window is a subwindow and our parent is not mapped yet, we
   // mark this window visible, so that mapping the parent at a later
   // point in time will call this function again to finally map the subwindow.
-  if (win->parent() && !Fl_X::i(win->window())) {
+  if (win->parent() && !Fl_X::flx(win->window())) {
     win->set_visible();
     return;
   }

@@ -45,7 +45,7 @@ Fl_PicoSDL_Window_Driver::~Fl_PicoSDL_Window_Driver()
 Fl_X *Fl_PicoSDL_Window_Driver::makeWindow()
 {
   Fl_Group::current(0);
-  if (parent() && !Fl_X::i(pWindow->window())) {
+  if (parent() && !Fl_X::flx(pWindow->window())) {
     pWindow->set_visible();
     return 0L;
   }
@@ -68,7 +68,7 @@ Fl_X *Fl_PicoSDL_Window_Driver::makeWindow()
   pNativeTexture = SDL_CreateTexture((SDL_Renderer*)x->xid, SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_TARGET, w(), h());
   x->next = Fl_X::first;
   wait_for_expose_value = 0;
-  pWindow->i = x;
+  pWindow->flx = x;
   Fl_X::first = x;
 
   pWindow->set_visible();
@@ -84,18 +84,18 @@ Fl_X *Fl_PicoSDL_Window_Driver::makeWindow()
 
 void Fl_PicoSDL_Window_Driver::draw_end()
 {
-  Fl_X *i = Fl_X::i(pWindow);
-  SDL_SetRenderTarget((SDL_Renderer*)pWindow->i->xid, 0L);
+  Fl_X *flx = Fl_X::flx(pWindow);
+  SDL_SetRenderTarget((SDL_Renderer*)pWindow->flx->xid, 0L);
   //SDL_RenderClear((SDL_Renderer*)i->xid);
-  SDL_RenderCopy((SDL_Renderer*)i->xid, pNativeTexture, 0L, 0L);
-  SDL_RenderPresent((SDL_Renderer*)i->xid);
+  SDL_RenderCopy((SDL_Renderer*)flx->xid, pNativeTexture, 0L, 0L);
+  SDL_RenderPresent((SDL_Renderer*)flx->xid);
 }
 
 
 void Fl_PicoSDL_Window_Driver::make_current()
 {
-  fl_window = pWindow->i->xid;
-  SDL_SetRenderTarget((SDL_Renderer*)pWindow->i->xid, pNativeTexture);
+  fl_window = pWindow->flx->xid;
+  SDL_SetRenderTarget((SDL_Renderer*)pWindow->flx->xid, pNativeTexture);
 }
 
 

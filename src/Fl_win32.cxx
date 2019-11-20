@@ -605,10 +605,10 @@ static char im_enabled = 1;
 void Fl_WinAPI_Screen_Driver::enable_im() {
   open_display();
 
-  Fl_X *i = Fl_X::first;
-  while (i) {
-    flImmAssociateContextEx(i->xid, 0, IACE_DEFAULT);
-    i = i->next;
+  Fl_X *flx = Fl_X::first;
+  while (flx) {
+    flImmAssociateContextEx(flx->xid, 0, IACE_DEFAULT);
+    flx = flx->next;
   }
 
   im_enabled = 1;
@@ -617,10 +617,10 @@ void Fl_WinAPI_Screen_Driver::enable_im() {
 void Fl_WinAPI_Screen_Driver::disable_im() {
   open_display();
 
-  Fl_X *i = Fl_X::first;
-  while (i) {
-    flImmAssociateContextEx(i->xid, 0, 0);
-    i = i->next;
+  Fl_X *flx = Fl_X::first;
+  while (flx) {
+    flImmAssociateContextEx(flx->xid, 0, 0);
+    flx = flx->next;
   }
 
   im_enabled = 0;
@@ -1233,12 +1233,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
       case WM_PAINT: {
 	Fl_Region R, R2;
-	Fl_X *i = Fl_X::i(window);
+	Fl_X *flx = Fl_X::flx(window);
 	Fl_Window_Driver::driver(window)->wait_for_expose_value = 0;
 	char redraw_whole_window = false;
-	if (!i->region && window->damage()) {
+	if (!flx->region && window->damage()) {
 	  // Redraw the whole window...
-	  i->region = CreateRectRgn(0, 0, window->w(), window->h());
+	  flx->region = CreateRectRgn(0, 0, window->w(), window->h());
 	  redraw_whole_window = true;
 	}
 
@@ -1251,7 +1251,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	}
 
 	// convert i->region in FLTK units to R2 in drawing units
-	R2 = Fl_GDI_Graphics_Driver::scale_region(i->region, scale, NULL);
+	R2 = Fl_GDI_Graphics_Driver::scale_region(flx->region, scale, NULL);
 
 	if (R2) {
 	  // Also tell Windows that we are drawing someplace else as well...
@@ -1267,7 +1267,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	}
 
 	// convert R2 in drawing units to i->region in FLTK units
-	i->region = Fl_GDI_Graphics_Driver::scale_region(R2, 1 / scale, NULL);
+	flx->region = Fl_GDI_Graphics_Driver::scale_region(R2, 1 / scale, NULL);
 
 	window->clear_damage((uchar)(window->damage() | FL_DAMAGE_EXPOSE));
 	// These next two statements should not be here, so that all update
@@ -1851,8 +1851,8 @@ void Fl_WinAPI_Window_Driver::resize(int X, int Y, int W, int H) {
       pWindow->redraw();
       // only wait for exposure if this window has a size - a window
       // with no width or height will never get an exposure event
-      Fl_X *i = Fl_X::i(pWindow);
-      if (i && W > 0 && H > 0)
+      Fl_X *flx = Fl_X::flx(pWindow);
+      if (flx && W > 0 && H > 0)
 	wait_for_expose_value = 1;
     }
   } else {
@@ -1945,7 +1945,7 @@ Fl_X *Fl_WinAPI_Window_Driver::makeWindow() {
   // mark this window visible, so that mapping the parent at a later
   // point in time will call this function again to finally map the subwindow.
   Fl_Window *w = pWindow;
-  if (w->parent() && !Fl_X::i(w->window())) {
+  if (w->parent() && !Fl_X::flx(w->window())) {
     w->set_visible();
     return 0L;
   }
@@ -2111,7 +2111,7 @@ Fl_X *Fl_WinAPI_Window_Driver::makeWindow() {
   Fl_X *x = new Fl_X;
   other_xid = 0;
   x->w = w;
-  i(x);
+  flx(x);
   x->region = 0;
   Fl_WinAPI_Window_Driver::driver(w)->private_dc = 0;
   cursor = LoadCursor(NULL, IDC_ARROW);
@@ -2386,7 +2386,7 @@ void Fl_Window::icons(HICON big_icon, HICON small_icon) {
     Fl_WinAPI_Window_Driver::driver(this)->icon_->big_icon = CopyIcon(big_icon);
   if (small_icon != NULL)
     Fl_WinAPI_Window_Driver::driver(this)->icon_->small_icon = CopyIcon(small_icon);
-  if (Fl_X::i(this))
+  if (Fl_X::flx(this))
     Fl_WinAPI_Window_Driver::driver(this)->set_icons();
 }
 
@@ -2586,11 +2586,11 @@ void Fl_WinAPI_Window_Driver::show() {
     makeWindow();
   } else {
     // Once again, we would lose the capture if we activated the window.
-    Fl_X *i = Fl_X::i(pWindow);
-    if (IsIconic(i->xid))
-      OpenIcon(i->xid);
+    Fl_X *flx = Fl_X::flx(pWindow);
+    if (IsIconic(flx->xid))
+      OpenIcon(flx->xid);
     if (!fl_capture)
-      BringWindowToTop(i->xid);
+      BringWindowToTop(flx->xid);
     // ShowWindow(i->xid,fl_capture?SW_SHOWNOACTIVATE:SW_RESTORE);
   }
 #ifdef USE_PRINT_BUTTON

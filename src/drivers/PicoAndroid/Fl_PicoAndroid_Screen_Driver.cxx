@@ -479,7 +479,7 @@ int Fl_X::set_cursor(Fl_RGB_Image const*, int, int) { return 0; }
 
 void Fl_Window::make_current()
 {
-  fl_window = i->xid;
+  fl_window = flx->xid;
   current_ = this;
 }
 
@@ -487,7 +487,7 @@ void Fl_Window::make_current()
 
 Window fl_xid(const Fl_Window* w)
 {
-  Fl_X *temp = Fl_X::i(w);
+  Fl_X *temp = Fl_X::flx(w);
   return temp ? temp->xid : 0;
 }
 

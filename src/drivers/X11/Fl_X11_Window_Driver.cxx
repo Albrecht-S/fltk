@@ -78,7 +78,7 @@ static int can_xdbe()
 void Fl_X11_Window_Driver::flush_double_dbe(int erase_overlay)
 {
   pWindow->make_current(); // make sure fl_gc is non-zero
-  Fl_X *i = Fl_X::i(pWindow);
+  Fl_X *flx = Fl_X::flx(pWindow);
   if (!other_xid) {
     other_xid = XdbeAllocateBackBufferName(fl_display, fl_xid(pWindow), XdbeCopied);
     backbuffer_bad = 1;
@@ -86,16 +86,16 @@ void Fl_X11_Window_Driver::flush_double_dbe(int erase_overlay)
   }
   if (backbuffer_bad || erase_overlay) {
     // Make sure we do a complete redraw...
-    if (i->region) {Fl_Graphics_Driver::default_driver().XDestroyRegion(i->region); i->region = 0;}
+    if (flx->region) {Fl_Graphics_Driver::default_driver().XDestroyRegion(flx->region); flx->region = 0;}
     pWindow->clear_damage(FL_DAMAGE_ALL);
     backbuffer_bad = 0;
   }  
   // Redraw as needed...
   if (pWindow->damage()) {
-    fl_clip_region(i->region); i->region = 0;
+    fl_clip_region(flx->region); flx->region = 0;
     fl_window = other_xid;
     draw();
-    fl_window = i->xid;
+    fl_window = flx->xid;
   }
   // Copy contents of back buffer to window...
   XdbeSwapInfo s;
@@ -155,7 +155,7 @@ void Fl_X11_Window_Driver::decorated_win_size(int &w, int &h)
   if (!win->shown() || win->parent() || !win->border() || !win->visible()) return;
   Window root, parent, *children;
   unsigned n = 0;
-  Status status = XQueryTree(fl_display, Fl_X::i(win)->xid, &root, &parent, &children, &n);
+  Status status = XQueryTree(fl_display, Fl_X::flx(win)->xid, &root, &parent, &children, &n);
   if (status != 0 && n) XFree(children);
   // when compiz is used, root and parent are the same window
   // and I don't know where to find the window decoration
@@ -189,10 +189,10 @@ int Fl_X11_Window_Driver::decorated_w()
 
 void Fl_X11_Window_Driver::take_focus()
 {
-  Fl_X *i = Fl_X::i(pWindow);
+  Fl_X *flx = Fl_X::flx(pWindow);
   if (!Fl_X11_Screen_Driver::ewmh_supported())
     pWindow->show();		// Old WMs, XMapRaised
-  else if (i)			// New WMs use the NETWM attribute:
+  else if (flx)			// New WMs use the NETWM attribute:
     activate_window();
 }
 
@@ -222,16 +222,16 @@ void Fl_X11_Window_Driver::flush_double()
 void Fl_X11_Window_Driver::flush_double(int erase_overlay)
 {
   pWindow->make_current(); // make sure fl_gc is non-zero
-  Fl_X *i = Fl_X::i(pWindow);
+  Fl_X *flx = Fl_X::flx(pWindow);
   if (!other_xid) {
       other_xid = fl_create_offscreen(w(), h());
     pWindow->clear_damage(FL_DAMAGE_ALL);
   }
     if (pWindow->damage() & ~FL_DAMAGE_EXPOSE) {
-      fl_clip_region(i->region); i->region = 0;
+      fl_clip_region(flx->region); flx->region = 0;
       fl_window = other_xid;
       draw();
-      fl_window = i->xid;
+      fl_window = flx->xid;
     }
   if (erase_overlay) fl_clip_region(0);
   int X,Y,W,H; fl_clip_box(0,0,w(),h(),X,Y,W,H);
@@ -359,7 +359,7 @@ void Fl_X11_Window_Driver::icons(const Fl_RGB_Image *icons[], int count) {
       icon_->icons[i] = (Fl_RGB_Image*)((Fl_RGB_Image*)icons[i])->copy();
   }
   
-  if (Fl_X::i(pWindow))
+  if (Fl_X::flx(pWindow))
     set_icons();
 }
 
@@ -467,16 +467,16 @@ void Fl_X11_Window_Driver::show_menu()
 
 
 void Fl_X11_Window_Driver::hide() {
-  Fl_X* ip = Fl_X::i(pWindow);
+  Fl_X* flx = Fl_X::flx(pWindow);
   if (hide_common()) return;
-  if (ip->region) Fl_Graphics_Driver::default_driver().XDestroyRegion(ip->region);
+  if (flx->region) Fl_Graphics_Driver::default_driver().XDestroyRegion(flx->region);
 # if USE_XFT
-  Fl_Xlib_Graphics_Driver::destroy_xft_draw(ip->xid);
+  Fl_Xlib_Graphics_Driver::destroy_xft_draw(flx->xid);
   screen_num_ = -1;
 # endif
-  // this test makes sure ip->xid has not been destroyed already
-  if (ip->xid) XDestroyWindow(fl_display, ip->xid);
-  delete ip;
+  // this test makes sure flx->xid has not been destroyed already
+  if (flx->xid) XDestroyWindow(fl_display, flx->xid);
+  delete flx;
 }
 
 
@@ -584,7 +584,7 @@ void _Fl_Overlay::show() {
   // find the outermost window to tell wm about the colormap:
   Fl_Window *w = window();
   for (;;) {Fl_Window *w1 = w->window(); if (!w1) break; w = w1;}
-  XSetWMColormapWindows(fl_display, fl_xid(w), &(Fl_X::i(this)->xid), 1);
+  XSetWMColormapWindows(fl_display, fl_xid(w), &(Fl_X::flx(this)->xid), 1);
 }
 
 void _Fl_Overlay::flush() {
@@ -594,7 +594,7 @@ void _Fl_Overlay::flush() {
 #endif
   fl_overlay = 1;
   Fl_Overlay_Window *w = (Fl_Overlay_Window *)parent();
-  Fl_X *myi = Fl_X::i(this);
+  Fl_X *myi = Fl_X::flx(this);
   if (damage() != FL_DAMAGE_EXPOSE) XClearWindow(fl_display, fl_xid(this));
   fl_clip_region(myi->region); myi->region = 0;
   w->draw_overlay();
@@ -639,7 +639,7 @@ void Fl_X11_Window_Driver::redraw_overlay() {
 void Fl_X11_Window_Driver::flush_menu() {
 #if HAVE_OVERLAY
    if (!fl_overlay_visual || !overlay()) {flush_Fl_Window(); return;}
-   Fl_X *myi = Fl_X::i(pWindow);
+   Fl_X *myi = Fl_X::flx(pWindow);
    fl_window = myi->xid;
 # if defined(FLTK_USE_CAIRO)
    // capture gc changes automatically to update the cairo context adequately
@@ -681,7 +681,7 @@ int Fl_X11_Window_Driver::scroll(int src_x, int src_y, int src_w, int src_h, int
 Fl_X *Fl_X11_Window_Driver::makeWindow()
 {
   Fl_X::make_xid(pWindow, fl_visual, fl_colormap);
-  return Fl_X::i(pWindow);
+  return Fl_X::flx(pWindow);
 }
 
 const Fl_Image* Fl_X11_Window_Driver::shape() {
