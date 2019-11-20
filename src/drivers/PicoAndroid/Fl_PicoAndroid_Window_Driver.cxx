@@ -81,7 +81,7 @@ Fl_X *Fl_PicoAndroid_Window_Driver::makeWindow()
 //  x->xid = SDL_CreateRenderer(pNativeWindow, -1, SDL_RENDERER_ACCELERATED);
   x->next = Fl_X::first;
   wait_for_expose_value = 0;
-  pWindow->flx = x;
+  pWindow->flx_ = x;
   Fl_X::first = x;
 
   pWindow->set_visible();

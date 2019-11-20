@@ -128,7 +128,7 @@ public:
   Fl_X *next;
   // static variables, static functions and member functions
   static Fl_X* first;
-  static Fl_X* flx(const Fl_Window* w) {return (Fl_X*)w->flx;}
+  static Fl_X* flx(const Fl_Window* w) {return (Fl_X*)w->flx_;}
 #  if defined(USE_X11) // for backward compatibility
   static void make_xid(Fl_Window*, XVisualInfo* =fl_visual, Colormap=fl_colormap);
   static Fl_X* set_xid(Fl_Window*, Window);

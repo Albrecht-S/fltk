@@ -2399,7 +2399,7 @@ Fl_X* Fl_X::set_xid(Fl_Window* win, Window winxid) {
   Fl_X *xp = new Fl_X;
   xp->xid = winxid;
   Fl_Window_Driver::driver(win)->other_xid = 0;
-  xp->w = win; win->flx = xp;
+  xp->w = win; win->flx_ = xp;
   xp->next = Fl_X::first;
   xp->region = 0;
   Fl_Window_Driver::driver(win)->wait_for_expose_value = 1;

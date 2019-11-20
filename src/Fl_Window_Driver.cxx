@@ -162,7 +162,7 @@ int Fl_Window_Driver::hide_common() {
   for (; *pp != ip; pp = &(*pp)->next) if (!*pp) return 1;
   *pp = ip->next;
   
-  pWindow->flx = 0;
+  pWindow->flx_ = 0;
   
   // recursively remove any subwindows:
   for (Fl_X *wi = Fl_X::first; wi;) {
