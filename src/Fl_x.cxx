@@ -2091,7 +2091,7 @@ int fl_handle(const XEvent& thisevent)
 
   case EnterNotify:
     if (xevent.xcrossing.detail == NotifyInferior) break;
-    // XInstallColormap(fl_display, Fl_X::i(window)->colormap);
+    // XInstallColormap(fl_display, Fl_X::flx(window)->colormap);
     set_event_xy(window);
     Fl::e_state = xevent.xcrossing.state << 16;
     event = FL_ENTER;

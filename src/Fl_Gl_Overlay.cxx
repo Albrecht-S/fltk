@@ -239,7 +239,7 @@ void Fl_WinAPI_Gl_Window_Driver::make_overlay_current() {
   if (overlay() != this) {
     set_gl_context(pWindow, (GLContext)overlay());
     //  if (fl_overlay_depth)
-    //    wglRealizeLayerPalette(Fl_X::i(this)->private_dc, 1, TRUE);
+    //    wglRealizeLayerPalette(Fl_X::flx(this)->private_dc, 1, TRUE);
   } else
 #endif
     glDrawBuffer(GL_FRONT);
