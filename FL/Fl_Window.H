@@ -70,7 +70,7 @@ private:
   int fullscreen_screen_right;
 
   // TODO: it would make sense to merge the use of Fl_X and Fl_Window_Driver, maybe simply by
-  // TODO: deriving Fl_Window_Driver from Fl_X. However, there are a lot of historic kldges for
+  // TODO: deriving Fl_Window_Driver from Fl_X. However, there are a lot of historic kludges for
   // TODO: some platforms around Fl_X.
   Fl_X *flx_; // points at the system-specific stuff (Fl_X), but exists only after the window is mapped
   Fl_Window_Driver *pWindowDriver; // points at the system-specific stuff at window creation time

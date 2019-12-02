@@ -18,6 +18,9 @@ Changes in FLTK 1.4.0					Released: ??? ?? 2019
   New Features and Extensions
 
   - (add new items here)
+  - The internal static method Fl_X * Fl_X::i(Fl_Window *) has been renamed
+    to Fl_X::flx(Fl_Window *). The old name is deprecated but kept for
+    backward compatibility.
   - Fl_Printer::begin_job() uses by default the Gnome print dialog on the X11
     platform when the GTK library is available at run-time. That can be turned off
     with Fl::option(OPTION_PRINTER_USES_GTK, false).
