@@ -108,7 +108,7 @@ CREATE_EXAMPLE(tree tree.fl fltk)
 CREATE_EXAMPLE(twowin twowin.cxx fltk)
 CREATE_EXAMPLE(utf8 utf8.cxx fltk)
 CREATE_EXAMPLE(valuators valuators.fl fltk)
-CREATE_EXAMPLE(unittests unittests.cxx fltk)
+CREATE_EXAMPLE(unittests unittests.cxx "fltk;fltk_images")
 CREATE_EXAMPLE(windowfocus windowfocus.cxx fltk)
 
 CREATE_EXAMPLE(fltk-versions ../examples/fltk-versions.cxx fltk)
@@ -156,6 +156,7 @@ configure_file(rgb.txt ${TESTFILE_PATH} COPYONLY)
 configure_file(help_dialog.html ${TESTFILE_PATH} COPYONLY)
 configure_file(browser.cxx ${TESTFILE_PATH} COPYONLY)
 configure_file(editor.cxx ${TESTFILE_PATH} COPYONLY)
+configure_file(unittest_rgb.png ${TESTFILE_PATH} COPYONLY)
 
 # Apple macOS creates bundles instead of executables and needs a little bit
 # more help for demos to run correctly

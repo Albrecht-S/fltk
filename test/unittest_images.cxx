@@ -16,11 +16,15 @@
 //     http://www.fltk.org/str.php
 //
 
+#define USE_SHARED_IMAGES (1) // 0 = use old style Fl_Image, 1 = use Fl_Shared_Image
+			      // the latter requires "unittest_rgb.png" in working dir.
+
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Radio_Button.H>
 #include <FL/Fl_Check_Button.H>
 #include <FL/fl_draw.H>
+#include <FL/Fl_Shared_Image.H>
 
 // Note: currently (March 2010) fl_draw_image() supports transparency with
 //	 alpha channel only on Apple (Mac OS X), but Fl_RGB_Image->draw()
@@ -95,20 +99,51 @@ class ImageTest : public Fl_Group {
       img_rgba   += 127*4;
     }
     i_g    = new Fl_RGB_Image (img_gray  ,128,128,1,LX*(128+DX));
-    i_ga   = new Fl_RGB_Image (img_gray_a,128,128,2,LX*(128+DX)*2);
+    if (USE_SHARED_IMAGES) {
+      i_ga = Fl_Shared_Image::get("unittest_rgb.png");
+      if (!i_ga)
+	Fl::fatal("Image file 'unittest_rgb.png' not found! Exiting.");
+    }
+    else
+      i_ga = new Fl_RGB_Image (img_gray_a,128,128,2,LX*(128+DX)*2);
     i_rgb  = new Fl_RGB_Image (img_rgb,   128,128,3,LX*(128+DX)*3);
-    i_rgba = new Fl_RGB_Image (img_rgba,  128,128,4,LX*(128+DX)*4);
+    if (USE_SHARED_IMAGES) {
+      i_rgba = Fl_Shared_Image::get("unittest_rgb.png");
+      if (!i_rgba)
+	Fl::fatal("Image file 'unittest_rgb.png' not found! Exiting.");
+    }
+    else
+      i_rgba = new Fl_RGB_Image (img_rgba,  128,128,4,LX*(128+DX)*4);
   } // build_imgs method ends
 
   void free_images() {
-    if (i_rgba) { delete i_rgba; i_rgba = 0; }
-    if (i_rgb) { delete i_rgb; i_rgb = 0; }
-    if (i_ga) { delete i_ga; i_ga = 0; }
-    if (i_g) { delete i_g; i_g = 0; }
+    printf("+free_images() - num_images = %d\n", Fl_Shared_Image::num_images());
+
+    if (i_rgba) {			// code w/o Fl_Image::release()
+      if (i_rgba->as_shared_image())	// needs additional if()
+	i_rgba->release();
+      else
+	delete i_rgba;
+      i_rgba = 0;
+    }
+    if (i_rgb) {
+      delete i_rgb;			// using delete for Fl_Image object
+      i_rgb = 0;
+    }
+    if (i_ga) {				// code with Fl_Image::release()
+      i_ga->release();			// doesn't need additional if()
+      i_ga = 0;
+    }
+    if (i_g) {
+      i_g->release();			// using release() for Fl_Image object
+      i_g = 0;
+    }
     if (img_rgba_base) { free (img_rgba_base); img_rgba_base = 0; }
     if (img_rgb_base) { free (img_rgb_base); img_rgb_base = 0; }
     if (img_gray_a_base) { free (img_gray_a_base); img_gray_a_base = 0; }
     if (img_gray_base) { free (img_gray_base); img_gray_base = 0; }
+
+    printf("/free_images() - num_images = %d\n", Fl_Shared_Image::num_images());
   } // end of free_images method
 
   static void refresh_imgs_CB(Fl_Widget*,void *data) {
@@ -141,10 +176,10 @@ public:
   static uchar *img_gray_a;
   static uchar *img_rgb;
   static uchar *img_rgba;
-  static Fl_RGB_Image *i_g;
-  static Fl_RGB_Image *i_ga;
-  static Fl_RGB_Image *i_rgb;
-  static Fl_RGB_Image *i_rgba;
+  static Fl_Image *i_g;
+  static Fl_Image *i_ga;
+  static Fl_Image *i_rgb;
+  static Fl_Image *i_rgba;
 
   // control widgets
   Fl_Group *ctr_grp;
@@ -288,10 +323,10 @@ uchar *ImageTest::img_gray = 0;
 uchar *ImageTest::img_gray_a = 0;
 uchar *ImageTest::img_rgb = 0;
 uchar *ImageTest::img_rgba = 0;
-Fl_RGB_Image *ImageTest::i_g = 0;
-Fl_RGB_Image *ImageTest::i_ga = 0;
-Fl_RGB_Image *ImageTest::i_rgb = 0;
-Fl_RGB_Image *ImageTest::i_rgba = 0;
+Fl_Image *ImageTest::i_g = 0;
+Fl_Image *ImageTest::i_ga = 0;
+Fl_Image *ImageTest::i_rgb = 0;
+Fl_Image *ImageTest::i_rgba = 0;
 
 UnitTest images("drawing images", ImageTest::create);
 

@@ -175,6 +175,7 @@ int main(int argc, char **argv) {
   Fl::get_system_colors();
   Fl::scheme(Fl::scheme()); // init scheme before instantiating tests
   Fl::visual(FL_RGB);
+  fl_register_images();
   mainwin = new MainWindow(MAINWIN_W, MAINWIN_H, "FLTK Unit Tests");
   browser = new Fl_Hold_Browser(BROWSER_X, BROWSER_Y, BROWSER_W, BROWSER_H, "Unit Tests");
   browser->align(FL_ALIGN_TOP|FL_ALIGN_LEFT);
