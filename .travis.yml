@@ -33,6 +33,7 @@ branches:
   - /^fix-.*/
   - /^issue-.*/
   - /^str-.*/
+  - Fl_Image_release
 
 before_script:
   - |
