@@ -2081,6 +2081,11 @@ Fl_X *Fl_WinAPI_Window_Driver::makeWindow() {
         break;
     }
 
+    // Forces a top-level window onto the taskbar when the window is visible
+    if (!w->skip_taskbar()) {
+      styleEx |= WS_EX_APPWINDOW;
+    }
+
     int xwm = xp, ywm = yp, bt, bx, by; // these are in graphical units
     fake_X_wm_style(w, xwm, ywm, bt, bx, by, style, styleEx, maxw(), minw(), maxh(), minh(), size_range_set());
     if (by + bt) {

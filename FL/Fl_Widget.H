@@ -158,9 +158,9 @@ protected:
         COPIED_TOOLTIP  = 1<<17,  ///< the widget tooltip is internally copied, its destruction is handled by the widget
         FULLSCREEN      = 1<<18,  ///< a fullscreen window (Fl_Window)
         MAC_USE_ACCENTS_MENU = 1<<19, ///< On the Mac OS platform, pressing and holding a key on the keyboard opens an accented-character menu window (Fl_Input_, Fl_Text_Editor)
-        // (space for more flags)
         NEEDS_KEYBOARD  = 1<<20,  ///< set this on touch screen devices if a widget needs a keyboard when it gets Focus. @see Fl_Screen_Driver::request_keyboard()
-        // a tiny bit more space for new flags...
+        SKIP_TASKBAR    = 1<<21,  ///< window will not show in taskbar (Fl_Window)
+        // (add more flags here)
         USERFLAG3       = 1<<29,  ///< reserved for 3rd party extensions
         USERFLAG2       = 1<<30,  ///< reserved for 3rd party extensions
         USERFLAG1       = 1<<31   ///< reserved for 3rd party extensions

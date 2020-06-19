@@ -21,9 +21,11 @@ void Fl_Window::border(int b) {
   if (b) {
     if (border()) return;
     clear_flag(NOBORDER);
+    clear_flag(SKIP_TASKBAR);
   } else {
     if (!border()) return;
     set_flag(NOBORDER);
+    set_flag(SKIP_TASKBAR);
   }
   pWindowDriver->use_border();
 }

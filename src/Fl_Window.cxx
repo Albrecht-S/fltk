@@ -541,6 +541,13 @@ void Fl_Window::show() {
   pWindowDriver->show();
 }
 
+void Fl_Window::skip_taskbar(int t) {
+  if (t) {
+    set_flag(SKIP_TASKBAR);
+  } else {
+    clear_flag(SKIP_TASKBAR);
+  }
+}
 void Fl_Window::resize(int X,int Y,int W,int H) {
   pWindowDriver->resize(X, Y, W, H);
 }
