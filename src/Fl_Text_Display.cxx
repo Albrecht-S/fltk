@@ -2295,6 +2295,8 @@ void Fl_Text_Display::draw_string(int style,
     } else if (style & HIGHLIGHT_MASK) {
       if (Fl::focus() == (Fl_Widget*)this) background = fl_color_average(color(), selection_color(), 0.5f);
       else background = fl_color_average(color(), selection_color(), 0.6f);
+    } else if (styleRec->bgcolor) {
+      background = styleRec->bgcolor;
     } else background = color();
     foreground = (style & PRIMARY_MASK) ? fl_contrast(styleRec->color, background) : styleRec->color;
   } else if (style & PRIMARY_MASK) {
@@ -2506,7 +2508,7 @@ int Fl_Text_Display::position_style( int lineStartPos, int lineLen, int lineInde
 
   pos = lineStartPos + min( lineIndex, lineLen );
 
-  if ( lineIndex >= lineLen )
+  if ( lineIndex > lineLen )
     style = FILL_MASK;
   else if ( styleBuf != NULL ) {
     style = ( unsigned char ) styleBuf->byte_at( pos );

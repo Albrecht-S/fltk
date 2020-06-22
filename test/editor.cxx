@@ -56,16 +56,21 @@ const int line_num_width = 75;
 
 // Syntax highlighting stuff...
 #define TS 14 // default editor textsize
+
+#define BG_COMMENT (fl_rgb_color(255, 255, 190))
+#define BG_STRING  (fl_color_average(FL_CYAN, FL_WHITE, 0.3))
+#define BG_DIRECT  (fl_lighter(FL_LIGHT1))
+
 Fl_Text_Buffer     *stylebuf = 0;
 Fl_Text_Display::Style_Table_Entry
                    styletable[] = {	// Style table
-		     { FL_BLACK,      FL_COURIER,           TS }, // A - Plain
-		     { FL_DARK_GREEN, FL_HELVETICA_ITALIC,  TS }, // B - Line comments
-		     { FL_DARK_GREEN, FL_HELVETICA_ITALIC,  TS }, // C - Block comments
-		     { FL_BLUE,       FL_COURIER,           TS }, // D - Strings
-		     { FL_DARK_RED,   FL_COURIER,           TS }, // E - Directives
-		     { FL_DARK_RED,   FL_COURIER_BOLD,      TS }, // F - Types
-		     { FL_BLUE,       FL_COURIER_BOLD,      TS }, // G - Keywords
+		     { FL_BLACK,      FL_COURIER,           TS, FL_WHITE },   // A - Plain
+		     { FL_DARK_GREEN, FL_HELVETICA_ITALIC,  TS, BG_COMMENT }, // B - Line comments
+		     { FL_DARK_GREEN, FL_HELVETICA_ITALIC,  TS, BG_COMMENT }, // C - Block comments
+		     { FL_BLUE,       FL_COURIER,           TS, BG_STRING },  // D - Strings
+		     { FL_DARK_RED,   FL_COURIER,           TS, BG_DIRECT }, // E - Directives
+		     { FL_DARK_RED,   FL_COURIER_BOLD,      TS, FL_WHITE },  // F - Types
+		     { FL_BLUE,       FL_COURIER_BOLD,      TS, FL_WHITE },  // G - Keywords
 		   };
 const char         *code_keywords[] = {	// List of known C/C++ keywords...
 		     "and",
@@ -284,6 +289,7 @@ style_parse(const char *text,
     last = isalnum((*text)&255) || *text == '_' || *text == '.';
 
     if (*text == '\n') {
+      if (current == 'E') style[-1] = 'A'; // change style for '\n' after directives to plain
       // Reset column and possibly reset the style
       col = 0;
       if (current == 'B' || current == 'E') current = 'A';

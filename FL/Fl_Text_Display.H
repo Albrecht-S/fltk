@@ -25,11 +25,11 @@
 #define FL_TEXT_DISPLAY_H
 
 #include <FL/Fl.H>		// Fl::scrollbar_size()
-#include "fl_draw.H"
-#include "Fl_Group.H"
-#include "Fl_Widget.H"
-#include "Fl_Scrollbar.H"
-#include "Fl_Text_Buffer.H"
+#include <FL/fl_draw.H>
+#include <FL/Fl_Group.H>
+#include <FL/Fl_Widget.H>
+#include <FL/Fl_Scrollbar.H>
+#include <FL/Fl_Text_Buffer.H>
 
 /**
  \brief Rich text display widget.
@@ -144,10 +144,10 @@ public:
    \see Fl_Text_Display::highlight_data()
    */
   struct Style_Table_Entry {
-    Fl_Color    color;	///< text color
-    Fl_Font     font;	///< text font
-    Fl_Fontsize size;	///< text font size
-    unsigned    attr;	///< currently unused (this may be changed in the future)
+    Fl_Color    color;	 ///< text color
+    Fl_Font     font;	 ///< text font
+    Fl_Fontsize size;	 ///< text font size
+    Fl_Color    bgcolor; ///< background color // since FLTK 1.4 (replaces unused 'attr')
   };
   
   Fl_Text_Display(int X, int Y, int W, int H, const char *l = 0);
