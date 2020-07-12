@@ -110,6 +110,8 @@ CREATE_EXAMPLE(unittests unittests.cxx fltk)
 CREATE_EXAMPLE(windowfocus windowfocus.cxx fltk)
 CREATE_EXAMPLE(fltk-versions ../examples/fltk-versions.cxx fltk)
 
+CREATE_EXAMPLE(str-3449-02_borderless str-3449-02_borderless.cxx fltk)
+
 # OpenGL demos...
 if(OPENGL_FOUND)
 CREATE_EXAMPLE(CubeView "CubeMain.cxx;CubeView.cxx;CubeViewUI.fl" "fltk_gl;fltk")
