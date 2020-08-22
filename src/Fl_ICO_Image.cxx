@@ -9,9 +9,9 @@
 //
 //     https://www.fltk.org/COPYING.php
 //
-// Please report all bugs and problems on the following page:
+// Please see the following page on how to report bugs and issues:
 //
-//     https://www.fltk.org/str.php
+//     https://www.fltk.org/bugs.php
 //
 
 
@@ -24,18 +24,21 @@
 #include "Fl_Image_Reader.h"
 #include <FL/Fl_ICO_Image.H>
 #if defined(HAVE_LIBPNG) && defined(HAVE_LIBZ)
-#  include <FL/Fl_PNG_Image.H>
+#include <FL/Fl_PNG_Image.H>
 #endif
 
 Fl_ICO_Image::Fl_ICO_Image(const char *filename, const unsigned char *data, int id)
-: Fl_BMP_Image(0,0),
- idcount_(0),
- icondirentry_(0)
-{
+  : Fl_BMP_Image(0, 0),
+    idcount_(0),
+    icondirentry_(0) {
+
   Fl_Image_Reader rdr;
   int r;
 
-  w(0); h(0); d(0); ld(0);
+  w(0);
+  h(0);
+  d(0);
+  ld(0);
   alloc_array = 0;
   array = 0;
 
@@ -56,8 +59,7 @@ Fl_ICO_Image::Fl_ICO_Image(const char *filename, const unsigned char *data, int 
  This method attempts to load the biggest image resource available
  inside a .ICO file (Windows Icon format).
  */
-void Fl_ICO_Image::load_ico_(Fl_Image_Reader &rdr, int id)
-{
+void Fl_ICO_Image::load_ico_(Fl_Image_Reader &rdr, int id) {
   int pickedID = -1;
 
   // Check file header (ICONDIR, 6 bytes)
@@ -75,7 +77,6 @@ void Fl_ICO_Image::load_ico_(Fl_Image_Reader &rdr, int id)
     ld(ERR_FORMAT);
     return;
   }
-
 
   // read entries (ICONDIRENTRY, 16 bytes each)
 
@@ -120,7 +121,7 @@ void Fl_ICO_Image::load_ico_(Fl_Image_Reader &rdr, int id)
   if (pickedID < 0 ||
       icondirentry_[pickedID].bWidth <= 0 ||
       icondirentry_[pickedID].bHeight <= 0 ||
-      icondirentry_[pickedID].dwImageOffset <= 0||
+      icondirentry_[pickedID].dwImageOffset <= 0 ||
       icondirentry_[pickedID].dwBytesInRes <= 0)
   {
     ld(ERR_FORMAT);
@@ -129,14 +130,13 @@ void Fl_ICO_Image::load_ico_(Fl_Image_Reader &rdr, int id)
 
   rdr.seek(icondirentry_[pickedID].dwImageOffset);
 
-
   // Check for a PNG image resource
   uchar b[8];
-  for (int i=0; i<8; ++i) b[i] = rdr.read_byte();
+  for (int i = 0; i < 8; ++i)
+    b[i] = rdr.read_byte();
 
-  if (b[0]==0x89 && b[1]=='P' && b[2]=='N' && b[3]=='G' &&
-      b[4]=='\r' && b[5]=='\n' && b[6]==0x1A && b[7]=='\n')
-  {
+  if (b[0] == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G' &&
+      b[4] == '\r' && b[5] == '\n' && b[6] == 0x1A && b[7] == '\n') {
 #if defined(HAVE_LIBPNG) && defined(HAVE_LIBZ)
     Fl_PNG_Image *png = new Fl_PNG_Image(rdr.name(), icondirentry_[pickedID].dwImageOffset);
 
@@ -144,7 +144,8 @@ void Fl_ICO_Image::load_ico_(Fl_Image_Reader &rdr, int id)
     if (loaded < 0) {
       w(0); h(0); d(0);
       ld(loaded);
-      if (png) delete png;
+      if (png)
+        delete png;
       return;
     }
 
@@ -168,7 +169,6 @@ void Fl_ICO_Image::load_ico_(Fl_Image_Reader &rdr, int id)
 #endif
   }
 
-
   // Bitmap resource
 
   w(icondirentry_[pickedID].bWidth);
@@ -185,5 +185,3 @@ void Fl_ICO_Image::load_ico_(Fl_Image_Reader &rdr, int id)
   rdr.seek(icondirentry_[pickedID].dwImageOffset);
   load_bmp_(rdr, h());
 }
-
-
