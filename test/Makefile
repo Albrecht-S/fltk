@@ -55,6 +55,7 @@ CPPFILES =\
 	help_dialog.cxx \
 	icon.cxx \
 	iconize.cxx \
+	icon_image.cxx \
 	image.cxx \
 	inactive.cxx \
 	input.cxx \
@@ -136,6 +137,7 @@ ALL =	\
 	help_dialog$(EXEEXT) \
 	icon$(EXEEXT) \
 	iconize$(EXEEXT) \
+	icon_image$(EXEEXT) \
 	image$(EXEEXT) \
 	inactive$(EXEEXT) \
 	input$(EXEEXT) \
@@ -428,6 +430,11 @@ help_dialog$(EXEEXT): help_dialog.o $(IMGLIBNAME)
 icon$(EXEEXT): icon.o
 
 iconize$(EXEEXT): iconize.o
+
+icon_image$(EXEEXT): icon_image.o
+	echo Linking $@...
+	$(CXX) $(ARCHFLAGS) $(CXXFLAGS) $(LDFLAGS) icon_image.o -o $@ $(LINKFLTKIMG) $(LDLIBS)
+	$(OSX_ONLY) ../fltk-config --post $@
 
 image$(EXEEXT): image.o
 

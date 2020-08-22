@@ -57,6 +57,7 @@ hello
 help_dialog
 icon
 iconize
+icon_image
 image
 inactive
 inactive.cxx

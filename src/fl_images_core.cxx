@@ -30,6 +30,7 @@
 #include <FL/Fl_PNG_Image.H>
 #include <FL/Fl_PNM_Image.H>
 #include <FL/Fl_SVG_Image.H>
+#include <FL/Fl_ICO_Image.H>
 #include <FL/fl_utf8.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -105,6 +106,11 @@ fl_check_images(const char *name,               // I - Filename
       memcmp(header, "<svg", 4) == 0)
     return new Fl_SVG_Image(name);
 #endif // FLTK_USE_SVG
+
+  // Windows Icons (*.ico)
+
+  if (memcmp(header, "\000\000\001\000", 4) == 0)
+    return new Fl_ICO_Image(name);
 
   return 0;
 }
