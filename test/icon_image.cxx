@@ -19,6 +19,26 @@
 #include <FL/Fl_ICO_Image.H>
 #include <FL/Fl_Double_Window.H>
 
+void load_icon(Fl_Box *box, const char *name, int id, int scale = 0) {
+  if (box->image())
+    delete box->image();
+  box->image(0);
+  Fl_ICO_Image *ico = new Fl_ICO_Image(name, NULL, id);
+  if (!ico->fail()) {
+    Fl_Image *img = 0;
+    if (scale > 0) {
+      float f1 = float(scale) / ico->w();
+      float f2 = float(scale) / ico->h();
+      if (f2 < f1) f1 = f2;
+      img = ico->copy(int(f1 * ico->w()), int(f1 * ico->h()));
+    } else {
+      img = ico->copy(ico->w(), ico->h());
+    }
+    box->image(img);
+  }
+  delete ico;
+}
+
 int main(int argc, char **argv) {
   int id = 0;
   const char *name = "icon_image.ico";
@@ -28,35 +48,30 @@ int main(int argc, char **argv) {
   if (argc > 2)
     id = atoi(argv[2]);
 
-  Fl_ICO_Image *ico = new Fl_ICO_Image(name, NULL, -2);
   Fl_Double_Window *win = new Fl_Double_Window(300, 400, "Fl_ICO_Image Test");
-  Fl_Box *b = new Fl_Box(0, 0, win->w(), win->h());
+  Fl_Box *box = new Fl_Box(0, 0, win->w(), win->h());
 
-  printf("icon count: %d\n", ico->idcount());
+  Fl_ICO_Image *ico = new Fl_ICO_Image(name, NULL, -2);
+  int icon_count = ico->idcount();
+  printf("icon count: %d\n", icon_count);
 
-  if (ico->idcount() < 1) {
+  if (icon_count < 1) {
     printf("No icon resources found\n");
     return 1;
   }
 
-  if (id > ico->idcount() - 1) {
+  if (id > icon_count - 1) {
     printf("Icon #%d does not exist in file %s\n", id, name);
     return 2;
   }
 
-  printf("icon resource #%d offset: %d\n", id, ico->icondirentry()[id].dwImageOffset);
+  fl_ICONDIRENTRY *icondir = &ico->icondirentry()[id];
+  printf("icon resource #%d offset: %d, width: %d, height: %d\n",
+         id, icondir->dwImageOffset, icondir->bWidth, icondir->bHeight);
 
   delete ico;
-  ico = new Fl_ICO_Image(name, NULL, id);
+  load_icon(box, name, id);
 
-  if (!ico->fail()) {
-    float f1 = 128. / ico->w();
-    float f2 = 128. / ico->h();
-    if (f2 < f1)
-      f1 = f2;
-    Fl_Image *ico2 = ico->copy(int(f1 * ico->w()), int(f1 * ico->h()));
-    b->image(ico2);
-  }
   win->end();
   win->show();
 
