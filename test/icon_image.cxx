@@ -25,6 +25,7 @@
 #include <FL/Fl_Simple_Counter.H>
 #include <FL/filename.H>
 #include <FL/Fl_File_Chooser.H>
+#include <FL/fl_string.h>
 
 #include <stdio.h>
 
@@ -95,7 +96,7 @@ void load_icon_file(const char *fname) {
     return;
   }
 
-  icon_name = strdup(fname);
+  icon_name = fl_strdup(fname);
   win->label(fl_filename_name(icon_name));
 
   // open icon file, get icon count ...
