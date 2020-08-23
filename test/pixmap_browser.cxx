@@ -77,7 +77,7 @@ void file_cb(const char *n) {
 
 void button_cb(Fl_Widget *,void *) {
   fl_file_chooser_callback(file_cb);
-  const char *fname = fl_file_chooser("Image file?","*.{bm,bmp,gif,jpg,pbm,pgm,png,ppm,xbm,xpm"
+  const char *fname = fl_file_chooser("Image file?","*.{bm,bmp,gif,ico,jpg,pbm,pgm,png,ppm,xbm,xpm"
 #ifdef FLTK_USE_SVG
                                       ",svg"
 #ifdef HAVE_LIBZ
