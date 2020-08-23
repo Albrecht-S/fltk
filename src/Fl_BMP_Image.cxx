@@ -166,7 +166,7 @@ void Fl_BMP_Image::load_bmp_(Fl_Image_Reader &rdr, int ico_height)
     // If the height is negative, the row order is flipped
     temp = rdr.read_long();
     if (temp < 0) row_order = 1;
-    w(ico_height > 0 ? ico_height : abs(temp));
+    h(ico_height > 0 ? ico_height : abs(temp));
     rdr.read_word();
     depth = rdr.read_word();
     compression = rdr.read_dword();
