@@ -52,6 +52,8 @@ struct Fl_Help_Block {
                 w,              // Width
                 h;              // Height
   int           line[32];       // Left starting position for each line
+  bool          ol;             // is ordered list <OL> element
+  int           ol_num;         // item number in ordered list
 };
 
 //

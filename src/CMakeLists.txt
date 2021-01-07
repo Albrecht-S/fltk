@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt to build the FLTK library using CMake (www.cmake.org)
 #
-# Copyright 1998-2020 by Bill Spitzak and others.
+# Copyright 1998-2021 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -130,6 +130,7 @@ set (CPPFILES
   fl_color.cxx
   fl_cursor.cxx
   fl_curve.cxx
+  fl_data_container.cxx
   fl_diamond_box.cxx
   fl_draw.cxx
   fl_draw_pixmap.cxx

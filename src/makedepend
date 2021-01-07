@@ -1195,6 +1195,10 @@ fl_cursor.o: fl_cursor_nwse.xpm
 fl_cursor.o: fl_cursor_wait.xpm
 fl_cursor.o: Fl_Window_Driver.H
 fl_curve.o: ../FL/fl_draw.H
+fl_data_container.o: ../FL/Fl_Export.H
+fl_data_container.o: ../FL/fl_string.h
+fl_data_container.o: ../FL/fl_types.h
+fl_data_container.o: fl_data_container.h
 Fl_Device.o: ../config.h
 Fl_Device.o: ../FL/abi-version.h
 Fl_Device.o: ../FL/Enumerations.H
@@ -1825,6 +1829,7 @@ Fl_Help_View.o: ../FL/Fl_Widget.H
 Fl_Help_View.o: ../FL/Fl_Window.H
 Fl_Help_View.o: ../FL/platform_types.h
 Fl_Help_View.o: flstring.h
+Fl_Help_View.o: fl_data_container.h
 Fl_Image.o: ../config.h
 Fl_Image.o: ../FL/abi-version.h
 Fl_Image.o: ../FL/Enumerations.H
