@@ -29,6 +29,12 @@ list(APPEND BUILD_SRCS "${systemdependent_SRCS};${common_SRCS}")
 list(APPEND BUILD_SRCS "${compression_SRCS};${decompression_SRCS}")
 #######################################################################
 FL_ADD_LIBRARY(fltk_jpeg STATIC "${BUILD_SRCS}")
+
+if (MSVC)
+  # suppress Visual Studio warnings in jpeg library
+  target_compile_options (fltk_jpeg PRIVATE "/wd4267")
+endif (MSVC)
+
 # install the jpeg headers
 install(FILES jconfig.h;jerror.h;jmorecfg.h;jpeglib.h
     DESTINATION ${FLTK_INCLUDEDIR}/FL/images

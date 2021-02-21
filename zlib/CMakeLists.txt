@@ -25,6 +25,11 @@ install(FILES zconf.h;zlib.h;zutil.h
     DESTINATION ${FLTK_INCLUDEDIR}/FL/images
 )
 
+if (MSVC)
+  # suppress Visual Studio warnings in zlib
+  target_compile_options (fltk_z PRIVATE /wd4267 /wd4996)
+endif (MSVC)
+
 #######################################################################
 if(OPTION_BUILD_SHARED_LIBS)
 #######################################################################
