@@ -15,9 +15,6 @@
 //
 
 #include "../src/fl_data_container.h"
-
-// #include <stdlib.h>
-// #include <string.h>
 #include <stdio.h>
 
 int main() {
@@ -30,18 +27,18 @@ int main() {
   ii.push(1);
   ii.push(2);
   ii.push(3);
-  printf("pushed: -1, 2, -1, 1, 2, 3, size = %lu\n", ii.size());
+  printf("pushed: -1, 2, -1, 1, 2, 3, size = %d\n", (int)ii.size());
   i = ii.back();
-  printf("back: %d, size = %lu\n", i, ii.size());
+  printf("back: %d, size = %d\n", i, (int)ii.size());
   i = ii.back();
-  printf("back: %d, size = %lu\n", i, ii.size());
+  printf("back: %d, size = %d\n", i, (int)ii.size());
 
   i = ii.pop();
-  printf("popped: %d, size = %lu\n", i, ii.size());
+  printf("popped: %d, size = %d\n", i, (int)ii.size());
   i = ii.pop();
-  printf("popped: %d, size = %lu\n", i, ii.size());
+  printf("popped: %d, size = %d\n", i, (int)ii.size());
   i = ii.pop();
-  printf("popped: %d, size = %lu\n", i, ii.size());
+  printf("popped: %d, size = %d\n", i, (int)ii.size());
 
   Fl_String_Cn ss;
   ss.push("abc");
@@ -55,9 +52,8 @@ int main() {
   dd.push("alpha-beta");
   dd.push("xyz");
   while (dd.size() > 0) {
-    int n = dd.size();
     pr = (const char *)dd.pop();
-    printf("size = %d, popped = %s\n", n, pr);
+    printf("size = %d, popped = %s\n", int(dd.size()), pr);
   }
 
   Fl_String_Cn *cs = new Fl_String_Cn();
