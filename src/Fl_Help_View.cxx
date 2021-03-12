@@ -906,7 +906,7 @@ Fl_Help_View::draw()
               if (block->ol) {
                 char buf[10];
                 snprintf(buf, sizeof(buf), "%d. ", block->ol_num);
-                hv_draw(buf, xx - fl_width(buf) + x() - leftline_, yy + y());
+                hv_draw(buf, xx - (int)fl_width(buf) + x() - leftline_, yy + y());
               }
               else {
                 // draw bullet (&bull;) Unicode: U+2022, UTF-8 (hex): e2 80 a2

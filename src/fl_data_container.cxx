@@ -32,19 +32,19 @@ Fl_Cn::~Fl_Cn() {
 
 void Fl_Cn::push(void *item) {
   if (!data_) {
-    static const size_t INITIAL_CAPACITY = 10;
+    static const size_t INITIAL_CAPACITY = 16;
     data_ = malloc(INITIAL_CAPACITY * data_size_);
     if (data_)
       capacity_ = INITIAL_CAPACITY;
   }
   if (data_) {
     if (capacity_ <= size_) {
-      size_t capacity = capacity_ * 1.5;
-      void *d = realloc(data_, capacity * 1.5);
+      size_t new_capacity = (capacity_ * 12 + 7) / 8; // old * 1.5, divisible by 8
+      void *d = realloc(data_, new_capacity);
       if (!d)
         return;
       data_ = d;
-      capacity_ = capacity;
+      capacity_ = new_capacity;
     }
     void *d = (char *)data_ + data_size_ * size_;
     memcpy(d, item, data_size_);
