@@ -130,6 +130,7 @@ CREATE_EXAMPLE (valuators valuators.fl fltk)
 CREATE_EXAMPLE (unittests unittests.cxx fltk)
 CREATE_EXAMPLE (windowfocus windowfocus.cxx fltk)
 
+CREATE_EXAMPLE (strlxxx strlxxx.cxx "fltk")
 # OpenGL demos...
 if (OPENGL_FOUND)
   CREATE_EXAMPLE (CubeView "CubeMain.cxx;CubeView.cxx;CubeViewUI.fl" "fltk_gl;fltk")
