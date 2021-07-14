@@ -346,13 +346,9 @@
 
 /*
  * Do we have PTHREAD_MUTEX_RECURSIVE?
- * *FIXME* HAVE_PTHREAD_MUTEX_RECURSIVE not yet implemented in CMake !
- * *FIXME* HAVE_PTHREAD_MUTEX_RECURSIVE defaults to YES (defined).
  */
 
-#ifdef HAVE_PTHREAD
-#define HAVE_PTHREAD_MUTEX_RECURSIVE 1
-#endif
+#cmakedefine HAVE_PTHREAD_MUTEX_RECURSIVE 1
 
 /*
  * Do we have the ALSA library?

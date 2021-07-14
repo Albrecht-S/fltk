@@ -71,6 +71,22 @@ else ()
   fl_find_header (HAVE_PTHREAD_H pthread.h)
 endif (WIN32 AND NOT CYGWIN)
 
+# Do we have PTHREAD_MUTEX_RECURSIVE ?
+
+if (HAVE_PTHREAD_H)
+  try_compile(HAVE_PTHREAD_MUTEX_RECURSIVE
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/CMake/pthread_mutex_recursive.c
+  )
+else ()
+  set (HAVE_PTHREAD_MUTEX_RECURSIVE 0)
+endif ()
+
+# *FIXME* *DEBUG* Remove this:
+
+fl_debug_var(HAVE_PTHREAD_H)
+fl_debug_var(HAVE_PTHREAD_MUTEX_RECURSIVE)
+
 # Special case for Microsoft Visual Studio generator (MSVC):
 #
 # The header files <GL/glu.h> and <locale.h> are located in the SDK's
@@ -139,7 +155,8 @@ endif (NOT HAVE_DIRENT_H)
 mark_as_advanced (HAVE_ALSA_ASOUNDLIB_H HAVE_DIRENT_H HAVE_DLFCN_H)
 mark_as_advanced (HAVE_GL_GLU_H)
 mark_as_advanced (HAVE_LIBPNG_PNG_H HAVE_LOCALE_H HAVE_NDIR_H)
-mark_as_advanced (HAVE_OPENGL_GLU_H HAVE_PNG_H HAVE_PTHREAD_H)
+mark_as_advanced (HAVE_OPENGL_GLU_H HAVE_PNG_H)
+mark_as_advanced (HAVE_PTHREAD_H HAVE_PTHREAD_MUTEX_RECURSIVE)
 mark_as_advanced (HAVE_STDIO_H HAVE_STRINGS_H HAVE_SYS_DIR_H)
 mark_as_advanced (HAVE_SYS_NDIR_H HAVE_SYS_SELECT_H)
 mark_as_advanced (HAVE_SYS_STDTYPES_H HAVE_XDBE_H)
