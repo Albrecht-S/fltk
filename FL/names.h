@@ -68,9 +68,16 @@ const char * const fl_eventnames[] =
   "FL_FULLSCREEN",
   "FL_ZOOM_GESTURE",
   "FL_ZOOM_EVENT",
-  "FL_EVENT_28", // not yet defined, just in case it /will/ be defined ...
-  "FL_EVENT_29", // not yet defined, just in case it /will/ be defined ...
-  "FL_EVENT_30"  // not yet defined, just in case it /will/ be defined ...
+  "FL_ROTATE_GESTURE",
+  "FL_SCROLL_GESTURE",
+  "FL_SWIPE_GESTURE",
+
+  // add new events here, above this comment !
+
+  "FL_LAST_EVENT", // not actually an event (never sent)
+  "FL_EVENT_32",   // not yet defined, just in case it /will/ be defined ...
+  "FL_EVENT_33"    // not yet defined, just in case it /will/ be defined ...
+  "FL_EVENT_34"    // not yet defined, just in case it /will/ be defined ...
 };
 
 /**

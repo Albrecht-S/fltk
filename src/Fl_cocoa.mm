@@ -542,6 +542,7 @@ void Fl_Cocoa_Screen_Driver::breakMacEventLoop()
 - (void)otherMouseDragged:(NSEvent *)theEvent;
 - (void)scrollWheel:(NSEvent *)theEvent;
 - (void)magnifyWithEvent:(NSEvent *)theEvent;
+- (void)rotateWithEvent:(NSEvent *)theEvent;
 - (void)keyDown:(NSEvent *)theEvent;
 - (void)keyUp:(NSEvent *)theEvent;
 - (void)flagsChanged:(NSEvent *)theEvent;
@@ -933,26 +934,54 @@ static void cocoaMouseWheelHandler(NSEvent *theEvent)
   fl_lock_function();
   Fl_Window *window = (Fl_Window*)[(FLWindow*)[theEvent window] getFl_Window];
   Fl::first_window(window);
-  // Under OSX, mousewheel deltas are floats, but fltk only supports ints.
   float s = Fl::screen_driver()->scale(0);
-  int dx = roundf([theEvent deltaX] / s);
-  int dy = roundf([theEvent deltaY] / s);
-  // allow both horizontal and vertical movements to be processed by the widget
-  if (dx) {
-    Fl::e_dx = -dx;
-    Fl::e_dy = 0;
-    Fl::handle( FL_MOUSEWHEEL, window );
+
+  NSEventSubtype subtype = [theEvent subtype];
+  if ( subtype == NSEventSubtypeMouseEvent ){
+    // Under OSX, mousewheel deltas are floats, but fltk only supports ints.
+    int dx = roundf([theEvent deltaX] / s);
+    int dy = roundf([theEvent deltaY] / s);
+    // allow both horizontal and vertical movements to be processed by the widget
+    printf("cocoaMouseWheelHandler (subtype = mouse): s = %3d%%, dx = %3d, dy = %3d\n", int(s * 100.), dx, dy);
+    if (dx) {
+      Fl::e_dx = -dx;
+      Fl::e_dy = 0;
+      Fl::handle( FL_MOUSEWHEEL, window );
+    }
+    if (dy) {
+      Fl::e_dx = 0;
+      Fl::e_dy = -dy;
+      Fl::handle( FL_MOUSEWHEEL, window );
+    }
   }
-  if (dy) {
-    Fl::e_dx = 0;
-    Fl::e_dy = -dy;
-    Fl::handle( FL_MOUSEWHEEL, window );
+  else {
+    int dx = roundf([theEvent scrollingDeltaX]);
+    int dy = roundf([theEvent scrollingDeltaY]);
+    // allow both horizontal and vertical movements to be processed by the widget
+    printf("cocoaMouseWheelHandler (subtype = touch): s = %3d%%, dx = %3d, dy = %3d\n", int(s * 100.), dx, dy);
+    if (dx) {
+      Fl::e_dx = dx;
+      Fl::e_dy = 0;
+      Fl::handle( FL_SCROLL_GESTURE, window );
+    }
+    if (dy) {
+      Fl::e_dx = 0;
+      Fl::e_dy = dy;
+      Fl::handle( FL_SCROLL_GESTURE, window );
+    }
   }
   fl_unlock_function();
 }
 
+static double total_zoom = 1.0;
+static double total_rotation = 0.0;
+
 /*
  * Cocoa Magnify Gesture Handler
+ *
+ * The magnification accessor method returns a floating-point (CGFloat) value
+ * representing a factor of magnification. For zooming in or out, you add the
+ * value from the magnification accessor to 1.0 to get the scale factor.
  */
 static void cocoaMagnifyHandler(NSEvent *theEvent)
 {
@@ -963,15 +992,89 @@ static void cocoaMagnifyHandler(NSEvent *theEvent)
     fl_unlock_function();
     return;
   }
+  total_rotation = 0.0; // reset rotation (debug)
   Fl::first_window(window);
-  Fl::e_dy = [theEvent magnification]*1000; // 10.5.2
-  if ( Fl::e_dy) {
+  double zoom = [theEvent magnification] + 1.0;
+  total_zoom *= zoom;
+  Fl::e_dy = zoom * 100000; // delta zoom value (fixed in 1.4.0)
+  printf("cocoaMagnifyHandler: Fl::e_dy = %d, zoom = %8.5f, total zoom = %8.5f\n", Fl::e_dy, zoom, total_zoom);
+  if (Fl::e_dy != 100000) {
     NSPoint pos = [theEvent locationInWindow];
     pos.y = window->h() - pos.y;
     NSUInteger mods = [theEvent modifierFlags];
     mods_to_e_state( mods );
     update_e_xy_and_e_xy_root([theEvent window]);
     Fl::handle( FL_ZOOM_GESTURE, window );
+  }
+  fl_unlock_function();
+#endif
+}
+
+/*
+ * Cocoa Rotate Gesture Handler
+ *
+ * The rotation accessor method returns a floating-point value representing
+ * the degrees of rotation, counterclockwise. For rotation, you add the newest
+ * degree of rotation to the view’s current rotation value.
+ */
+static void cocoaRotateHandler(NSEvent *theEvent)
+{
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+  fl_lock_function();
+  Fl_Window *window = (Fl_Window*)[(FLWindow*)[theEvent window] getFl_Window];
+  if ( !window->shown() ) {
+    fl_unlock_function();
+    return;
+  }
+  total_zoom = 1.0; // reset zoom (Debug)
+  Fl::first_window(window);
+  double rotation = -[theEvent rotation]; // 10.5.2
+  total_rotation += rotation;
+  Fl::e_dy = int(rotation * 100000);
+  printf("cocoaRotateHandler: Fl::e_dy = %d (%7.3f), total = %8.3f\n", Fl::e_dy, rotation, total_rotation);
+  if (Fl::e_dy) {
+    NSPoint pos = [theEvent locationInWindow];
+    pos.y = window->h() - pos.y;
+    NSUInteger mods = [theEvent modifierFlags];
+    mods_to_e_state( mods );
+    update_e_xy_and_e_xy_root([theEvent window]);
+    Fl::handle( FL_ROTATE_GESTURE, window );
+  }
+  fl_unlock_function();
+#endif
+}
+
+
+/*
+ * Cocoa Swipe Gesture Handler
+ *
+ * Three fingers brushing across the trackpad surface in a common direction
+ * is a swipe gesture (macOS documentation).
+ * The deltaX and deltaY accessor methods return the direction of the swipe as a
+ * floating-point (CGFloat) value. A non-zero deltaX value represents a horizontal
+ * swipe; -1 indicates a swipe-right and 1 indicates a swipe-left. A non-0 deltaY
+ * represent a vertical swipe; -1 indicates a swipe-down and 1 indicates a swipe-up.
+ */
+static void cocoaSwipeHandler(NSEvent *theEvent)
+{
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+  fl_lock_function();
+  Fl_Window *window = (Fl_Window*)[(FLWindow*)[theEvent window] getFl_Window];
+  if (!window->shown()) {
+    fl_unlock_function();
+    return;
+  }
+  Fl::first_window(window);
+  double deltaX = [theEvent deltaX]; // 10.5.2
+  double deltaY = [theEvent deltaY]; // 10.5.2
+  Fl::e_dx = int(deltaX * 100000);   // should only be {-1, 0, 1}
+  Fl::e_dy = int(deltaY * 100000);   // should only be {-1, 0, 1}
+  printf("cocoaSwipeHandler: Fl::e_dx = %d (%4.1f), Fl::e_dy = %d (%4.1f)\n", Fl::e_dx, deltaX, Fl::e_dy, deltaY);
+  if (Fl::e_dx || Fl::e_dy) {
+    NSUInteger mods = [theEvent modifierFlags];
+    mods_to_e_state(mods);
+    update_e_xy_and_e_xy_root([theEvent window]);
+    Fl::handle(FL_SWIPE_GESTURE, window);
   }
   fl_unlock_function();
 #endif
@@ -2446,6 +2549,12 @@ static FLTextInputContext* fltextinputcontext_instance = nil;
 }
 - (void)magnifyWithEvent:(NSEvent *)theEvent {
   cocoaMagnifyHandler(theEvent);
+}
+- (void)rotateWithEvent:(NSEvent *)theEvent {
+    cocoaRotateHandler(theEvent);
+}
+- (void)swipeWithEvent:(NSEvent *)theEvent {
+    cocoaSwipeHandler(theEvent);
 }
 - (void)keyDown:(NSEvent *)theEvent {
   //NSLog(@"keyDown:%@",[theEvent characters]);

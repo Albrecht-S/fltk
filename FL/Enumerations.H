@@ -398,7 +398,7 @@ enum Fl_Event { // events
    This event is sent to the window's handle method.
    */
   FL_FULLSCREEN         = 25,
-  /** The user has made a zoom/pinch/magnification gesture (Mac OS platform only).
+  /** The user has made a zoom/pinch/magnification gesture (experimental).
       The Fl::event_dy() method can be used to find magnification amount,
       Fl::event_x() and Fl::event_y() are set as well.
       This event is sent to the window's handle method.
@@ -407,7 +407,34 @@ enum Fl_Event { // events
   /** A zoom event (ctrl/+/-/0/ or cmd/+/-/0/) was processed.
    Use Fl::add_handler() to be notified of this event.
    */
-  FL_ZOOM_EVENT = 27
+  FL_ZOOM_EVENT         = 27,
+  /** The user has made a rotate gesture (experimental).
+      The Fl::event_dy() method can be used to find rotation angle,
+      Fl::event_x() and Fl::event_y() are set as well.
+      This event is sent to the window's handle method.
+     */
+  FL_ROTATE_GESTURE     = 28,
+  /** The user has made a scroll gesture (experimental).
+      The Fl::event_dx() and Fl::event_dy() methods can be used
+      to find the amount to scroll horizontally and vertically.
+      This event is sent to the window's handle method.
+     */
+  FL_SCROLL_GESTURE     = 29,
+  /** The user has made a swipe gesture (experimental).
+      The Fl::event_dx() and Fl::event_dy() methods can be used
+      to find the amount to scroll horizontally and vertically.
+      This event is sent to the window's handle method.
+     */
+  FL_SWIPE_GESTURE      = 30,
+
+  // NOTE: add new events here, above this comment
+
+  /** This event is the last event (highest event number) sent
+      by FLTK (actually it's the highest real event number + 1).
+      This event should never occur.
+   */
+  FL_LAST_EVENT  // no number (defined by compiler)
+
 // DEV NOTE: Keep this list in sync with FL/names.h
 };
 
