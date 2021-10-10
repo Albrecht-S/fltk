@@ -346,6 +346,7 @@ GDICPPFILES = \
 	drivers/WinAPI/Fl_WinAPI_Printer_Driver.cxx \
 	drivers/WinAPI/fl_WinAPI_platform_init.cxx \
 	Fl_win32.cxx \
+	Fl_win32_gestures.cxx \
 	fl_dnd_win32.cxx \
         Fl_Native_File_Chooser_WIN32.cxx \
         Fl_get_key_win32.cxx

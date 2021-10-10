@@ -21,17 +21,23 @@
 #if defined(_WIN32) && !defined(FL_DOXYGEN)
 
 /* We require Windows 2000 features (e.g. VK definitions) */
-# if !defined(WINVER) || (WINVER < 0x0500)
+// #define FL_WINVER_MIN 0x0500 // Windows 2000 (FLTK standard)
+// #define FL_WINVER_MIN 0x0501 // Windows XP
+
+// *FIXME* Need to check and/or define touch gestures locally
+#define FL_WINVER_MIN 0x0601    // Windows 7 (touch gestures)
+
+# if !defined(WINVER) || (WINVER < FL_WINVER_MIN)
 #  ifdef WINVER
 #   undef WINVER
 #  endif
-#  define WINVER 0x0500
+#  define WINVER FL_WINVER_MIN
 # endif
-# if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0500)
+# if !defined(_WIN32_WINNT) || (_WIN32_WINNT < FL_WINVER_MIN)
 #  ifdef _WIN32_WINNT
 #   undef _WIN32_WINNT
 #  endif
-#  define _WIN32_WINNT 0x0500
+#  define _WIN32_WINNT FL_WINVER_MIN
 # endif
 
 // recent versions of MinGW warn: "Please include winsock2.h before windows.h",
@@ -106,6 +112,12 @@ extern void fl_cleanup_pens(void);
 #if defined(_MSC_VER) && _MSC_VER <= 1600
 #define round(A) int((A) + 0.5)
 #endif // _MSC_VER <= 1600
+
+// Windows Gestures - used prototypes
+// see: Fl_win32_gestures.cxx
+// #include "Fl_win32_gestures.h"
+int fl_SetGestureConfig(HWND hWnd, WPARAM wParam, LPARAM lParam);
+int fl_DecodeGesture(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 // USE_ASYNC_SELECT - define it if you have WSAAsyncSelect()...
 // USE_ASYNC_SELECT is OBSOLETED in 1.3 for the following reasons:
@@ -1565,6 +1577,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       } // case WM_DEADCHAR ... WM_SYSCHAR
 
       case WM_MOUSEWHEEL: {
+        printf("WM_MOUSEWHEEL message (%u), delta = %d\n", uMsg, (SHORT)(HIWORD(wParam))); fflush(stdout);
         static int delta = 0; // running total of all motion
         delta += (SHORT)(HIWORD(wParam));
         Fl::e_dx = 0;
@@ -1576,6 +1589,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       }
 
       case WM_MOUSEHWHEEL: {
+        printf("WM_MOUSEHWHEEL message (%u), delta = %d\n", uMsg, (SHORT)(HIWORD(wParam))); fflush(stdout);
         static int delta = 0; // running total of all motion
         delta += (SHORT)(HIWORD(wParam));
         Fl::e_dy = 0;
@@ -1585,6 +1599,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
           Fl::handle(FL_MOUSEWHEEL, window);
         return 0;
       }
+
+      case WM_GESTURENOTIFY: // 0x011a
+        // printf("WM_GESTURENOTIFY message (%04x)\n", uMsg); fflush(stdout);
+        fl_SetGestureConfig(hWnd, wParam, lParam);
+        break;
+
+      case WM_GESTURE: // 0x0119
+        // printf("WM_GESTURE message (%04x)\n", uMsg); fflush(stdout);
+        fl_DecodeGesture(hWnd, uMsg, wParam, lParam);
+        break;
 
       case WM_GETMINMAXINFO:
         Fl_WinAPI_Window_Driver::driver(window)->set_minmax((LPMINMAXINFO)lParam);

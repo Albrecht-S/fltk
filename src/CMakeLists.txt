@@ -330,6 +330,7 @@ else ()
     drivers/GDI/Fl_GDI_Copy_Surface_Driver.cxx
     drivers/GDI/Fl_GDI_Image_Surface_Driver.cxx
     Fl_win32.cxx
+    Fl_win32_gestures.cxx
     fl_dnd_win32.cxx
     Fl_Native_File_Chooser_WIN32.cxx
     Fl_get_key_win32.cxx
