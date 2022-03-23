@@ -208,6 +208,9 @@ public: // should be private!
   static Fl_Window* grab_;
   static int compose_state; // used for dead keys (Windows) or marked text (MacOS)
   static void call_screen_init(); // recompute screen number and dimensions
+  // multitouch gestures
+  static double e_value;      // floating point event value, e.g. zoom gesture
+  static double e_angle;      // floating point event angle, e.g. rotate gesture
 #endif // FL_DOXYGEN
 
 
@@ -859,6 +862,23 @@ int main() {
    */
   static const char *event_clipboard_type() {return e_clipboard_type; }
 
+  /**
+    Returns the primary value of a multitouch gesture.
+
+    This can be a relative zoom factor or anything else, as documented for
+    the respective multitouch event.
+  */
+  static double event_value() { return e_value; }
+
+  /**
+    Returns the relative rotation of a multitouch gesture in degrees.
+
+    This can be a relative angle of a rotate gesture or any other angle
+    as documented for the respective multitouch event.
+
+    Counter-clockwise is positive.
+  */
+  static double event_angle() { return e_angle; }
 
   static int compose(int &del);
   static void compose_reset();

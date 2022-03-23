@@ -398,44 +398,89 @@ enum Fl_Event { // events
    This event is sent to the window's handle method.
    */
   FL_FULLSCREEN         = 25,
+
   /** The user has made a zoom/pinch/magnification gesture (experimental).
-      The Fl::event_dy() method can be used to find magnification amount,
-      Fl::event_x() and Fl::event_y() are set as well.
-      This event is sent to the window's handle method.
-     */
+
+    The Fl::event_value() method can be used to find the relative magnification
+    of this gesture. A value \> 1.0 means "zoom in", \< 1.0 means "zoom out".
+    Values are always \> 0.
+
+    This event can be sent multiple times while the fingers are moved. The amount
+    sent by each event is relative to the previous event state (typically near 1.0).
+    You should multiply your current zoom factor with this value.
+
+    Fl::event_x() and Fl::event_y() are set as well.
+
+    This event is sent to the window's handle method and will primarily be sent
+    to the widget under the mouse or the finger position.
+
+    \since 1.4.0
+
+    \note In FLTK 1.3.x this method was implemented only on macOS and used
+      the Fl::event_dy() method to send the magnification amount. This is
+      still supported in FLTK 1.4.0 for backwards compatibility but will
+      be removed in a later version. For reference: the old Fl::event_dy()
+      can be calculated from Fl::event_zoom():
+      \code int dy = int((Fl::event_zoom() - 1.0) * 100); \endcode
+  */
   FL_ZOOM_GESTURE       = 26,
+
   /** A zoom event (ctrl/+/-/0/ or cmd/+/-/0/) was processed.
-   Use Fl::add_handler() to be notified of this event.
-   */
+    Use Fl::add_handler() to be notified of this event.
+  */
   FL_ZOOM_EVENT         = 27,
-  /** The user has made a rotate gesture (experimental).
-      The Fl::event_dy() method can be used to find rotation angle,
-      Fl::event_x() and Fl::event_y() are set as well.
-      This event is sent to the window's handle method.
-     */
+
+  /** The user has made a multitouch rotate gesture.
+
+    Use Fl::event_angle() to find the rotation angle in degrees.
+    Fl::event_x() and Fl::event_y() are set as well.
+    This event is sent to the window's handle method.
+    Positive values are counter-clockwise.
+
+    \since 1.4.0
+
+    \note Delivery of this event is still experimental and details
+      may be changed after FLTK 1.4.0 has been released.
+      This event may not be generated on all FLTK platforms.
+  */
   FL_ROTATE_GESTURE     = 28,
-  /** The user has made a scroll gesture (experimental).
-      The Fl::event_dx() and Fl::event_dy() methods can be used
-      to find the amount to scroll horizontally and vertically.
-      This event is sent to the window's handle method.
-     */
+
+  /** The user has made a multitouch scroll gesture.
+
+    The Fl::event_dx() and Fl::event_dy() methods can be used
+    to find the amount to scroll horizontally and vertically.
+    This event is sent to the window's handle method.
+
+    \since 1.4.0
+
+    \note Delivery of this event is still experimental and details
+      may be changed after FLTK 1.4.0 has been released.
+      This event may not be generated on all FLTK platforms.
+  */
   FL_SCROLL_GESTURE     = 29,
-  /** The user has made a swipe gesture (experimental).
-      The Fl::event_dx() and Fl::event_dy() methods can be used
-      to find the amount to scroll horizontally and vertically.
-      This event is sent to the window's handle method.
-     */
+
+  /** The user has made a swipe gesture.
+
+    The Fl::event_dx() and Fl::event_dy() methods can be used
+    to find the amount to scroll horizontally and vertically.
+    This event is sent to the window's handle method.
+
+    \since 1.4.0
+
+    \note Delivery of this event is still experimental and details
+      may be changed after FLTK 1.4.0 has been released.
+      This event may not be generated on all FLTK platforms.
+  */
   FL_SWIPE_GESTURE      = 30,
 
   // NOTE: add new events here, above this comment
 
-  /** This event is the last event (highest event number) sent
-      by FLTK (actually it's the highest real event number + 1).
-      This event should never occur.
-   */
+  /** This is the highest defined event number + 1.
+    This is not a real event and will never be sent.
+  */
   FL_LAST_EVENT  // no number (defined by compiler)
 
-// DEV NOTE: Keep this list in sync with FL/names.h
+  // DEV NOTE: Keep this list in sync with FL/names.h
 };
 
 /** \name When Conditions */
