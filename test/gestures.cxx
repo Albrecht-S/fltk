@@ -49,9 +49,9 @@ public:
         ret = 1;
         break;
       case FL_ZOOM_GESTURE:
-        z = Fl::event_dy()/100000.0;
-        printf("handle FL_ZOOM_GESTURE: %d (%5.3f)\n", Fl::event_dy(), z);
-        if (z > 0)
+        z = Fl::event_value();
+        printf("handle FL_ZOOM_GESTURE: %5.3f\n", z);
+        if (z)
           zoom *= z;
         if (zoom < zmin) zoom = zmin;
         if (zoom > zmax) zoom = zmax;
@@ -115,7 +115,7 @@ public:
         return 1;
         break;
       case FL_ROTATE_GESTURE:
-        angle += Fl::event_dy() / 100000.;
+        angle += Fl::event_angle();
         if (angle < 0.) angle += 360.;
         if (angle > 360.) angle -= 360;
         sprintf(txt_, "%3.0f", angle);
@@ -154,11 +154,6 @@ public:
     int ret = 0;
     double z = 0;
     switch(event) {
-//      case FL_RELEASE:
-//        reset();
-//        parent()->redraw();
-//        return 1;
-//        break;
       case FL_MOUSEWHEEL:
         if (Fl::event_dy() > 0)
           rscale += 0.1;
@@ -170,9 +165,9 @@ public:
         return 1;
         break;
       case FL_ZOOM_GESTURE:
-        z = Fl::event_dy()/100000.0;
-        printf("handle FL_ZOOM_GESTURE: %d (%5.3f)\n", Fl::event_dy(), z);
-        if (z > 0)
+        z = Fl::event_value();
+        printf("handle FL_ZOOM_GESTURE: %5.3f\n", Fl::event_value());
+        if (z)
           rscale *= z;
         if (rscale < zmin) rscale = zmin;
         if (rscale > zmax) rscale = zmax;
@@ -190,7 +185,7 @@ public:
         return 1;
         break;
       case FL_ROTATE_GESTURE:
-        rtheta -= Fl::event_dy() / 100000.;
+        rtheta -= Fl::event_angle();
         if (rtheta < 0.) rtheta += 360.;
         if (rtheta > 360.) rtheta -= 360;
         redraw();

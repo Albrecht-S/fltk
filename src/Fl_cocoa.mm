@@ -930,15 +930,15 @@ static void cocoaMouseWheelHandler(NSEvent *theEvent)
 {
   // Handle the new "MightyMouse" mouse wheel events. Please, someone explain
   // to me why Apple changed the API on this even though the current API
-  // supports two wheels just fine. Matthias,
+  // supports two wheels just fine. Matthias
   fl_lock_function();
   Fl_Window *window = (Fl_Window*)[(FLWindow*)[theEvent window] getFl_Window];
   Fl::first_window(window);
   float s = Fl::screen_driver()->scale(0);
 
   NSEventSubtype subtype = [theEvent subtype];
-  if ( subtype == NSEventSubtypeMouseEvent ){
-    // Under OSX, mousewheel deltas are floats, but fltk only supports ints.
+  if (subtype == NSEventSubtypeMouseEvent) {
+    // Under macOS, mousewheel deltas are floats, but fltk only supports ints.
     int dx = roundf([theEvent deltaX] / s);
     int dy = roundf([theEvent deltaY] / s);
     // allow both horizontal and vertical movements to be processed by the widget
@@ -946,12 +946,12 @@ static void cocoaMouseWheelHandler(NSEvent *theEvent)
     if (dx) {
       Fl::e_dx = -dx;
       Fl::e_dy = 0;
-      Fl::handle( FL_MOUSEWHEEL, window );
+      Fl::handle(FL_MOUSEWHEEL, window);
     }
     if (dy) {
       Fl::e_dx = 0;
       Fl::e_dy = -dy;
-      Fl::handle( FL_MOUSEWHEEL, window );
+      Fl::handle(FL_MOUSEWHEEL, window);
     }
   }
   else {
@@ -962,19 +962,16 @@ static void cocoaMouseWheelHandler(NSEvent *theEvent)
     if (dx) {
       Fl::e_dx = dx;
       Fl::e_dy = 0;
-      Fl::handle( FL_SCROLL_GESTURE, window );
+      Fl::handle(FL_SCROLL_GESTURE, window);
     }
     if (dy) {
       Fl::e_dx = 0;
       Fl::e_dy = dy;
-      Fl::handle( FL_SCROLL_GESTURE, window );
+      Fl::handle(FL_SCROLL_GESTURE, window);
     }
   }
   fl_unlock_function();
 }
-
-static double total_zoom = 1.0;
-static double total_rotation = 0.0;
 
 /*
  * Cocoa Magnify Gesture Handler
@@ -988,23 +985,22 @@ static void cocoaMagnifyHandler(NSEvent *theEvent)
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
   fl_lock_function();
   Fl_Window *window = (Fl_Window*)[(FLWindow*)[theEvent window] getFl_Window];
-  if ( !window->shown() ) {
+  if (!window->shown()) {
     fl_unlock_function();
     return;
   }
-  total_rotation = 0.0; // reset rotation (debug)
   Fl::first_window(window);
-  double zoom = [theEvent magnification] + 1.0;
-  total_zoom *= zoom;
-  Fl::e_dy = zoom * 100000; // delta zoom value (fixed in 1.4.0)
-  printf("cocoaMagnifyHandler: Fl::e_dy = %d, zoom = %8.5f, total zoom = %8.5f\n", Fl::e_dy, zoom, total_zoom);
-  if (Fl::e_dy != 100000) {
+  double zoom = [theEvent magnification]; // 10.5.2
+  if (zoom) {
+    Fl::e_dy = int(zoom * 1000);                  // FLTK 1.3.x backwards compatibiity
+    Fl::e_value = [theEvent magnification] + 1.0; // since FLTK 1.4.0
     NSPoint pos = [theEvent locationInWindow];
     pos.y = window->h() - pos.y;
     NSUInteger mods = [theEvent modifierFlags];
-    mods_to_e_state( mods );
+    mods_to_e_state(mods);
     update_e_xy_and_e_xy_root([theEvent window]);
-    Fl::handle( FL_ZOOM_GESTURE, window );
+    printf("cocoaMagnifyHandler: dy = %d, value = %8.5f\n", Fl::e_dy, Fl::e_value);
+    Fl::handle(FL_ZOOM_GESTURE, window);
   }
   fl_unlock_function();
 #endif
@@ -1022,23 +1018,20 @@ static void cocoaRotateHandler(NSEvent *theEvent)
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
   fl_lock_function();
   Fl_Window *window = (Fl_Window*)[(FLWindow*)[theEvent window] getFl_Window];
-  if ( !window->shown() ) {
+  if (!window->shown()) {
     fl_unlock_function();
     return;
   }
-  total_zoom = 1.0; // reset zoom (Debug)
   Fl::first_window(window);
-  double rotation = -[theEvent rotation]; // 10.5.2
-  total_rotation += rotation;
-  Fl::e_dy = int(rotation * 100000);
-  printf("cocoaRotateHandler: Fl::e_dy = %d (%7.3f), total = %8.3f\n", Fl::e_dy, rotation, total_rotation);
-  if (Fl::e_dy) {
+  Fl::e_angle = [theEvent rotation]; // 10.5.2
+  if (Fl::e_angle) {
     NSPoint pos = [theEvent locationInWindow];
     pos.y = window->h() - pos.y;
     NSUInteger mods = [theEvent modifierFlags];
-    mods_to_e_state( mods );
+    mods_to_e_state(mods);
     update_e_xy_and_e_xy_root([theEvent window]);
-    Fl::handle( FL_ROTATE_GESTURE, window );
+    printf("cocoaRotateHandler: angle = %7.3f\n", Fl::e_angle);
+    Fl::handle(FL_ROTATE_GESTURE, window);
   }
   fl_unlock_function();
 #endif
@@ -1053,7 +1046,7 @@ static void cocoaRotateHandler(NSEvent *theEvent)
  * The deltaX and deltaY accessor methods return the direction of the swipe as a
  * floating-point (CGFloat) value. A non-zero deltaX value represents a horizontal
  * swipe; -1 indicates a swipe-right and 1 indicates a swipe-left. A non-0 deltaY
- * represent a vertical swipe; -1 indicates a swipe-down and 1 indicates a swipe-up.
+ * represents a vertical swipe; -1 indicates a swipe-down and 1 indicates a swipe-up.
  */
 static void cocoaSwipeHandler(NSEvent *theEvent)
 {
@@ -1067,8 +1060,8 @@ static void cocoaSwipeHandler(NSEvent *theEvent)
   Fl::first_window(window);
   double deltaX = [theEvent deltaX]; // 10.5.2
   double deltaY = [theEvent deltaY]; // 10.5.2
-  Fl::e_dx = int(deltaX * 100000);   // should only be {-1, 0, 1}
-  Fl::e_dy = int(deltaY * 100000);   // should only be {-1, 0, 1}
+  Fl::e_dx = int(deltaX * 100000);   // *FIXME* should only be {-1, 0, 1}
+  Fl::e_dy = int(deltaY * 100000);   // *FIXME* should only be {-1, 0, 1}
   printf("cocoaSwipeHandler: Fl::e_dx = %d (%4.1f), Fl::e_dy = %d (%4.1f)\n", Fl::e_dx, deltaX, Fl::e_dy, deltaY);
   if (Fl::e_dx || Fl::e_dy) {
     NSUInteger mods = [theEvent modifierFlags];
