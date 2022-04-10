@@ -116,8 +116,8 @@ extern void fl_cleanup_pens(void);
 // Windows Gestures - used prototypes
 // see: Fl_win32_gestures.cxx
 // #include "Fl_win32_gestures.h"
-int fl_SetGestureConfig(HWND hWnd, WPARAM wParam, LPARAM lParam);
-int fl_DecodeGesture(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+int fl_win32_SetGestureConfig(HWND hWnd);
+int fl_win32_DecodeGesture(Fl_Window *window, LPARAM lParam);
 
 // USE_ASYNC_SELECT - define it if you have WSAAsyncSelect()...
 // USE_ASYNC_SELECT is OBSOLETED in 1.3 for the following reasons:
@@ -1602,12 +1602,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
       case WM_GESTURENOTIFY: // 0x011a
         // printf("WM_GESTURENOTIFY message (%04x)\n", uMsg); fflush(stdout);
-        fl_SetGestureConfig(hWnd, wParam, lParam);
+        fl_win32_SetGestureConfig(hWnd);
         break;
 
       case WM_GESTURE: // 0x0119
         // printf("WM_GESTURE message (%04x)\n", uMsg); fflush(stdout);
-        fl_DecodeGesture(hWnd, uMsg, wParam, lParam);
+        fl_win32_DecodeGesture(window, lParam);
         break;
 
       case WM_GETMINMAXINFO:

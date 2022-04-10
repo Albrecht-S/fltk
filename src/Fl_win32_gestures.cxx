@@ -1,7 +1,7 @@
 //
 // Windows touch gesture support code for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 2021 by Bill Spitzak and others.
+// Copyright 2021-2022 by Bill Spitzak and others.
 //
 // This library is free software. Distribution and use rights are outlined in
 // the file "COPYING" which should have been included with this file.  If this
@@ -15,6 +15,9 @@
 //
 
 // This file contains Windows specific code to support multi-touch gestures.
+
+#include <FL/Fl.H>
+#include <FL/Fl_Window.H>
 
 #if defined(_WIN32) && !defined(FL_DOXYGEN)
 
@@ -69,7 +72,7 @@ static const char *gestures[] = {
 // This function is used to select parts or all touch gesture messages.
 // Currently all messages are enabled
 
-int fl_SetGestureConfig(HWND hWnd, WPARAM wParam, LPARAM lParam) {
+int fl_win32_SetGestureConfig(HWND hWnd) {
   GESTURECONFIG gc = {0, GC_ALLGESTURES, 0};
   BOOL bResult = SetGestureConfig(hWnd, 0, 1, &gc, sizeof(GESTURECONFIG));
 
@@ -83,13 +86,13 @@ int fl_SetGestureConfig(HWND hWnd, WPARAM wParam, LPARAM lParam) {
   }
   return 1;
 
-} // fl_SetGestureConfig()
+} // fl_win32_SetGestureConfig()
 
 // This function does all the system specific work to decode a gesture message.
 // It returns 1 if the gesture could be decoded and should be handled by FLTK,
 // zero (0) otherwise.
 
-int fl_DecodeGesture(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+int fl_win32_DecodeGesture(Fl_Window *window, LPARAM lParam) {
   // Create and populate a structure to retrieve the extra message info.
   GESTUREINFO gi;
   ZeroMemory(&gi, sizeof(GESTUREINFO));
@@ -153,6 +156,10 @@ int fl_DecodeGesture(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
             zoom_factor = 1.0;
           }
         }
+        Fl::e_value = zoom_factor;                    // since FLTK 1.4.0
+        Fl::e_dy = (zoom_factor - 1.0) * 1000;        // FLTK 1.3.x backwards compatibiity (macOS)
+        printf("***** Fl::handle(FL_ZOOM_GESTURE) f = %5.3f, e_dy = %6d\n", Fl::e_value, Fl::e_dy);
+        Fl::handle(FL_ZOOM_GESTURE, window);
         handled = 1;
         break;
       case GID_PAN:

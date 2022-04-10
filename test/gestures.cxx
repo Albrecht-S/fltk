@@ -50,7 +50,7 @@ public:
         break;
       case FL_ZOOM_GESTURE:
         z = Fl::event_value();
-        printf("handle FL_ZOOM_GESTURE: %5.3f\n", z);
+        printf("[gestures.cxx:%d] myButton::handle FL_ZOOM_GESTURE: %5.3f\n", __LINE__, z);
         if (z)
           zoom *= z;
         if (zoom < zmin) zoom = zmin;
@@ -166,7 +166,7 @@ public:
         break;
       case FL_ZOOM_GESTURE:
         z = Fl::event_value();
-        printf("handle FL_ZOOM_GESTURE: %5.3f\n", Fl::event_value());
+        printf("[gestures.cxx:%d] myPad::handle FL_ZOOM_GESTURE: %5.3f\n", __LINE__, z);
         if (z)
           rscale *= z;
         if (rscale < zmin) rscale = zmin;

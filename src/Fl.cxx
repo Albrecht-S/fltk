@@ -63,6 +63,10 @@ int             Fl::damage_,
                 Fl::scrollbar_size_ = 16,
                 Fl::menu_linespacing_ = 4;      // 4: was a local macro in Fl_Menu.cxx called "LEADING"
 
+// multitouch gestures
+double          Fl::e_value;      // floating point event value, e.g. zoom gesture
+double          Fl::e_angle;      // floating point event angle, e.g. rotate gesture
+
 char            *Fl::e_text = (char *)"";
 int             Fl::e_length;
 const char      *Fl::e_clipboard_type = "";
