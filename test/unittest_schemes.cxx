@@ -100,7 +100,15 @@ public:
     active->value(1);
     active->selection_color(FL_RED);
     active->align(FL_ALIGN_CENTER);
+
+#if (0) // default: Fl_Window
     Fl_Window *subwin = new Fl_Window(X,Y+30,W,H-30);
+    printf("Subwindow    : Fl_Window\n");
+#else
+    Fl_Window *subwin = new Fl_Double_Window(X,Y+30,W,H-30);
+    printf("Subwindow    : Fl_Double_Window\n");
+#endif
+
     active->callback(activate_subwin, subwin);
     subwin->begin();
     {

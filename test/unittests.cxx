@@ -23,7 +23,9 @@
 
 #include "unittests.h"
 
+#include <config.h>         // USE_PANGO
 #include <FL/Fl.H>
+#include <FL/platform.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Hold_Browser.H>
 #include <FL/Fl_Help_View.H>
@@ -130,6 +132,32 @@ void Browser_CB(Fl_Widget*, void*) {
   }
 }
 
+const int max_count = 100;
+
+// TEST: timer callback to resize and draw the window
+void resize_cb(void *data) {
+  static int s = 100;       // % of window size
+  static int delta = 10;    // dto.
+  static int count = 0;
+  count++;
+  if (count > max_count) {
+    mainwin->hide();
+    return;
+  }
+  s += delta;
+  if (s > 199) {
+    s = 200;
+    delta = -10;
+  } else if (s < 101) {
+    s = 100;
+    delta = 10;
+  }
+  int nw = (int)(MAINWIN_W * s / 100);
+  int nh = (int)(MAINWIN_H * s / 100);
+  mainwin->resize(100, 100, nw, nh);
+  mainwin->redraw();
+  Fl::repeat_timeout(0.1, resize_cb);
+}
 
 // This is the main call. It creates the window and adds all previously
 // registered tests to the browser widget.
@@ -158,8 +186,46 @@ int main(int argc, char **argv) {
 
   mainwin->resizable(mainwin);
   mainwin->show(argc,argv);
+
+#if (0) // execute only drawing performance test
+
+  mainwin->position(100, 100); // doesn't work under Wayland
+
+#if defined(FLTK_USE_X11) || defined(FLTK_USE_WAYLAND)
+  if (fl_x11_display())
+    printf("Backend      : x11\n");
+  else
+    printf("Backend      : wayland\n");
+#ifdef FLTK_USE_CAIRO
+  printf("Drawing type : Cairo (FLTK_USE_CAIRO)\n");
+#else
+  printf("Drawing type : x11\n");
+#endif
+#if defined(USE_PANGO) && USE_PANGO
+  printf("Text drawing : Pango (USE_PANGO)\n");
+#else
+#if USE_XFT
+  printf("Text drawing : xft\n");
+#else // USE_XFT
+  printf("Text drawing : x11\n");
+#endif // USE_XFT
+#endif // USE_PANGO
+#endif // x11 || wayland
+
+  printf("Test type    : %s\n", mainwin->label());
+  printf("Scheme       : %s\n", Fl::scheme() ? Fl::scheme() : "none");
+  printf("Iterations   : %d\n", max_count);
+  // Select schemes test in browser, and show that test.
+  browser->select(kTestSchemes + 1);
+  Fl::add_timeout(1.0, resize_cb);
+
+#else // original interactive code
+
   // Select first test in browser, and show that test.
   browser->select(kTestAbout+1);
+
+#endif // performance test or interactive
+
   Browser_CB(browser,0);
   return(Fl::run());
 }
