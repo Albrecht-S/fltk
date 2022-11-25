@@ -2,9 +2,9 @@ name: Build and Test
 
 on: [push]
 
-env:
+# env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
+  # BUILD_TYPE: Release
 
 jobs:
 
