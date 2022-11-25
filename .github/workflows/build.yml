@@ -15,7 +15,7 @@ jobs:
 
     - name: Configure CMake
       working-directory: ${{github.workspace}}/build
-      run: cmake --enable-localjpeg --enable-localpng --enable-localzlib ..
+      run: cmake -D OPTION_USE_SYSTEM_LIBJPEG:BOOL=OFF -D OPTION_USE_SYSTEM_LIBPNG:BOOL=OFF -D OPTION_USE_SYSTEM_ZLIB:BOOL=OFF ..
 
     - name: Build
       working-directory: ${{github.workspace}}/build
