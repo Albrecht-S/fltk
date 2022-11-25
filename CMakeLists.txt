@@ -151,48 +151,6 @@ endif (FLTK_BUILD_EXAMPLES)
 #######################################################################
 include (CMake/install.cmake)
 
-#######################################################################
-# Generate Library Export Headers          *** EXPERIMENTAL *** WIP ***
-#######################################################################
-
-# Enable (1) or disable (0) generation of experimental headers (WIP)
-set (GENERATE_EXPORT_HEADERS 0)
-
-if (OPTION_BUILD_SHARED_LIBS AND GENERATE_EXPORT_HEADERS)
-
-  include (GenerateExportHeader)
-
-  generate_export_header (fltk_SHARED
-    BASE_NAME fl
-    EXPORT_FILE_NAME FL/fltk_export.h
-    STATIC_DEFINE FL_STATIC_LIB
-  )
-
-  if (NOT MSVC)
-
-    # Visual Studio builds only one shared lib (DLL)
-
-    generate_export_header (fltk_images_SHARED
-      BASE_NAME fl_images
-      EXPORT_FILE_NAME FL/fltk_images_export.h
-      STATIC_DEFINE FL_STATIC_LIB
-    )
-
-    generate_export_header (fltk_forms_SHARED
-      BASE_NAME fl_forms
-      EXPORT_FILE_NAME FL/fltk_forms_export.h
-      STATIC_DEFINE FL_STATIC_LIB
-    )
-
-    generate_export_header (fltk_gl_SHARED
-      BASE_NAME fl_gl
-      EXPORT_FILE_NAME FL/fltk_gl_export.h
-      STATIC_DEFINE FL_STATIC_LIB
-    )
-
-  endif (NOT MSVC)
-
-endif (OPTION_BUILD_SHARED_LIBS AND GENERATE_EXPORT_HEADERS)
 
 #######################################################################
 # Output Configuration Summary

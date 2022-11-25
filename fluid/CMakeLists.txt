@@ -84,7 +84,8 @@ endif (WIN32)
 
 source_group("Header Files" FILES ${HEADERFILES})
 
-set (FLUID_TARGETS fluid)         # fluid and optional fluid-cmd target
+## set (FLUID_TARGETS fluid)      # fluid and optional fluid-cmd target
+set (FLUID_TARGETS "")            # fluid minimal build for GitHub Actions
 set (FLUID_LIBS fltk fltk_images) # libraries used to link fluid executables
 
 if (APPLE AND (NOT OPTION_APPLE_X11))
@@ -110,7 +111,8 @@ if (APPLE AND (NOT OPTION_APPLE_X11))
 else ()
 
   # option WIN32 builds a Windows GUI program, ignored on other platforms
-  add_executable (fluid WIN32 ${CPPFILES} ${HEADERFILES})
+  ## minimal build for GitHub ...
+  ## add_executable (fluid WIN32 ${CPPFILES} ${HEADERFILES})
 
 endif ()
 
@@ -127,7 +129,7 @@ if (USE_GDIPLUS)        # can only be true on Windows
   list (APPEND FLUID_LIBS gdiplus)
 endif (USE_GDIPLUS)
 
-target_link_libraries (fluid ${FLUID_LIBS})
+## target_link_libraries (fluid ${FLUID_LIBS})
 
 
 # Add fluid-cmd console app (Windows only) for converting .fl to .cxx/.h files.

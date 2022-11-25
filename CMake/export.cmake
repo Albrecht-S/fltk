@@ -25,7 +25,8 @@ if (FLTK_BUILD_FLUID AND NOT CMAKE_CROSSCOMPILING)
   # use the fluid executable we build
   if (WIN32)
     set (FLTK_FLUID_EXECUTABLE fluid-cmd)
-    set (FLUID_EXPORT fluid fluid-cmd)      # export fluid and fluid-cmd
+    ## set (FLUID_EXPORT fluid fluid-cmd)      # export fluid and fluid-cmd
+    set (FLUID_EXPORT fluid-cmd)               # minimal build for GitHub
   else ()
     set (FLTK_FLUID_EXECUTABLE fluid)
     set (FLUID_EXPORT fluid)                # export fluid

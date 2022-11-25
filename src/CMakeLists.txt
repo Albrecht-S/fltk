@@ -688,11 +688,6 @@ target_link_libraries (fltk ${OPTIONAL_LIBS})
 
 #######################################################################
 
-FL_ADD_LIBRARY (fltk_forms STATIC "${FORMS_FILES}")
-target_link_libraries (fltk_forms fltk)
-
-#######################################################################
-
 FL_ADD_LIBRARY (fltk_images STATIC "${IMGCPPFILES}")
 target_link_libraries (fltk_images fltk)
 
