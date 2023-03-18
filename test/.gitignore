@@ -25,6 +25,8 @@ browser
 button
 buttons
 cairo_test
+cairo_widget
+cairo_window
 checkers
 clipboard
 clock

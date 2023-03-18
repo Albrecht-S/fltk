@@ -48,6 +48,8 @@ CPPFILES =\
 	button.cxx \
 	buttons.cxx \
 	cairo_test.cxx \
+	cairo_widget.cxx \
+	cairo_window.cxx \
 	checkers.cxx \
 	clipboard.cxx \
 	clock.cxx \
@@ -150,6 +152,8 @@ ALL =	\
 	button$(EXEEXT) \
 	buttons$(EXEEXT) \
 	cairo_test$(EXEEXT) \
+	cairo_widget$(EXEEXT) \
+	cairo_window$(EXEEXT) \
 	clipboard$(EXEEXT) \
 	clock$(EXEEXT) \
 	colbrowser$(EXEEXT) \
@@ -705,4 +709,14 @@ shape$(EXEEXT): shape.o
 cairo_test$(EXEEXT): cairo_test.o
 	echo Linking $@...
 	$(CXX) $(ARCHFLAGS) $(CXXFLAGS) $(CAIROFLAGS) $(LDFLAGS) -o $@ cairo_test.o $(LINKFLTK) $(CAIROLIBS) $(GLDLIBS)
+	$(OSX_ONLY) ../fltk-config --post $@
+
+cairo_widget$(EXEEXT): cairo_widget.o
+	echo Linking $@...
+	$(CXX) $(ARCHFLAGS) $(CXXFLAGS) $(CAIROFLAGS) $(LDFLAGS) -o $@ cairo_widget.o $(LINKFLTK) $(CAIROLIBS) $(GLDLIBS)
+	$(OSX_ONLY) ../fltk-config --post $@
+
+cairo_window$(EXEEXT): cairo_window.o
+	echo Linking $@...
+	$(CXX) $(ARCHFLAGS) $(CXXFLAGS) $(CAIROFLAGS) $(LDFLAGS) -o $@ cairo_window.o $(LINKFLTK) $(CAIROLIBS) $(GLDLIBS)
 	$(OSX_ONLY) ../fltk-config --post $@

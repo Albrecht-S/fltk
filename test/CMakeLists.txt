@@ -77,6 +77,18 @@ else()
   set(FORMS_LIBS fltk::fltk)
 endif()
 
+# Build Fl_Cairo2 demo programs if Cairo was found
+
+if(CAIRO_FOUND)
+  fl_debug_var(PKG_CAIRO_INCLUDE_DIRS)
+  foreach(tgt cairo2_window cairo2_widget cairo2_draw-x cairo2_image)
+    fl_create_example(${tgt} ${tgt}.cxx "fltk::fltk;cairo")
+    target_include_directories(${tgt} PRIVATE ${PKG_CAIRO_INCLUDE_DIRS})
+  endforeach()
+else()
+  message(STATUS "Cairo was not found, can't build Fl_Cairo2 demo programs")
+endif()
+
 #######################################################################
 
 fl_create_example(adjuster adjuster.cxx fltk::fltk)
