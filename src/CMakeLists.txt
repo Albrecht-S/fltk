@@ -575,6 +575,12 @@ if (WIN32)
   list (APPEND CFILES
     scandir_win32.c
   )
+
+  ## TEST - works only with Visual Studio (MSYS2 doesn't provide 'winrt')
+  if (MSVC)
+    list (APPEND CPPFILES win32_get_ui_color.cxx)
+  endif ()
+
 endif (WIN32)
 
 if (APPLE AND (NOT OPTION_APPLE_X11))
@@ -628,6 +634,11 @@ endif (FLTK_USE_X11)
 
 if (WIN32)
   list (APPEND OPTIONAL_LIBS comctl32 ws2_32)
+
+  if (MSVC)
+    list (APPEND OPTIONAL_LIBS WindowsApp)    # for winrt: OleAut32 not required on Win10
+  endif ()
+
   if (USE_GDIPLUS)
     list (APPEND OPTIONAL_LIBS gdiplus)
   endif ()

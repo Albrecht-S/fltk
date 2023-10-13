@@ -101,8 +101,7 @@ int fl_parse_color(const char* p, uchar& r, uchar& g, uchar& b) {
     newer versions of KDE set this automatically if you check the "apply
     style to other X programs" switch in their control panel.
 */
-void Fl::get_system_colors()
-{
+void Fl::get_system_colors() {
   Fl::screen_driver()->get_system_colors();
 }
 
@@ -110,16 +109,32 @@ void Fl::get_system_colors()
 Fl_Dynamic_Color Fl::dynamic_color_ = FL_DYNAMIC_COLOR_OFF;
 #endif // !FL_DOXYGEN
 
-void Fl::dynamic_color(Fl_Dynamic_Color mode)
-{
+void Fl::dynamic_color(Fl_Dynamic_Color mode) {
   dynamic_color_ = mode;
+  Fl::get_system_colors();
 }
 
-Fl_Dynamic_Color Fl::dynamic_color()
-{
-  // TODO: Remove this
-  if (getenv("FL_DYNAMIC_COLOR") && dynamic_color_ == FL_DYNAMIC_COLOR_OFF)
-    dynamic_color_ = FL_DYNAMIC_COLOR_AUTO;
+Fl_Dynamic_Color Fl::dynamic_color() {
+#if (1) // use environment variable FLTK_DYNAMIC_COLOR
+  // TODO: Remove this (?)
+  const char *dyn_color_env = fl_getenv("FLTK_DYNAMIC_COLOR");
+
+#if (0) // debug
+  if (dyn_color_env)
+    fprintf(stderr, "env(FLTK_DYNAMIC_COLOR) = %s\n", dyn_color_env);
+  else
+    fprintf(stderr, "env(FLTK_DYNAMIC_COLOR) is not defined\n");
+#endif // debug
+
+  if (dyn_color_env && dynamic_color_ == FL_DYNAMIC_COLOR_OFF) {
+    if (!strcmp(dyn_color_env, "AUTO"))
+      dynamic_color_ = FL_DYNAMIC_COLOR_AUTO;
+    else if (!strcmp(dyn_color_env, "LIGHT"))
+      dynamic_color_ = FL_DYNAMIC_COLOR_LIGHT;
+    else if (!strcmp(dyn_color_env, "DARK"))
+      dynamic_color_ = FL_DYNAMIC_COLOR_DARK;
+  }
+#endif // use environment variable FLTK_DYNAMIC_COLOR
 
   if (dynamic_color_ == FL_DYNAMIC_COLOR_AUTO)
     return Fl::system_driver()->dynamic_color();

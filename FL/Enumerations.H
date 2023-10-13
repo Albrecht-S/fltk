@@ -395,23 +395,24 @@ enum Fl_Event { // events
    */
   FL_SCREEN_CONFIGURATION_CHANGED = 24,
   /** The fullscreen state of the window has changed.
-   This event is sent to the window's handle method.
-   */
+    This event is sent to the window's handle method.
+  */
   FL_FULLSCREEN         = 25,
   /** The user has made a zoom/pinch/magnification gesture (Mac OS platform only).
-      The Fl::event_dy() method can be used to find magnification amount,
-      Fl::event_x() and Fl::event_y() are set as well.
-      This event is sent to the window's handle method.
-     */
+    The Fl::event_dy() method can be used to find magnification amount,
+    Fl::event_x() and Fl::event_y() are set as well.
+    This event is sent to the window's handle method.
+  */
   FL_ZOOM_GESTURE       = 26,
   /** A zoom event (ctrl/+/-/0/ or cmd/+/-/0/) was processed.
-   Use Fl::add_handler() to be notified of this event.
-   */
+    Use Fl::add_handler() to be notified of this event.
+  */
   FL_ZOOM_EVENT = 27,
   /** The current dynamic color mode has changed.
-   Call Fl::dynamic_color() to get the new mode.
-   */
+    Call Fl::dynamic_color() to get the new mode.
+  */
   FL_DYNAMIC_COLOR_CHANGED = 28
+
 // DEV NOTE: Keep this list in sync with FL/names.h
 };
 
@@ -1385,25 +1386,23 @@ enum Fl_Orientation {
 };
 
 /**
-    Modern operating systems provide a pair of color themes suitable for use in
-    light and dark ambient lighting. Automatic switching is normally provided
-    either using the current time of day or with ambient lighting sensors.
-    This enumeration lists the values for the Fl::dynamic_color() API, allowing
-    applications to opt in to automatic color theme switching or specify that
-    color switching is not desired.
+  Modern operating systems provide a pair of color themes suitable for use in
+  light and dark ambient lighting. Automatic switching is normally provided
+  either using the current time of day or with ambient lighting sensors.
+  This enumeration lists the values for the Fl::dynamic_color() API, allowing
+  applications to opt in to automatic color theme switching or specify that
+  color switching is not desired.
 
-    \see Fl::dynamic_color()
- */
+  \see Fl::dynamic_color()
 
-enum Fl_Dynamic_Color { // dynamic color values
-  /** Dynamic color themes are off/not supported/disabled */
-  FL_DYNAMIC_COLOR_OFF,
-  /** Automatically change color themes */
-  FL_DYNAMIC_COLOR_AUTO,
-  /** Use the light color theme */
-  FL_DYNAMIC_COLOR_LIGHT,
-  /** Use the dark color theme */
-  FL_DYNAMIC_COLOR_DARK
+  \since 1.4.0
+*/
+
+enum Fl_Dynamic_Color {
+  FL_DYNAMIC_COLOR_OFF = 0, ///< Dynamic color themes are off/not supported/disabled
+  FL_DYNAMIC_COLOR_AUTO,    ///< Automatically change color themes
+  FL_DYNAMIC_COLOR_LIGHT,   ///< Use the light color theme
+  FL_DYNAMIC_COLOR_DARK     ///< Use the dark color theme
 };
 
 #endif

@@ -404,15 +404,29 @@ public:
     When set to FL_DYNAMIC_COLOR_AUTO, FLTK will monitor for appearance/theme
     changes. When the color theme changes, a FL_DYNAMIC_COLOR_CHANGED event is
     sent to allow widgets to update their colors as needed.
-    */
+
+    \note The automatic detection of color theme changes is platform dependent
+      and currently only available on the following platform:
+      - macOS.
+
+    If automatic detection is not available on your platform you can still
+    use Fl::dynamic_color(FL_DYNAMIC_COLOR_DARK)
+    and Fl::dynamic_color(FL_DYNAMIC_COLOR_LIGHT)
+    to change the dynamic color mode whenever you like, for instance based
+    on time of day or by user input.
+
+    \since 1.4.0
+  */
   static void dynamic_color(Fl_Dynamic_Color mode);
   /** Gets the current dynamic color theme.
 
     Returns FL_DYNAMIC_COLOR_OFF if dynamic color themes are off or disabled
     (the default), FL_DYNAMIC_COLOR_LIGHT if the current color theme is for use
-    in bright ambient light, or FL_DYNAMIC_COLOR_DARK is the current color
+    in bright ambient light, or FL_DYNAMIC_COLOR_DARK if the current color
     theme is for use in dark ambient light.
-    */
+
+    \since 1.4.0
+  */
   static Fl_Dynamic_Color dynamic_color();
 
   // schemes:

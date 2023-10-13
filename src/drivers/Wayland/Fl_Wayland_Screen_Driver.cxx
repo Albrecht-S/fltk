@@ -1594,6 +1594,7 @@ static void getsyscolor(const char *key1, const char* key2, const char *arg,
 void Fl_Wayland_Screen_Driver::get_system_colors()
 {
   open_display();
+
   const char* key1 = 0;
   if (Fl::first_window()) key1 = Fl::first_window()->xclass();
   if (!key1) key1 = "fltk";
@@ -1604,6 +1605,16 @@ void Fl_Wayland_Screen_Driver::get_system_colors()
   if (!bg_set)
     getsyscolor(key1,  "background",    fl_bg,  "#c0c0c0", Fl::background);
   getsyscolor("Text", "selectBackground", 0, "#000080", set_selection_color);
+
+  // FIXME: Force dark mode (experimental)
+
+  Fl_Dynamic_Color mode = Fl::dynamic_color();
+  if (mode == FL_DYNAMIC_COLOR_DARK) {
+    // fprintf(stderr, "FIXME: Forcing dark mode\n");
+    Fl::background2(23, 23, 23);
+    Fl::foreground(223, 223, 223);
+    Fl::background(50, 50, 50);
+  }
 }
 
 

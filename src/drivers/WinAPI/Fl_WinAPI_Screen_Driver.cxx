@@ -326,6 +326,16 @@ void Fl_WinAPI_Screen_Driver::get_system_colors()
   if (!fg_set) getsyscolor(COLOR_WINDOWTEXT,    fl_fg, Fl::foreground);
   if (!bg_set) getsyscolor(COLOR_BTNFACE,       fl_bg, Fl::background);
   getsyscolor(COLOR_HIGHLIGHT,  0,     set_selection_color);
+
+  // FIXME: Force dark mode (experimental)
+
+  Fl_Dynamic_Color mode = Fl::dynamic_color();
+  if (mode == FL_DYNAMIC_COLOR_DARK) {
+    // fprintf(stderr, "FIXME: Forcing dark mode\n");
+    Fl::background2(23, 23, 23);
+    Fl::foreground(223, 223, 223);
+    Fl::background(50, 50, 50);
+  }
 }
 
 

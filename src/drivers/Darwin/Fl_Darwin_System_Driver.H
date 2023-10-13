@@ -38,9 +38,7 @@
  - multithreading
  */
 
-class Fl_Darwin_System_Driver : public Fl_Posix_System_Driver
-{
-  Fl_Dynamic_Color dynamic_color_;
+class Fl_Darwin_System_Driver : public Fl_Posix_System_Driver {
 
 public:
   Fl_Darwin_System_Driver();
@@ -84,8 +82,8 @@ public:
   Fl_Sys_Menu_Bar_Driver *sys_menu_bar_driver() FL_OVERRIDE;
   double wait(double time_to_wait) FL_OVERRIDE;
   int ready() FL_OVERRIDE;
-  Fl_Dynamic_Color dynamic_color() FL_OVERRIDE;
-  void dynamic_color(Fl_Dynamic_Color mode) { dynamic_color_ = mode; }
+  // inherited from Fl_System_Driver:
+  // Fl_Dynamic_Color dynamic_color() FL_OVERRIDE;
 };
 
 #endif // FL_DARWIN_SYSTEM_DRIVER_H

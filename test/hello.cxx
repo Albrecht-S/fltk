@@ -18,6 +18,10 @@
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Box.H>
 
+#ifdef _MSC_VER
+int get_ui_color();   // prototype for MSVC only
+#endif
+
 int main(int argc, char **argv) {
   Fl_Window *window = new Fl_Window(340, 180);
   Fl_Box *box = new Fl_Box(20, 40, 300, 100, "Hello, World!");
@@ -27,5 +31,10 @@ int main(int argc, char **argv) {
   box->labeltype(FL_SHADOW_LABEL);
   window->end();
   window->show(argc, argv);
+#ifdef _MSC_VER
+  int dark = get_ui_color();
+  printf("This system is in %s mode\n", dark ? "dark" : "light");
+  fflush(stdout);
+#endif
   return Fl::run();
 }

@@ -59,6 +59,7 @@ class Fl_Sys_Menu_Bar_Driver;
   */
 class Fl_System_Driver {
   friend class Fl;
+  Fl_Dynamic_Color dynamic_color_;
 protected:
   // implement once for each platform
   static Fl_System_Driver *newSystemDriver();
@@ -222,12 +223,20 @@ public:
   virtual const char *alt_name() { return "Alt"; }
   virtual const char *control_name() { return "Ctrl"; }
   virtual Fl_Sys_Menu_Bar_Driver *sys_menu_bar_driver() { return NULL; }
-  virtual Fl_Dynamic_Color dynamic_color() { return FL_DYNAMIC_COLOR_LIGHT; }
   virtual void lock_ring() {}
   virtual void unlock_ring() {}
-  virtual double wait(double);                             // must FL_OVERRIDE
-  virtual int ready() { return 0; }                        // must FL_OVERRIDE
-  virtual int close_fd(int) {return -1;} // to close a file descriptor
+  virtual double wait(double);                // must override
+  virtual int ready() { return 0; }           // must override
+  virtual int close_fd(int) {return -1;}      // to close a file descriptor
+
+  virtual Fl_Dynamic_Color dynamic_color() {  // may be overridden
+    return dynamic_color_;
+  }
+
+  virtual void dynamic_color(Fl_Dynamic_Color mode) { // may be overridden
+    dynamic_color_ = mode;
+  }
+
 };
 
 #endif // FL_SYSTEM_DRIVER_H

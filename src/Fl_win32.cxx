@@ -46,6 +46,35 @@
 #include <winerror.h>
 #include <math.h> // for ceil() and round()
 
+// Experimental: Windows "Dark Mode": the following macro defines whether
+// we support dark mode on Windows (1 = true, 0 = false).
+// Currently this mode sets a dark window title bar depending on the user's
+// system setting. This is only a proof of concept.
+// Note: dwmapi.dll is loaded dynamically if available, dwmapi.h is not strictly required.
+//
+// https://learn.microsoft.com/en-us/windows/apps/desktop/modernize/apply-windows-themes#code-try-12
+// https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/nf-dwmapi-dwmsetwindowattribute
+
+#ifndef WINDOWS_DARKMODE
+#define WINDOWS_DARKMODE 1  // default: 0 = no, 1 = yes
+#endif
+
+#if (WINDOWS_DARKMODE) // support dark mode (dark title bar)
+// #include <dwmapi.h>
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+// #warning "DWMWA_USE_IMMERSIVE_DARK_MODE is not defined, setting it to 20"
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
+
+// FIXME !
+// This should be implemented as a global function, e.g. Fl::system_dark_mode()
+
+#ifdef _MSC_VER     // Visual Studio only
+int get_ui_color(); // returns 1 if system dark mode is active
+#endif
+
+#endif // support dark mode
+
 void fl_free_fonts(void);
 void fl_release_dc(HWND, HDC);
 void fl_cleanup_dc_list(void);
@@ -1679,6 +1708,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 
         return 0;
 
+#if (1) // experimental: report system setting changes (e.g. dark mode)
+      case WM_SETTINGCHANGE:
+        printf("WM_SETTINGCHANGE: wParam = %llx, lParam = %llx\n", wParam, lParam);
+        if (lParam) {
+          printf("WM_SETTINGCHANGE: lParam -> '%s'\n", (const char *)lParam);
+        }
+        fflush(stdout);
+        break;
+#endif
+
       default:
         if (Fl::handle(0, 0))
           return 0;
@@ -2155,6 +2194,43 @@ void Fl_WinAPI_Window_Driver::makeWindow() {
 
   x->next = Fl_X::first;
   Fl_X::first = x;
+
+#if (WINDOWS_DARKMODE)
+
+// FIXME !
+// See above: Fl::system_dark_mode() !
+
+#ifdef _MSC_VER               // Visual Studio only
+  int dark = get_ui_color();  // returns 1 if system dark mode is active
+#else
+  int dark = 0;               // MinGW, MSYS: assume light mode
+#endif
+
+  if (x->xid && dark) {
+    // Load Dynamic Library
+    static HMODULE dwmapi_dll = LoadLibrary("dwmapi.dll");
+    typedef HRESULT (WINAPI* fl_DwmSetWindowAttribute_type)(HWND hwnd, DWORD dwAttribute, PVOID pvAttribute, DWORD cbAttribute);
+    static fl_DwmSetWindowAttribute_type fl_DwmSetWindowAttribute = dwmapi_dll ?
+        (fl_DwmSetWindowAttribute_type)GetProcAddress(dwmapi_dll, "DwmSetWindowAttribute") : NULL;
+
+    if (fl_DwmSetWindowAttribute) {
+      BOOL value = TRUE;
+      HWND hwnd = (HWND)x->xid;
+      HRESULT res = fl_DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+      if (res != S_OK) {
+        fprintf(stdout, "Dark mode: DwmSetWindowAttribute() error: return value %ld\n", res);
+        fflush(stdout);
+      } else {
+        fprintf(stdout, "Dark mode: DwmSetWindowAttribute() success (S_OK)\n");
+        fflush(stdout);
+      }
+    } else {
+      fprintf(stdout, "Dark mode: DwmSetWindowAttribute() could not be loaded: %p\n", (void *)dwmapi_dll);
+      fflush(stdout);
+    }
+  }
+
+#endif // WINDOWS_DARKMODE
 
   set_icons();
 

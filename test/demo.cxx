@@ -537,6 +537,8 @@ int main(int argc, char **argv) {
 
   fl_putenv("FLTK_DOCDIR=../documentation/html"); // used by fluid
 
+  fprintf(stderr, "Dynamic color mode (main ) = %d\n", Fl::dynamic_color());
+
   char menu[FL_PATH_MAX];
 
   // construct app_path for all executable files
@@ -653,6 +655,24 @@ int main(int argc, char **argv) {
     }
   }
 #endif // End of debug and test statements
+
+  fprintf(stderr, "Dynamic color mode (init ) = %d\n", Fl::dynamic_color());
+
+#if (0)
+  Fl::dynamic_color(FL_DYNAMIC_COLOR_OFF);
+  fprintf(stderr, "Dynamic color mode (OFF  ) = %d\n", Fl::dynamic_color());
+
+  Fl::dynamic_color(FL_DYNAMIC_COLOR_AUTO);
+  fprintf(stderr, "Dynamic color mode (AUTO ) = %d\n", Fl::dynamic_color());
+
+  Fl::dynamic_color(FL_DYNAMIC_COLOR_LIGHT);
+  fprintf(stderr, "Dynamic color mode (LIGHT) = %d\n", Fl::dynamic_color());
+
+  Fl::dynamic_color(FL_DYNAMIC_COLOR_DARK);
+  fprintf(stderr, "Dynamic color mode (DARK ) = %d\n", Fl::dynamic_color());
+#endif
+
+  // Fl::get_system_colors();
 
   Fl::run();
   return 0;

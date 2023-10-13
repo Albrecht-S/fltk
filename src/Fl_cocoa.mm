@@ -2424,8 +2424,8 @@ static FLTextInputContext* fltextinputcontext_instance = nil;
 
     if (@available(macOS 10.14, *)) {
       NSAppearanceName temp = [self.effectiveAppearance bestMatchFromAppearancesWithNames:@[
-	  NSAppearanceNameAqua,
-	  NSAppearanceNameDarkAqua
+	                                NSAppearanceNameAqua,
+	                                NSAppearanceNameDarkAqua
       ]];
 
       if ([temp isEqualToString:NSAppearanceNameDarkAqua])

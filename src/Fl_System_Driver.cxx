@@ -49,15 +49,13 @@ int fl_control_modifier() {
 }
 
 
-Fl_System_Driver::Fl_System_Driver()
-{
-  command_key = FL_CTRL;
-  control_key = FL_META;
+Fl_System_Driver::Fl_System_Driver() {
+  command_key    = FL_CTRL;
+  control_key    = FL_META;
+  dynamic_color_ = FL_DYNAMIC_COLOR_OFF; // default for backwards compatibility
 }
 
-Fl_System_Driver::~Fl_System_Driver()
-{
-}
+Fl_System_Driver::~Fl_System_Driver() {}
 
 void Fl_System_Driver::warning(const char* format, ...) {
   va_list args;
