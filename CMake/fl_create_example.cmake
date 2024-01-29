@@ -2,7 +2,7 @@
 # A function used by the CMake build system for the Fast Light Tool Kit (FLTK).
 # Originally written by Michael Surette
 #
-# Copyright 1998-2023 by Bill Spitzak and others.
+# Copyright 1998-2024 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -17,7 +17,7 @@
 
 ################################################################################
 #
-# function CREATE_EXAMPLE - Create a test/demo (example) program
+# function fl_create_example - Create a test/demo (example) program
 #
 # Input:
 #
@@ -42,15 +42,12 @@
 #   These files must reside in the subdirectory 'mac-resources'.
 #
 # - LIBRARIES:
-#   List of libraries (CMake target names), separated by ';'. Needs
-#   quotes if more than one library is required, e.g. "fltk_gl;fltk"
-#
-# CREATE_EXAMPLE can have an optional fourth argument with a list of options
-# - these options are currently not used
+#   List of libraries (CMake target names), separated by ';'. Must be
+#   quoted if more than one library is required, e.g. "fltk::gl;fltk::images"
 #
 ################################################################################
 
-function (CREATE_EXAMPLE NAME SOURCES LIBRARIES)
+function (fl_create_example NAME SOURCES LIBRARIES)
 
   set (srcs)                    # source files
   set (flsrcs)                  # fluid source (.fl) files
@@ -61,22 +58,15 @@ function (CREATE_EXAMPLE NAME SOURCES LIBRARIES)
 
   # create macOS bundle? 0 = no, 1 = yes
 
-  if (APPLE AND (NOT OPTION_APPLE_X11))
+  if (APPLE AND (NOT FLTK_APPLE_X11))
     set (MAC_BUNDLE 1)
   else ()
     set (MAC_BUNDLE 0)
-  endif (APPLE AND (NOT OPTION_APPLE_X11))
-
-  # rename target name "help" (reserved since CMake 2.8.12)
-  # FIXME: not necessary in FLTK 1.4 but left for compatibility (06/2020)
-
-  if (${TARGET_NAME} STREQUAL "help")
-    set (TARGET_NAME "test_help")
-  endif (${TARGET_NAME} STREQUAL "help")
+  endif (APPLE AND (NOT FLTK_APPLE_X11))
 
   # filter input files for different handling (fluid, icon, plist, source)
 
-  foreach (src ${SOURCES})
+  foreach(src ${SOURCES})
     if ("${src}" MATCHES "\\.fl$")
       list (APPEND flsrcs ${src})
     elseif ("${src}" MATCHES "\\.icns$")
@@ -86,7 +76,7 @@ function (CREATE_EXAMPLE NAME SOURCES LIBRARIES)
     else ()
       list (APPEND srcs ${src})
     endif ("${src}" MATCHES "\\.fl$")
-  endforeach (src)
+  endforeach(src)
 
   # generate source files from .fl files, add output to sources
 
@@ -117,25 +107,35 @@ function (CREATE_EXAMPLE NAME SOURCES LIBRARIES)
   endif (MAC_BUNDLE)
 
   set_target_properties   (${TARGET_NAME} PROPERTIES OUTPUT_NAME ${NAME})
-  target_link_libraries   (${TARGET_NAME} ${LIBRARIES})
+  target_link_libraries   (${TARGET_NAME} PRIVATE ${LIBRARIES})
 
   # make sure we're "exporting" global symbols like 'fl_disable_wayland',
   # see also README.Wayland.txt and CMake policy CMP0065.
 
   set_target_properties   (${TARGET_NAME} PROPERTIES ENABLE_EXPORTS TRUE)
 
-  # we must link all programs with cairo if option CAIROEXT is enabled
-  if (FLTK_HAVE_CAIROEXT)
-    target_link_libraries (${TARGET_NAME} ${PKG_CAIRO_LIBRARIES})
-  endif ()
+  ### *FIXME* Remove the entire 'if' block below when verified:
 
-  if (FLTK_HAVE_CAIRO AND PKG_CAIRO_LIBRARY_DIRS)
-    target_link_directories (${TARGET_NAME} PUBLIC ${PKG_CAIRO_LIBRARY_DIRS})
-  endif ()
+  if (0) # This should no longer be necessary (implied by linking the libs)
 
-  if (USE_GDIPLUS)        # can only be true on Windows
-    target_link_libraries (${TARGET_NAME} gdiplus)
-  endif ()
+    # we must link all programs with Cairo if option CAIROEXT is enabled
+    if (FLTK_HAVE_CAIROEXT)
+      target_link_libraries (${TARGET_NAME} PRIVATE ${PKG_CAIRO_LIBRARIES})
+    endif ()
+
+    if (FLTK_HAVE_CAIRO AND PKG_CAIRO_LIBRARY_DIRS)
+      target_link_directories (${TARGET_NAME} PRIVATE ${PKG_CAIRO_LIBRARY_DIRS})
+    endif ()
+
+  endif () # This should no longer be necessary (implied by linking the libs)
+
+  # Search the current binary directory for header files created by CMake
+  # or fluid and the source folder for other headers included by test programs
+
+  target_include_directories(${TARGET_NAME} PRIVATE
+      ${CMAKE_CURRENT_BINARY_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}
+  )
 
   if (MAC_BUNDLE)
     if (PLIST)
@@ -173,26 +173,15 @@ function (CREATE_EXAMPLE NAME SOURCES LIBRARIES)
     unset (WRAPPER)
   endif (MAC_BUNDLE)
 
-  if (MSVC AND TARGET fltk_SHARED)
-    set (DllDir "$<SHELL_PATH:$<TARGET_FILE_DIR:fltk_SHARED>>")
-    ## fl_debug_var (DllDir)
+  ##############################################################################
+  # MSVC: Add fltk-shared (DLL) path to Environment 'PATH' for debugging
+  ##############################################################################
+
+  if (MSVC AND TARGET fltk-shared)
+    set (DllDir "$<SHELL_PATH:$<TARGET_FILE_DIR:fltk-shared>>")
     set_target_properties(${TARGET_NAME} PROPERTIES
       VS_DEBUGGER_ENVIRONMENT "PATH=${DllDir};$ENV{PATH}"
     )
   endif()
-
-  ######################################################################
-  # Parse optional fourth argument, see description above.
-  ######################################################################
-
-  # code left commented out as an example
-
-  # *unused* #  if (${ARGC} GREATER 3)
-  # *unused* #    foreach (OPTION ${ARGV3})
-  # *unused* #      if (${OPTION} STREQUAL "xxx")
-  # *unused* #        # do something ...
-  # *unused* #      endif ()
-  # *unused* #    endforeach ()
-  # *unused* #  endif ()
 
 endfunction ()

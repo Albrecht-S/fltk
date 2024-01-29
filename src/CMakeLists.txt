@@ -173,7 +173,7 @@ set (CPPFILES
   screen_xywh.cxx
 )
 
-if (FLTK_HAVE_CAIRO) # OPTION_CAIRO or OPTION_CAIROEXT
+if (FLTK_HAVE_CAIRO) # FLTK_OPTION_CAIRO or FLTK_OPTION_CAIROEXT
   list (APPEND CPPFILES Fl_Cairo.cxx)
 endif ()
 
@@ -191,19 +191,18 @@ list (APPEND HEADER_FILES
 
 set (GL_HEADER_FILES)  # FIXME: not (yet?) defined
 
-if (FLTK_USE_X11 AND NOT OPTION_PRINT_SUPPORT)
-  set (PSFILES
-  )
+if (FLTK_USE_X11 AND NOT FLTK_OPTION_PRINT_SUPPORT)
+  set (PSFILES)
 else ()
   set (PSFILES
     drivers/PostScript/Fl_PostScript.cxx
     drivers/PostScript/Fl_PostScript_image.cxx
   )
-endif (FLTK_USE_X11 AND NOT OPTION_PRINT_SUPPORT)
+endif (FLTK_USE_X11 AND NOT FLTK_OPTION_PRINT_SUPPORT)
 
 set (DRIVER_FILES)
 
-if (FLTK_USE_X11 AND NOT OPTION_USE_WAYLAND)
+if (FLTK_USE_X11 AND NOT FLTK_OPTION_WAYLAND)
 
   # X11 (including APPLE with X11)
 
@@ -224,30 +223,30 @@ if (FLTK_USE_X11 AND NOT OPTION_USE_WAYLAND)
     Fl_get_key.cxx
   )
 
-  if (OPTION_USE_KDIALOG)
-    set (DRIVER_FILES ${DRIVER_FILES} Fl_Native_File_Chooser_Kdialog.cxx
+  if (FLTK_OPTION_USE_KDIALOG)
+    list (APPEND DRIVER_FILES Fl_Native_File_Chooser_Kdialog.cxx
       Fl_Native_File_Chooser_Zenity.cxx)
-  endif (OPTION_USE_KDIALOG)
+  endif (FLTK_OPTION_USE_KDIALOG)
 
   if (FLTK_USE_CAIRO)
-    set (DRIVER_FILES ${DRIVER_FILES}
+    list (APPEND DRIVER_FILES
       drivers/Cairo/Fl_Cairo_Graphics_Driver.cxx
       drivers/Cairo/Fl_X11_Cairo_Graphics_Driver.cxx
     )
   else ()
     if (USE_XFT)
-      set (DRIVER_FILES ${DRIVER_FILES}
+      list (APPEND DRIVER_FILES
         drivers/Xlib/Fl_Xlib_Graphics_Driver_font_xft.cxx
       )
       if (USE_PANGO)
-        set (DRIVER_FILES ${DRIVER_FILES} drivers/Cairo/Fl_Cairo_Graphics_Driver.cxx)
+        list (APPEND DRIVER_FILES drivers/Cairo/Fl_Cairo_Graphics_Driver.cxx)
       endif (USE_PANGO)
     else ()
-      set (DRIVER_FILES ${DRIVER_FILES}
+      list (APPEND DRIVER_FILES
         drivers/Xlib/Fl_Xlib_Graphics_Driver_font_x.cxx
       )
     endif (USE_XFT)
-    set (DRIVER_FILES ${DRIVER_FILES}
+    list (APPEND DRIVER_FILES
       drivers/Xlib/Fl_Xlib_Graphics_Driver.cxx
       drivers/Xlib/Fl_Xlib_Graphics_Driver_arci.cxx
       drivers/Xlib/Fl_Xlib_Graphics_Driver_color.cxx
@@ -279,7 +278,7 @@ if (FLTK_USE_X11 AND NOT OPTION_USE_WAYLAND)
    )
  endif (FLTK_USE_CAIRO)
 
-elseif (OPTION_USE_WAYLAND)
+elseif (FLTK_OPTION_WAYLAND)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${CMAKE_CURRENT_BINARY_DIR}")
   set (DRIVER_FILES
     drivers/Posix/Fl_Posix_System_Driver.cxx
@@ -296,23 +295,27 @@ elseif (OPTION_USE_WAYLAND)
     drivers/Cairo/Fl_Cairo_Graphics_Driver.cxx
     Fl_Native_File_Chooser_FLTK.cxx
     Fl_Native_File_Chooser_GTK.cxx
+  )
+
+  if (FLTK_OPTION_USE_KDIALOG)
+    list (APPEND DRIVER_FILES
+      Fl_Native_File_Chooser_Kdialog.cxx
+      Fl_Native_File_Chooser_Zenity.cxx)
+  endif (FLTK_OPTION_USE_KDIALOG)
+
+  if (FLTK_USE_X11)
+    list (APPEND DRIVER_FILES
+      drivers/Cairo/Fl_X11_Cairo_Graphics_Driver.cxx
+      drivers/X11/Fl_X11_Screen_Driver.cxx
+      drivers/X11/Fl_X11_Window_Driver.cxx
+      drivers/Xlib/Fl_Xlib_Copy_Surface_Driver.cxx
+      drivers/Xlib/Fl_Xlib_Image_Surface_Driver.cxx
+      Fl_x.cxx
+      fl_dnd_x.cxx
+      Fl_get_key.cxx
     )
-    if (OPTION_USE_KDIALOG)
-      set (DRIVER_FILES ${DRIVER_FILES} Fl_Native_File_Chooser_Kdialog.cxx
-        Fl_Native_File_Chooser_Zenity.cxx)
-    endif (OPTION_USE_KDIALOG)
-    if (FLTK_USE_X11)
-      list (APPEND DRIVER_FILES
-        drivers/Cairo/Fl_X11_Cairo_Graphics_Driver.cxx
-        drivers/X11/Fl_X11_Screen_Driver.cxx
-        drivers/X11/Fl_X11_Window_Driver.cxx
-        drivers/Xlib/Fl_Xlib_Copy_Surface_Driver.cxx
-        drivers/Xlib/Fl_Xlib_Image_Surface_Driver.cxx
-        Fl_x.cxx
-        fl_dnd_x.cxx
-        Fl_get_key.cxx
-      )
-    endif (FLTK_USE_X11)
+  endif (FLTK_USE_X11)
+
   set (DRIVER_HEADER_FILES
     drivers/Posix/Fl_Posix_System_Driver.H
     drivers/Wayland/Fl_Wayland_Screen_Driver.H
@@ -394,7 +397,7 @@ else ()
     drivers/GDI/Fl_GDI_Image_Surface_Driver.H
   )
 
-endif (FLTK_USE_X11 AND NOT OPTION_USE_WAYLAND)
+endif (FLTK_USE_X11 AND NOT FLTK_OPTION_WAYLAND)
 
 source_group("Header Files" FILES ${HEADER_FILES})
 source_group("Driver Source Files" FILES ${DRIVER_FILES})
@@ -444,7 +447,7 @@ set (GL_DRIVER_FILES
   drivers/OpenGL/Fl_OpenGL_Graphics_Driver_rect.cxx
   drivers/OpenGL/Fl_OpenGL_Graphics_Driver_vertex.cxx
 )
-if (OPTION_USE_WAYLAND)
+if (FLTK_OPTION_WAYLAND)
   set (GL_DRIVER_FILES ${GL_DRIVER_FILES} drivers/Wayland/Fl_Wayland_Gl_Window_Driver.cxx)
   set (GL_DRIVER_HEADER_FILES drivers/Wayland/Fl_Wayland_Gl_Window_Driver.H)
   if (FLTK_USE_X11)
@@ -460,7 +463,7 @@ elseif (APPLE)
 elseif (WIN32)
   set (GL_DRIVER_FILES ${GL_DRIVER_FILES} drivers/WinAPI/Fl_WinAPI_Gl_Window_Driver.cxx)
   set (GL_DRIVER_HEADER_FILES drivers/WinAPI/Fl_WinAPI_Gl_Window_Driver.H)
-endif (OPTION_USE_WAYLAND)
+endif (FLTK_OPTION_WAYLAND)
 
 set (GL_DRIVER_HEADER_FILES ${GL_DRIVER_FILES}
   drivers/OpenGL/Fl_OpenGL_Display_Device.H
@@ -515,7 +518,7 @@ if (FLTK_USE_X11)
   endif (NOT USE_XFT)
 endif (FLTK_USE_X11)
 
-if (OPTION_USE_WAYLAND)
+if (FLTK_OPTION_WAYLAND)
   pkg_check_modules(DBUS dbus-1)
   set (IDIRS "${CMAKE_CURRENT_BINARY_DIR}")
   set (CDEFS "_GNU_SOURCE;HAVE_MEMFD_CREATE;HAVE_MKOSTEMP;HAVE_POSIX_FALLOCATE")
@@ -524,7 +527,7 @@ if (OPTION_USE_WAYLAND)
     set (CDEFS "${CDEFS};HAS_DBUS")
     set (IDIRS "${IDIRS};${DBUS_INCLUDE_DIRS}")
   endif (DBUS_FOUND)
-  if (OPTION_USE_SYSTEM_LIBDECOR)
+  if (USE_SYSTEM_LIBDECOR)
     set (CDEFS "${CDEFS};USE_SYSTEM_LIBDECOR;LIBDECOR_PLUGIN_DIR=${LIBDECOR_PLUGIN_DIR}")
     if (GTK_FOUND)
       set (CDEFS "${CDEFS};HAVE_GTK")
@@ -542,9 +545,9 @@ if (OPTION_USE_WAYLAND)
       "${CMAKE_CURRENT_SOURCE_DIR}/../libdecor/src/plugins")
     set (CDEFS "${CDEFS};USE_SYSTEM_LIBDECOR=0;LIBDECOR_PLUGIN_API_VERSION=1"
       "LIBDECOR_PLUGIN_DIR=\"\"")
-    if (GTK_FOUND AND OPTION_ALLOW_GTK_PLUGIN)
+    if (GTK_FOUND AND FLTK_OPTION_WAYLAND_GTK)
       set (CDEFS "${CDEFS};HAVE_GTK")
-    endif (GTK_FOUND AND OPTION_ALLOW_GTK_PLUGIN)
+    endif (GTK_FOUND AND FLTK_OPTION_WAYLAND_GTK)
     set_source_files_properties(
       ${CMAKE_CURRENT_SOURCE_DIR}/../libdecor/build/fl_libdecor.c
       ${CMAKE_CURRENT_SOURCE_DIR}/../libdecor/build/fl_libdecor-plugins.c
@@ -555,24 +558,24 @@ if (OPTION_USE_WAYLAND)
       INCLUDE_DIRECTORIES "${IDIRS}"
       COMPILE_OPTIONS "${COPTS}"
       )
-  endif (OPTION_USE_SYSTEM_LIBDECOR)
+  endif (USE_SYSTEM_LIBDECOR)
 
   list (APPEND CFILES
     scandir_posix.c
     ../libdecor/src/cursor-settings.c
     ../libdecor/src/os-compatibility.c
     ../libdecor/build/fl_libdecor-plugins.c
-    )
+  )
   if (FLTK_USE_X11)
     list (APPEND CFILES xutf8/keysym2Ucs.c)
   endif (FLTK_USE_X11)
-  if (NOT OPTION_USE_SYSTEM_LIBDECOR)
+  if (NOT USE_SYSTEM_LIBDECOR)
     list (APPEND CFILES
-    ../libdecor/build/fl_libdecor.c
-    ../libdecor/src/plugins/common/libdecor-cairo-blur.c
+      ../libdecor/build/fl_libdecor.c
+      ../libdecor/src/plugins/common/libdecor-cairo-blur.c
     )
-  endif (NOT OPTION_USE_SYSTEM_LIBDECOR)
-endif (OPTION_USE_WAYLAND)
+  endif (NOT USE_SYSTEM_LIBDECOR)
+endif (FLTK_OPTION_WAYLAND)
 
 if (WIN32)
   list (APPEND CFILES
@@ -580,7 +583,7 @@ if (WIN32)
   )
 endif (WIN32)
 
-if (APPLE AND (NOT OPTION_APPLE_X11))
+if (APPLE AND (NOT FLTK_APPLE_X11))
   set (MMFILES
     Fl_cocoa.mm
     drivers/Cocoa/Fl_Cocoa_Printer_Driver.mm
@@ -588,9 +591,8 @@ if (APPLE AND (NOT OPTION_APPLE_X11))
     Fl_MacOS_Sys_Menu_Bar.mm
   )
 else()
-  set (MMFILES
-  )
-endif (APPLE AND (NOT OPTION_APPLE_X11))
+  set (MMFILES)
+endif (APPLE AND (NOT FLTK_APPLE_X11))
 
 
 #######################################################################
@@ -652,9 +654,9 @@ if (HAVE_XRENDER)
   list (APPEND OPTIONAL_LIBS ${X11_Xrender_LIB})
 endif (HAVE_XRENDER)
 
-if (FLTK_HAVE_CAIRO) # OPTION_CAIRO or OPTION_CAIROEXT
-  list (APPEND OPTIONAL_LIBS ${PKG_CAIRO_LIBRARIES})
-endif()
+### if (FLTK_HAVE_CAIRO) # FLTK_OPTION_CAIRO or FLTK_OPTION_CAIROEXT or Wayland
+###   list (APPEND OPTIONAL_LIBS ${PKG_CAIRO_LIBRARIES})
+### endif()
 
 if (USE_PANGO)
   ### FIXME ###  This needs to use the PKG_* variables directly
@@ -672,10 +674,10 @@ if (USE_XFT)
   endif (LIB_fontconfig)
 endif (USE_XFT)
 
-if (UNIX AND OPTION_USE_WAYLAND)
+if (UNIX AND FLTK_OPTION_WAYLAND)
   pkg_get_variable(PROTOCOLS wayland-protocols pkgdatadir)
   # replace "//" with "/"
-  string (REPLACE "//" "/" PROTOCOLS ${PROTOCOLS})
+  string(REPLACE "//" "/" PROTOCOLS ${PROTOCOLS})
   if (NOT(EXISTS ${PROTOCOLS}/stable/xdg-shell/xdg-shell.xml))
     message(WARNING "Install necessary file ${PROTOCOLS}/stable/xdg-shell/xdg-shell.xml")
   endif ()
@@ -701,7 +703,7 @@ if (UNIX AND OPTION_USE_WAYLAND)
   )
   list (APPEND STATIC_FILES "xdg-shell-protocol.c")
   list (APPEND SHARED_FILES "xdg-shell-protocol.c")
-  if (NOT OPTION_USE_SYSTEM_LIBDECOR)
+  if (NOT USE_SYSTEM_LIBDECOR)
     add_custom_command(
       OUTPUT xdg-decoration-protocol.c xdg-decoration-client-protocol.h
       COMMAND wayland-scanner private-code ${PROTOCOLS}/unstable/xdg-decoration/xdg-decoration-unstable-v1.xml xdg-decoration-protocol.c
@@ -711,7 +713,7 @@ if (UNIX AND OPTION_USE_WAYLAND)
     )
     list (APPEND STATIC_FILES "xdg-decoration-protocol.c")
     list (APPEND SHARED_FILES "xdg-decoration-protocol.c")
-  endif (NOT OPTION_USE_SYSTEM_LIBDECOR)
+  endif (NOT USE_SYSTEM_LIBDECOR)
   add_custom_command(
       OUTPUT gtk-shell-protocol.c gtk-shell-client-protocol.h
       COMMAND wayland-scanner private-code ${CMAKE_CURRENT_SOURCE_DIR}/../libdecor/build/gtk-shell.xml gtk-shell-protocol.c
@@ -731,70 +733,72 @@ if (UNIX AND OPTION_USE_WAYLAND)
   list (APPEND STATIC_FILES "text-input-protocol.c")
   list (APPEND SHARED_FILES "text-input-protocol.c")
 
-  if (OPTION_USE_GL)
+  if (FLTK_OPTION_USE_GL)
     list (APPEND OPTIONAL_LIBS "-lwayland-egl -lEGL")
-  endif (OPTION_USE_GL)
-  if (OPTION_USE_SYSTEM_LIBDECOR)
+  endif (FLTK_OPTION_USE_GL)
+  if (USE_SYSTEM_LIBDECOR)
     list (APPEND OPTIONAL_LIBS "-ldecor-0")
-  elseif (GTK_FOUND AND OPTION_ALLOW_GTK_PLUGIN)
+  elseif (GTK_FOUND AND FLTK_OPTION_WAYLAND_GTK)
       list (APPEND OPTIONAL_LIBS ${GTK_LDFLAGS} )
-  endif (OPTION_USE_SYSTEM_LIBDECOR)
+  endif (USE_SYSTEM_LIBDECOR)
   list (APPEND OPTIONAL_LIBS "-lwayland-cursor -lwayland-client -lxkbcommon -ldl")
   if (DBUS_FOUND)
     list (APPEND OPTIONAL_LIBS "${DBUS_LDFLAGS}")
   endif (DBUS_FOUND)
-  if (NOT OPTION_WAYLAND_ONLY)
+  if (NOT FLTK_OPTION_WAYLAND_ONLY)
     list (APPEND OPTIONAL_LIBS "-lXcursor -lXrender -lXinerama -lXfixes -lXft -lXext -lX11")
-  endif (NOT OPTION_WAYLAND_ONLY)
-  if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux" AND NOT OPTION_BUILD_SHARED_LIBS)
+  endif (NOT FLTK_OPTION_WAYLAND_ONLY)
+  if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" AND NOT FLTK_BUILD_SHARED_LIBS)
     list (APPEND OPTIONAL_LIBS "-no-pie")
-  endif (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux" AND NOT OPTION_BUILD_SHARED_LIBS)
-endif (UNIX AND OPTION_USE_WAYLAND)
+  endif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux" AND NOT FLTK_BUILD_SHARED_LIBS)
+endif (UNIX AND FLTK_OPTION_WAYLAND)
 
 #######################################################################
 
-FL_ADD_LIBRARY (fltk STATIC "${STATIC_FILES}")
-target_link_libraries (fltk ${OPTIONAL_LIBS})
+fl_add_library (fltk STATIC "${STATIC_FILES}")
+target_link_libraries (fltk PUBLIC ${OPTIONAL_LIBS})
 
-if (FLTK_HAVE_CAIRO)
-  target_link_directories (fltk PUBLIC ${PKG_CAIRO_LIBRARY_DIRS})
-endif()
+### if (FLTK_HAVE_CAIRO OR FLTK_USE_CAIRO)
+###   target_link_directories (fltk PUBLIC ${PKG_CAIRO_LIBRARY_DIRS})
+### endif ()
 
 #######################################################################
 
 if (FLTK_BUILD_FORMS)
-  FL_ADD_LIBRARY (fltk_forms STATIC "${FORMS_FILES}")
-  target_link_libraries (fltk_forms fltk)
+  fl_add_library (fltk_forms STATIC "${FORMS_FILES}")
+  target_link_libraries (fltk_forms PUBLIC fltk::fltk)
 endif ()
 
 #######################################################################
 
-FL_ADD_LIBRARY (fltk_images STATIC "${IMGCPPFILES}")
-target_link_libraries (fltk_images fltk)
-
-if (FLTK_USE_BUILTIN_JPEG)
-  target_link_libraries (fltk_images fltk_jpeg)
-else()
-  target_link_libraries (fltk_images ${FLTK_JPEG_LIBRARIES})
+if (0)
+  message (STATUS "----------------------   fltk_images   -----------------------")
+  fl_debug_var (FLTK_JPEG_LIBRARIES)
+  fl_debug_var (FLTK_PNG_LIBRARIES)
+  fl_debug_var (FLTK_ZLIB_LIBRARIES)
+  fl_debug_var (FLTK_IMAGE_LIBRARIES)
+  message (STATUS "----------------------   fltk_images   -----------------------")
 endif ()
 
-if (FLTK_USE_BUILTIN_ZLIB)
-  target_link_libraries (fltk_images fltk_z)
-else()
-  target_link_libraries (fltk_images ${FLTK_ZLIB_LIBRARIES})
-endif ()
+fl_add_library (fltk_images STATIC "${IMGCPPFILES}")
+target_link_libraries (fltk_images PUBLIC  fltk::fltk)
+target_link_libraries (fltk_images PRIVATE ${FLTK_IMAGE_LIBRARIES})
 
-if (FLTK_USE_BUILTIN_PNG)
-  target_link_libraries (fltk_images fltk_png)
-else()
-  target_link_libraries (fltk_images ${FLTK_PNG_LIBRARIES})
+### target_link_libraries (fltk_images PUBLIC ${FLTK_JPEG_LIBRARIES})
+### target_link_libraries (fltk_images PUBLIC ${FLTK_PNG_LIBRARIES})
+### target_link_libraries (fltk_images PUBLIC ${FLTK_IMAGE_LIBRARIES})
+
+if (FLTK_USE_BUNDLED_JPEG)
+  target_include_directories (fltk_images PUBLIC
+    $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/jpeg>
+    $<INSTALL_INTERFACE:include>)
 endif ()
 
 #######################################################################
 
 if (OPENGL_FOUND)
-  FL_ADD_LIBRARY (fltk_gl STATIC "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
-  target_link_libraries (fltk_gl fltk ${OPENGL_LIBRARIES})
+  fl_add_library (fltk_gl STATIC "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
+  target_link_libraries (fltk_gl PUBLIC ${OPENGL_LIBRARIES} fltk::fltk)
 endif (OPENGL_FOUND)
 
 #######################################################################
@@ -803,92 +807,119 @@ endif (OPENGL_FOUND)
 # Shared libraries, part 1: everything except Visual Studio (MSVC)
 #######################################################################
 
-if (OPTION_BUILD_SHARED_LIBS AND NOT MSVC)
+### fl_debug_var (OPTIONAL_LIBS)
 
-  FL_ADD_LIBRARY (fltk SHARED "${SHARED_FILES}")
-  target_link_libraries (fltk_SHARED ${OPTIONAL_LIBS} ${PKG_CAIRO_LIBRARIES})
-  target_link_directories (fltk_SHARED PUBLIC ${PKG_CAIRO_LIBRARY_DIRS})
+if (FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
+
+  fl_add_library (fltk SHARED "${SHARED_FILES}")
+  target_link_libraries (fltk-shared PUBLIC ${OPTIONAL_LIBS})
+
+  ### if (FLTK_HAVE_CAIRO OR FLTK_USE_CAIRO)
+  ###   target_link_directories (fltk-shared PUBLIC ${PKG_CAIRO_LIBRARY_DIRS})
+  ### endif ()
 
   ###################################################################
 
   if (FLTK_BUILD_FORMS)
-    FL_ADD_LIBRARY (fltk_forms SHARED "${FORMS_FILES}")
-    target_link_libraries (fltk_forms_SHARED fltk_SHARED)
+    fl_add_library (fltk_forms SHARED "${FORMS_FILES}")
+    target_link_libraries (fltk_forms-shared PUBLIC fltk::fltk-shared)
   endif ()
 
   ###################################################################
 
-  FL_ADD_LIBRARY (fltk_images SHARED "${IMGCPPFILES}")
-  target_link_libraries (fltk_images_SHARED fltk_SHARED)
+  ### fl_debug_var (fltk_images)
+  ### fl_debug_var (FLTK_JPEG_LIBRARIES)
+  ### fl_debug_var (FLTK_PNG_LIBRARIES)
+  ### fl_debug_var (FLTK_ZLIB_LIBRARIES)
+  ### fl_debug_var (FLTK_IMAGE_LIBRARIES)
 
-  if (FLTK_USE_BUILTIN_JPEG)
-    target_link_libraries (fltk_images_SHARED fltk_jpeg_SHARED)
-  else()
-    target_link_libraries (fltk_images_SHARED ${FLTK_JPEG_LIBRARIES})
+  fl_add_library (fltk_images SHARED "${IMGCPPFILES}")
+  target_link_libraries (fltk_images-shared PUBLIC fltk::fltk-shared)
+
+  target_link_libraries (fltk_images PUBLIC ${FLTK_JPEG_LIBRARIES})
+  target_link_libraries (fltk_images PUBLIC ${FLTK_PNG_LIBRARIES})
+  target_link_libraries (fltk_images PUBLIC ${FLTK_IMAGE_LIBRARIES})
+
+  if (FLTK_USE_BUNDLED_JPEG)
+    ## include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories (fltk_images-shared PUBLIC
+      $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/jpeg>
+      # $<INSTALL_INTERFACE:include>
+    )
   endif ()
 
-  if (FLTK_USE_BUILTIN_PNG)
-    target_link_libraries (fltk_images_SHARED fltk_png_SHARED)
-  else()
-    target_link_libraries (fltk_images_SHARED ${FLTK_PNG_LIBRARIES})
+  if (FLTK_USE_BUNDLED_JPEG)
+    target_link_libraries (fltk_images-shared PUBLIC fltk::jpeg-shared)
+  else ()
+    target_link_libraries (fltk_images-shared PUBLIC ${JPEG_LIBRARIES})
   endif ()
 
-  if (FLTK_USE_BUILTIN_ZLIB)
-    target_link_libraries (fltk_images_SHARED fltk_z_SHARED)
-  else()
-    target_link_libraries (fltk_images_SHARED ${FLTK_ZLIB_LIBRARIES})
+  if (FLTK_USE_BUNDLED_PNG)
+    target_link_libraries (fltk_images-shared PUBLIC fltk::png-shared)
+  else ()
+    target_link_libraries (fltk_images-shared PUBLIC ${PNG_LIBRARIES})
   endif ()
 
   ###################################################################
 
   if (OPENGL_FOUND)
-    FL_ADD_LIBRARY (fltk_gl SHARED "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
-    target_link_libraries (fltk_gl_SHARED fltk_SHARED ${OPENGL_LIBRARIES})
+    fl_add_library (fltk_gl SHARED "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
+    target_link_libraries (fltk_gl-shared PUBLIC ${OPENGL_LIBRARIES} fltk::fltk-shared)
   endif (OPENGL_FOUND)
 
-endif (OPTION_BUILD_SHARED_LIBS AND NOT MSVC)
+endif (FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
 
 #######################################################################
 # Shared libraries, part 2: Visual Studio (MSVC)
 #######################################################################
 
-# Note to devs: As of June 2020 we can't build separate shared libs (DLL's)
-# under Windows with Visual Studio (MSVC) but we can build one big DLL
-# that comprises all FLTK and optional PNG, JPEG, and ZLIB libs.
+# Note to devs: As of June 2020 we can't build separate shared libs
+# (DLL's) under Windows with Visual Studio (MSVC) but we can build one
+# big DLL that comprises all FLTK and optional PNG, JPEG, and ZLIB libs.
+# The reason is the common DLL linkage (FL_EXPORT) for all libs. This
+# might be changed in the future but it would require a lot of work.
 # AlbrechtS
 
-if (OPTION_BUILD_SHARED_LIBS AND MSVC)
+if (FLTK_BUILD_SHARED_LIBS AND MSVC)
 
   set (SOURCES ${SHARED_FILES} ${FORMS_FILES} ${IMGCPPFILES})
   if (OPENGL_FOUND)
     list (APPEND SOURCES ${GLCPPFILES} ${GL_HEADER_FILES} ${GL_DRIVER_HEADER_FILES})
   endif (OPENGL_FOUND)
 
-  FL_ADD_LIBRARY (fltk SHARED "${SOURCES}")
-  target_link_libraries (fltk_SHARED ${OPTIONAL_LIBS})
+  fl_add_library (fltk SHARED "${SOURCES}")
+  target_link_libraries (fltk-shared PUBLIC ${OPTIONAL_LIBS})
 
-  if (FLTK_USE_BUILTIN_JPEG)
-    target_link_libraries (fltk_SHARED fltk_jpeg)
-  else()
-    target_link_libraries (fltk_SHARED ${FLTK_JPEG_LIBRARIES})
+  if (FLTK_USE_BUNDLED_JPEG)
+    target_link_libraries (fltk-shared PUBLIC fltk::jpeg-shared)
+  else ()
+    target_link_libraries (fltk-shared PUBLIC ${FLTK_JPEG_LIBRARIES})
   endif ()
 
-  if (FLTK_USE_BUILTIN_PNG)
-    target_link_libraries (fltk_SHARED fltk_png)
-  else()
-    target_link_libraries (fltk_SHARED ${FLTK_PNG_LIBRARIES})
-  endif ()
-
-  if (FLTK_USE_BUILTIN_ZLIB)
-    target_link_libraries (fltk_SHARED fltk_z)
-  else()
-    target_link_libraries (fltk_SHARED ${FLTK_ZLIB_LIBRARIES})
+  if (FLTK_USE_BUNDLED_PNG)
+    target_link_libraries (fltk-shared PUBLIC fltk::png-shared)
+  else ()
+    target_link_libraries (fltk-shared PUBLIC ${FLTK_PNG_LIBRARIES})
   endif ()
 
   if (OPENGL_FOUND)
-    target_link_libraries (fltk_SHARED ${OPENGL_LIBRARIES})
+    target_link_libraries (fltk-shared PUBLIC ${OPENGL_LIBRARIES})
   endif (OPENGL_FOUND)
 
-endif (OPTION_BUILD_SHARED_LIBS AND MSVC)
+endif (FLTK_BUILD_SHARED_LIBS AND MSVC)
 
 #######################################################################
+
+set (FLTK_LIBRARIES ${FLTK_LIBRARIES} PARENT_SCOPE)
+set (FLTK_LIBRARIES_SHARED ${FLTK_LIBRARIES_SHARED} PARENT_SCOPE)
+
+if (0) # debug library targets
+  foreach(tgt fltk images gl forms jpeg png z)
+    if (TARGET fltk::${tgt})
+      fl_debug_target (fltk::${tgt})
+    endif ()
+    if (TARGET fltk::${tgt}-shared)
+      fl_debug_target (fltk::${tgt}-shared)
+    endif ()
+  endforeach()
+endif ()

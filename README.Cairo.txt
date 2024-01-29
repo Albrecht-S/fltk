@@ -22,8 +22,6 @@ README.Cairo.txt - Cairo rendering support for FLTK
    3.3.2  Install Homebrew for Cairo and other Library Support
    3.3.3  Install CMake and Build with CMake
 
- 4   DOCUMENT HISTORY
-
 
  INTRODUCTION
 ==============
@@ -37,18 +35,23 @@ backends. Cairo is designed to use hardware acceleration when available.
  CAIRO SUPPORT FOR FLTK
 ========================
 
-It is now possible to integrate Cairo rendering in your FLTK application
-more easily and transparently.
 Since FLTK 1.3 we provide minimum support for Cairo; no "total" Cairo
-rendering layer support is achieved.
+rendering layer support is achieved in FLTK 1.3.x. This option is known
+as "Fl_Cairo_Window support" and is available on all supported platforms
+as a configure or CMake build option.
+
+Since FLTK 1.4 the new Wayland platform uses Cairo for all drawings.
+Under X11 drawing with Cairo rather than Xlib is a build option.
+The old "Fl_Cairo_Window support" is still available on all platforms.
 
 
  Configuration
 ---------------
 
-All the changes are *inactive* as long as the new configuration
+Fl_Cairo_Window support is *inactive* as long as the configuration
 option --enable-cairo is not added to the configure command or the CMake
-variable OPTION_CAIRO:BOOL=ON is set.
+variable FLTK_OPTION_CAIRO:BOOL=ON is, even if the new Cairo drawing
+support in FLTK's Wayland and X11 backend is active.
 
 
  Currently supported features
@@ -61,7 +64,7 @@ variable OPTION_CAIRO:BOOL=ON is set.
     transparently a Cairo context to your custom Fl_Window derived class.
     This function is intended to be used in your overloaded draw() method.
 
-(3) FLTK instrumentation for cairo extended use :
+(3) FLTK instrumentation for cairo extended use:
     Adding an optional Cairo autolink context mode support which permits
     complete and automatic synchronization of OS dependent graphical context
     and Cairo contexts, thus furthering a valid Cairo context anytime,
@@ -82,7 +85,7 @@ variable OPTION_CAIRO:BOOL=ON is set.
       in any FLTK window.
 
     This feature must be enabled with 'configure --enable-cairoext' or the
-    CMake variable OPTION_CAIROEXT:BOOL=ON (Default: OFF).
+    CMake variable FLTK_OPTION_CAIROEXT:BOOL=ON (Default: OFF).
 
 (4) A new Cairo demo that is available in the test subdirectory and has
     been used as a testcase during the multiplatform tests.
@@ -107,7 +110,7 @@ on the various supported operating systems.
         sudo apt install libcairo2-dev
 
     Then build fltk using the Cairo support option using:
-      cmake -G"Unix Makefiles" -DOPTION_CAIRO:BOOL=ON -S <fltk_dir> -B <your_build_dir>
+      cmake -G "Unix Makefiles" -D FLTK_OPTION_CAIRO:BOOL=ON -S <fltk_dir> -B <your_build_dir>
       cd <your_build_dir>
       make
 
@@ -156,9 +159,7 @@ on the various supported operating systems.
     Note 1: CMake builds *require* the use of pkg-config.
 
     Note 2: As of Feb 2021 autoconf/configure/make builds require pkg-config
-    as well but there are plans to implement a fallback mechanism so you can
-    build FLTK w/o having to install and use pkg-config. This will be done if
-    possible (but not guaranteed).
+    as well.
 
 
     3.2 Windows
@@ -241,17 +242,7 @@ on the various supported operating systems.
     e.g. 'build' or another folder anywhere else) and click "configure".
     Follow the instructions and select either "native compilers" or Xcode or
     whatever you like to build your FLTK library. In the CMake GUI you need
-    to select OPTION_CAIRO (ON) to build with basic Cairo support. Finally
+    to select FLTK_OPTION_CAIRO (ON) to build with basic Cairo support. Finally
     click "generate" to create the build files.
 
     For more information on using CMake to build FLTK see README.CMake.txt.
-
-
- DOCUMENT HISTORY
-==================
-
-Dec 20 2010 - matt: restructured document
-Dec 09 2011 - greg: Updates for Centos 5.5 builds
-Dec 10 2011 - Albrecht: Updates for Ubuntu and Debian, fixed typos.
-Jul 05 2017 - Albrecht: Added CMake config info, fixed typos.
-Feb 28 2021 - Albrecht: Update for FLTK 1.4, add macOS instructions.

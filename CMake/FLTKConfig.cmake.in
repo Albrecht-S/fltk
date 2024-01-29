@@ -8,7 +8,7 @@
 #
 #  FLTK_VERSION           - FLTK version string ("x.y.z")
 #  FLTK_INCLUDE_DIRS      - FLTK include directories
-#  FLTK_LIBRARIES         - list of FLTK libraries built (not yet implemented)
+#  FLTK_LIBRARIES         - list of built FLTK libraries
 #  FLTK_FLUID_EXECUTABLE  - needed by the function FLTK_RUN_FLUID
 #                           (or the deprecated fltk_wrap_ui() CMake command)
 #
@@ -24,15 +24,31 @@
 
 set (FLTK_VERSION @FLTK_VERSION@)
 
-include (${CMAKE_CURRENT_LIST_DIR}/FLTK-Targets.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FLTK-Targets.cmake)
 
 set (FLTK_INCLUDE_DIRS "@INCLUDE_DIRS@")
+set (FLTK_LIBRARIES "@FLTK_LIBRARIES@")
 
 # for compatibility with CMake's FindFLTK.cmake
 
 set (FLTK_INCLUDE_DIR "${FLTK_INCLUDE_DIRS}")
 
+function (_fltk_make_alias target from)
+  if (TARGET ${from} AND NOT TARGET ${target})
+    # message (STATUS "FLTKConfig.cmake - create alias: ${target} from ${from}")
+    get_target_property(ttype ${from} TYPE)
+    if (ttype STREQUAL "EXECUTABLE")
+      add_executable (${target} ALIAS ${from})
+    else ()
+      add_library (${target} ALIAS ${from})
+    endif ()
+  # else()
+  #   message (STATUS "FLTKConfig.cmake - alias: ${target} from ${from} - not created.")
+  endif ()
+endfunction (_fltk_make_alias target)
+
 if (CMAKE_CROSSCOMPILING)
+
   find_file(FLUID_PATH
     NAMES fluid fluid.exe
     PATHS ENV PATH
@@ -42,7 +58,39 @@ if (CMAKE_CROSSCOMPILING)
   set_target_properties(fluid
     PROPERTIES IMPORTED_LOCATION ${FLUID_PATH}
   )
-  set (FLTK_FLUID_EXECUTABLE ${FLUID_PATH})
+  add_executable(fltk::fluid ALIAS fluid)
+  ## set (FLTK_FLUID_EXECUTABLE ${FLUID_PATH})
+  set (FLTK_FLUID_EXECUTABLE fltk::fluid)
+
 else ()
-  set (FLTK_FLUID_EXECUTABLE fluid)
+
+  if (1)  # Create aliases for libraries and fluid ...
+
+    if (NOT TARGET fltk::fltk)
+      message (FATAL "FLTKConfig.cmake: target fltk::fltk does not exist!")
+    endif ()
+
+    _fltk_make_alias (fltk fltk::fltk)
+    _fltk_make_alias (fltk-shared fltk::fltk-shared)
+
+    _fltk_make_alias (fluid fltk::fluid)
+    _fltk_make_alias (fluid-shared fltk::fluid-shared)
+
+    foreach(target cairo forms gl images jpeg png z)
+      _fltk_make_alias (fltk_${target} fltk::${target})
+      _fltk_make_alias (fltk_${target}-shared fltk::${target}-shared)
+    endforeach()
+
+  endif () # Creating aliases ...
+
+  # set FLTK_FLUID_EXECUTABLE
+
+  if (TARGET fltk::fluid)
+    set (FLTK_FLUID_EXECUTABLE fltk::fluid)
+  else ()
+    set (FLTK_FLUID_EXECUTABLE fluid)
+  endif ()
+
 endif (CMAKE_CROSSCOMPILING)
+
+# message (STATUS "FLTKConfig.cmake: FLTK_FLUID_EXECUTABLE = '${FLTK_FLUID_EXECUTABLE}'")

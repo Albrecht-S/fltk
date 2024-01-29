@@ -22,9 +22,9 @@ set (HEADERFILES
 )
 
 set (FLTK_OPTIONS_TARGETS fltk-options)  # fltk-options and optional fltk-options-cmd target
-set (FLTK_OPTIONS_LIBS fltk)  # libraries used to link fltk-options executables
+set (FLTK_OPTIONS_LIBS fltk::fltk)       # libraries used to link fltk-options executables
 
-if (APPLE AND (NOT OPTION_APPLE_X11))
+if (APPLE AND (NOT FLTK_APPLE_X11))
 
   # macOS
 
@@ -56,12 +56,7 @@ if (FLTK_HAVE_CAIRO)
   target_link_directories (fltk-options PRIVATE ${PKG_CAIRO_LIBRARY_DIRS})
 endif (FLTK_HAVE_CAIRO)
 
-if (USE_GDIPLUS)        # can only be true on Windows
-  list (APPEND FLTK_OPTIONS_LIBS gdiplus)
-endif (USE_GDIPLUS)
-
-target_link_libraries (fltk-options ${FLTK_OPTIONS_LIBS})
-
+target_link_libraries (fltk-options PRIVATE ${FLTK_OPTIONS_LIBS})
 
 # Add fltk-options-cmd console app (Windows only) for editing FLTK options.
 # This is done for all Windows targets, even if cross-compiling.
@@ -69,7 +64,7 @@ target_link_libraries (fltk-options ${FLTK_OPTIONS_LIBS})
 if (WIN32)
   list (APPEND FLTK_OPTIONS_TARGETS fltk-options-cmd)
   add_executable (fltk-options-cmd ${CPPFILES} ${HEADERFILES})
-  target_link_libraries (fltk-options-cmd ${FLTK_OPTIONS_LIBS})
+  target_link_libraries (fltk-options-cmd PRIVATE ${FLTK_OPTIONS_LIBS})
   if (FLTK_HAVE_CAIRO)
     target_link_directories (fltk-options-cmd PRIVATE ${PKG_CAIRO_LIBRARY_DIRS})
   endif (FLTK_HAVE_CAIRO)
@@ -78,7 +73,7 @@ endif ()
 
 # install fltk-options GUI and commandline tool
 
-if (APPLE AND (NOT OPTION_APPLE_X11))
+if (APPLE AND (NOT FLTK_APPLE_X11))
 
   # On macOS, fltk-options must be installed twice. The bundled version of
   # fltk-options needs to go into the /Applications folder to make it visible
@@ -115,7 +110,7 @@ else()
     ARCHIVE DESTINATION ${FLTK_LIBDIR}
   )
 
-  endif (APPLE AND (NOT OPTION_APPLE_X11))
+  endif (APPLE AND (NOT FLTK_APPLE_X11))
 
 # install desktop files
 
@@ -129,7 +124,7 @@ if (UNIX)
   )
 
   # Install desktop icons
-  foreach (icon 32 48 64 128)
+  foreach(icon 32 48 64 128)
     install (FILES icons/fltk-options-${icon}.png
       DESTINATION ${FLTK_DATADIR}/icons/hicolor/${icon}x${icon}/apps
       RENAME fltk-options.png

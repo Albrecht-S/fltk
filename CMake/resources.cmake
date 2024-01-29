@@ -1,8 +1,8 @@
 #
 # Resource definitions to build the FLTK project using CMake (www.cmake.org)
-# Written by Michael Surette
+# Originally written by Michael Surette
 #
-# Copyright 1998-2021 by Bill Spitzak and others.
+# Copyright 1998-2024 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -26,10 +26,10 @@
 
 set (CMAKE_REQUIRED_QUIET 1)
 
-include (CheckIncludeFiles)
+include(CheckIncludeFiles)
 
 macro (fl_find_header VAR HEADER)
-  check_include_files ("${HEADER}" ${VAR})
+  check_include_files("${HEADER}" ${VAR})
   if (NOT CMAKE_REQUIRED_QUIET)
     fl_debug_var (${VAR})
   endif (NOT CMAKE_REQUIRED_QUIET)
@@ -39,7 +39,7 @@ endmacro (fl_find_header)
 # Include FindPkgConfig for later use of pkg-config
 #######################################################################
 
-include (FindPkgConfig)
+include(FindPkgConfig)
 
 # fl_debug_var (PKG_CONFIG_FOUND)
 # fl_debug_var (PKG_CONFIG_EXECUTABLE)
@@ -52,6 +52,9 @@ include (FindPkgConfig)
 if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "FreeBSD")
   list (APPEND CMAKE_REQUIRED_INCLUDES /usr/local/include)
 endif (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "FreeBSD")
+
+# fl_debug_var (CMAKE_HOST_SYSTEM_NAME)
+# fl_debug_var (CMAKE_REQUIRED_INCLUDES)
 
 fl_find_header (HAVE_ALSA_ASOUNDLIB_H alsa/asoundlib.h)
 fl_find_header (HAVE_DLFCN_H dlfcn.h)
@@ -148,7 +151,7 @@ find_path (FREETYPE_PATH freetype.h PATH_SUFFIXES freetype2)
 find_path (FREETYPE_PATH freetype/freetype.h PATH_SUFFIXES freetype2)
 
 if (FREETYPE_PATH)
-  include_directories (${FREETYPE_PATH})
+  list (APPEND FLTK_BUILD_INCLUDE_DIRECTORIES ${FREETYPE_PATH})
 endif (FREETYPE_PATH)
 
 mark_as_advanced (FREETYPE_PATH)
@@ -156,9 +159,9 @@ mark_as_advanced (FREETYPE_PATH)
 #######################################################################
 # libraries
 find_library (LIB_dl dl)
-if ((NOT APPLE) OR OPTION_APPLE_X11)
+if ((NOT APPLE) OR FLTK_APPLE_X11)
   find_library (LIB_fontconfig fontconfig)
-endif ((NOT APPLE) OR OPTION_APPLE_X11)
+endif ((NOT APPLE) OR FLTK_APPLE_X11)
 find_library (LIB_freetype freetype)
 find_library (LIB_GL GL)
 find_library (LIB_MesaGL MesaGL)
@@ -173,7 +176,7 @@ mark_as_advanced (LIB_jpeg LIB_png LIB_zlib)
 
 #######################################################################
 # functions
-include (CheckFunctionExists)
+include(CheckFunctionExists)
 
 # save CMAKE_REQUIRED_LIBRARIES (is this really necessary ?)
 if (DEFINED CMAKE_REQUIRED_LIBRARIES)

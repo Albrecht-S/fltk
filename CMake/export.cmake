@@ -2,7 +2,7 @@
 # Export CMake file to build the FLTK project using CMake (www.cmake.org)
 # Originally written by Michael Surette
 #
-# Copyright 1998-2022 by Bill Spitzak and others.
+# Copyright 1998-2024 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -42,7 +42,10 @@ else ()
 endif (FLTK_BUILD_FLUID AND NOT CMAKE_CROSSCOMPILING)
 
 # generate FLTK-Targets.cmake for build directory use
-export (TARGETS ${FLUID_EXPORT} ${FLTK_LIBRARIES} FILE ${CMAKE_CURRENT_BINARY_DIR}/FLTK-Targets.cmake)
+export (TARGETS
+        ${FLUID_EXPORT} ${FLTK_LIBRARIES}
+        NAMESPACE fltk::
+        FILE ${CMAKE_CURRENT_BINARY_DIR}/FLTK-Targets.cmake)
 
 # generate FLTK-Functions.cmake for build directory use
 configure_file (
@@ -121,7 +124,7 @@ configure_file(
   @ONLY
 )
 
-if (OPTION_CREATE_LINKS)
+if (FLTK_INSTALL_LINKS)
   # Set PREFIX_INCLUDE to the proper value.
   if (IS_ABSOLUTE ${FLTK_INCLUDEDIR})
     set (PREFIX_INCLUDE ${FLTK_INCLUDEDIR})
@@ -132,4 +135,4 @@ if (OPTION_CREATE_LINKS)
     "${CMAKE_CURRENT_SOURCE_DIR}/CMake/install-symlinks.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/install-symlinks.cmake"
     @ONLY)
-endif (OPTION_CREATE_LINKS)
+endif (FLTK_INSTALL_LINKS)

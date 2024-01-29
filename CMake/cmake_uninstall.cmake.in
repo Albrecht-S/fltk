@@ -21,7 +21,7 @@ if (NOT EXISTS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt")
 endif ()
 
 file (READ "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt" files)
-string (REGEX REPLACE "\n" ";" files "${files}")
+string(REGEX REPLACE "\n" ";" files "${files}")
 
 # Note 1: 'cmake -E remove [-f]' is deprecated since CMake 3.17 and the docs
 # state: "The implementation was buggy and always returned 0. It cannot be
@@ -36,7 +36,7 @@ else ()
   set (rm_cmd rm)
 endif ()
 
-foreach (file ${files})
+foreach(file ${files})
   message(STATUS "Uninstalling \"$ENV{DESTDIR}${file}\"")
   execute_process(
     COMMAND "${CMAKE_COMMAND}" -E ${rm_cmd} -f "$ENV{DESTDIR}${file}"
@@ -53,4 +53,4 @@ foreach (file ${files})
     message (FATAL_ERROR "Exiting with fatal error.")
   endif ()
 
-endforeach (file)
+endforeach(file)

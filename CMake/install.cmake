@@ -2,7 +2,7 @@
 # Installation support for building the FLTK project using CMake (www.cmake.org)
 # Originally written by Michael Surette
 #
-# Copyright 1998-2022 by Bill Spitzak and others.
+# Copyright 1998-2024 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -44,9 +44,9 @@ install (DIRECTORY
     PATTERN "*.[hH]"
 )
 
-if (OPTION_CREATE_LINKS)
+if (FLTK_INSTALL_LINKS)
   install (SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/install-symlinks.cmake)
-endif (OPTION_CREATE_LINKS)
+endif (FLTK_INSTALL_LINKS)
 
 # generate FLTKConfig.cmake for installed directory use
 set (INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
@@ -59,6 +59,7 @@ set (CONFIG_PATH ${CMAKE_INSTALL_PREFIX}/${FLTK_CONFIG_PATH})
 install (EXPORT FLTK-Targets
   DESTINATION ${FLTK_CONFIG_PATH}
   FILE FLTK-Targets.cmake
+  NAMESPACE fltk::
 )
 
 configure_file(
