@@ -153,7 +153,7 @@ function (fl_add_library LIBNAME LIBTYPE SOURCES)
       $<INSTALL_INTERFACE:lib>
     )
 
-    if(APPLE AND NOT FLTK_APPLE_X11)
+    if(APPLE AND NOT FLTK_BACKEND_X11)
       target_link_libraries(${TARGET_NAME} PUBLIC "-framework Cocoa")
     endif()
 

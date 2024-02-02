@@ -24,7 +24,7 @@ set (HEADERFILES
 set (FLTK_OPTIONS_TARGETS fltk-options)  # fltk-options and optional fltk-options-cmd target
 set (FLTK_OPTIONS_LIBS fltk::fltk)       # libraries used to link fltk-options executables
 
-if (APPLE AND (NOT FLTK_APPLE_X11))
+if (APPLE AND (NOT FLTK_BACKEND_X11))
 
   # macOS
 
@@ -73,7 +73,7 @@ endif ()
 
 # install fltk-options GUI and commandline tool
 
-if (APPLE AND (NOT FLTK_APPLE_X11))
+if (APPLE AND (NOT FLTK_BACKEND_X11))
 
   # On macOS, fltk-options must be installed twice. The bundled version of
   # fltk-options needs to go into the /Applications folder to make it visible
@@ -110,7 +110,7 @@ else()
     ARCHIVE DESTINATION ${FLTK_LIBDIR}
   )
 
-  endif (APPLE AND (NOT FLTK_APPLE_X11))
+  endif (APPLE AND (NOT FLTK_BACKEND_X11))
 
 # install desktop files
 

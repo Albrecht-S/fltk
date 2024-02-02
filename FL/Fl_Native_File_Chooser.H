@@ -108,7 +108,7 @@ class Fl_Native_File_Chooser_Driver;
  not turned off, the \p zenity -based dialog opens. This is expected to be more appropriate
  than other dialog forms for sandboxed apps.
  -# Else if the app runs under the KDE desktop and if command \p kdialog is available at run-time
- and if the library was not built with <tt>cmake -D FLTK_OPTION_USE_KDIALOG=OFF</tt>, the
+ and if the library was not built with <tt>cmake -D FLTK_USE_KDIALOG=OFF</tt>, the
  \p kdialog -based dialog opens.
  -# Else if the GTK library is available at run-time on the computer and if \p Fl::option(OPTION_FNFC_USES_GTK) is
  not turned off, the GTK-styled dialog opens. Call fl_register_images() to add  a "Preview" button to this dialog.

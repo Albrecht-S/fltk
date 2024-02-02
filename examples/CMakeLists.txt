@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt used to build example apps by the CMake build system
 #
-# Copyright 2020-2023 by Bill Spitzak and others.
+# Copyright 2020-2024 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -18,8 +18,8 @@
 include(../CMake/fl_create_example.cmake)
 include(../CMake/FLTK-Functions.cmake)
 
-set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/../bin/examples)
-file (MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/../bin/examples)
+file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 
 ################################################################################
 
@@ -30,7 +30,7 @@ file (MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
 # simple examples w/o extra libs
 ############################################################
 
-set (SIMPLE_SOURCES
+set(SIMPLE_SOURCES
   browser-simple
   callbacks
   chart-simple
@@ -75,7 +75,7 @@ set (SIMPLE_SOURCES
 # simple FLUID examples w/o extra libs
 ############################################################
 
-set (FLUID_SOURCES
+set(FLUID_SOURCES
   fluid-callback
 )
 
@@ -83,7 +83,7 @@ set (FLUID_SOURCES
 # examples requiring fltk_images
 ############################################################
 
-set (IMAGE_SOURCES
+set(IMAGE_SOURCES
   animgifimage
   animgifimage-play
   animgifimage-resize
@@ -95,7 +95,7 @@ set (IMAGE_SOURCES
 # examples requiring cairo
 ############################################################
 
-set (CAIRO_SOURCES
+set(CAIRO_SOURCES
   cairo-draw-x
 )
 
@@ -103,7 +103,7 @@ set (CAIRO_SOURCES
 # examples requiring OpenGL + libGLEW
 ############################################################
 
-set (OPENGL_SOURCES
+set(OPENGL_SOURCES
   OpenGL3-glut-test
   OpenGL3test
 )
@@ -113,7 +113,7 @@ set (OPENGL_SOURCES
 ############################################################
 
 foreach(src ${SIMPLE_SOURCES})
-  fl_create_example (${src} ${src}.cxx fltk)
+  fl_create_example(${src} ${src}.cxx fltk)
 endforeach(src)
 
 ############################################################
@@ -121,7 +121,7 @@ endforeach(src)
 ############################################################
 
 foreach(src ${FLUID_SOURCES})
-  fl_create_example (${src} ${src}.fl fltk)
+  fl_create_example(${src} ${src}.fl fltk)
 endforeach(src)
 
 ############################################################
@@ -129,24 +129,24 @@ endforeach(src)
 ############################################################
 
 foreach(src ${IMAGE_SOURCES})
-  fl_create_example (${src} ${src}.cxx "fltk_images;fltk")
+  fl_create_example(${src} ${src}.cxx "fltk_images;fltk")
 endforeach(src)
 
 ############################################################
 # create example programs requiring cairo
 ############################################################
 
-if (FLTK_HAVE_CAIRO)
-  set (cairo_libs "fltk;cairo")
-  if (TARGET fltk_cairo)
-    set (cairo_libs fltk_cairo ${cairo_libs})
-  endif ()
-else ()
+if(FLTK_HAVE_CAIRO)
+  set(cairo_libs "fltk;cairo")
+  if(TARGET fltk_cairo)
+    set(cairo_libs fltk_cairo ${cairo_libs})
+  endif()
+else()
   set(cairo_libs "fltk")
-endif ()
+endif()
 
 foreach(src ${CAIRO_SOURCES})
-  fl_create_example (${src} ${src}.cxx "${cairo_libs}")
+  fl_create_example(${src} ${src}.cxx "${cairo_libs}")
 endforeach(src)
 
 ############################################################
@@ -155,25 +155,25 @@ endforeach(src)
 
 # Note: macOS does not need libGLEW
 
-if (APPLE AND (NOT FLTK_APPLE_X11))
-  if (NOT LIB_GLEW)
-    set (LIB_GLEW TRUE)
-  endif ()
-  set (REQUIRED_LIBS fltk_gl fltk ${OPENGL_LIBRARIES})
-else ()
-  set (REQUIRED_LIBS fltk_gl fltk ${LIB_GLEW} ${OPENGL_LIBRARIES})
-endif ()
+if(APPLE AND (NOT FLTK_BACKEND_X11))
+  if(NOT LIB_GLEW)
+    set(LIB_GLEW TRUE)
+  endif()
+  set(REQUIRED_LIBS fltk_gl fltk ${OPENGL_LIBRARIES})
+else()
+  set(REQUIRED_LIBS fltk_gl fltk ${LIB_GLEW} ${OPENGL_LIBRARIES})
+endif()
 
-if (OPENGL_FOUND AND LIB_GLEW)
+if(OPENGL_FOUND AND LIB_GLEW)
   foreach(src ${OPENGL_SOURCES})
-    fl_create_example (${src} ${src}.cxx "${REQUIRED_LIBS}")
+    fl_create_example(${src} ${src}.cxx "${REQUIRED_LIBS}")
   endforeach(src)
-else ()
-  message (STATUS
+else()
+  message(STATUS
     "OpenGL or libGLEW not present: OpenGL example programs will not be built.")
-  fl_debug_var (OPENGL_FOUND)
-  fl_debug_var (LIB_GLEW)
-  message ("")
-endif (OPENGL_FOUND AND LIB_GLEW)
+  fl_debug_var(OPENGL_FOUND)
+  fl_debug_var(LIB_GLEW)
+  message("")
+endif(OPENGL_FOUND AND LIB_GLEW)
 
-unset (REQUIRED_LIBS)
+unset(REQUIRED_LIBS)

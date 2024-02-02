@@ -128,13 +128,28 @@ FLTK_ABI_VERSION - default EMPTY
     Please see README.abi-version.txt for more information about which
     ABI version to select.
 
-FLTK_APPLE_X11 - default OFF
-    Build FLTK to use X11 on macOS which requires XQuartz or a similar X11
-    installation. The build is tested only with XQuartz. Use this only
-    if you know what you do, and if you have installed X11.
-
 FLTK_ARCHFLAGS - default EMPTY
     Extra architecture flags.
+
+FLTK_BACKEND_WAYLAND - default ON (only Unix/Linux)
+    Enable the Wayland backend for all window operations, Cairo for all
+    graphics and Pango for text drawing (Linux+FreeBSD only). Resulting FLTK
+    apps use Wayland when a Wayland compositor is available at runtime,
+    and use X11 for their window operations otherwise (unless FLTK_BACKEND_X11
+    is OFF), but keep using Cairo and Pango - see README.Wayland.txt.
+    If FLTK_BACKEND_X11 has been turned OFF and there is no Wayland compositor
+    at runtime, then FLTK programs fail to start.
+
+FLTK_BACKEND_X11 - default ON on Unix/Linux, OFF elsewhere (Windows, macOS).
+    Enable or disable the X11 backend on platforms that support it.
+    - Unix/Linux: this can be used to disable the X11 backend when building
+      with Wayland support, otherwise this option must be ON.
+    - macOS: enable the X11 backend instead of standard system graphics.
+      This requires XQuartz or a similar X11 installation. This option is
+      tested only with XQuartz. Use this only if you know what you do and
+      if you have installed X11.
+    - Windows/Cygwin: enable X11 backend for Cygwin platforms. This option
+      is currently (as of FLTK 1.4.0) not supported on Windows.
 
 FLTK_BUILD_EXAMPLES - default OFF
     Builds the example programs in the 'examples' directory.
@@ -186,42 +201,42 @@ FLTK_OPTION_PRINT_SUPPORT - default ON
     When turned off, the Fl_Printer class does nothing and the
     Fl_PostScript_File_Device class cannot be used, but the FLTK library
     is somewhat smaller. This option makes sense only on the Unix/Linux
-    platform or when FLTK_APPLE_X11 is ON.
+    platform or on macOS when FLTK_BACKEND_X11 is ON.
 
 FLTK_OPTION_USE_CAIRO - default OFF
     Makes all drawing operations use the Cairo library (rather than Xlib)
-    producing antialiased graphics (X11 platform, implies FLTK_OPTION_USE_PANGO).
+    producing antialiased graphics (X11 platform, implies FLTK_USE_PANGO).
     When using Wayland this option is ignored. Wayland always uses Cairo.
 
-FLTK_OPTION_USE_GDIPLUS - default ON (Windows only).
+FLTK_USE_GDIPLUS - default ON (Windows only).
     Makes FLTK use GDI+ to draw oblique lines and curves resulting in
     antialiased graphics.
 
-FLTK_OPTION_USE_GL - default ON
+FLTK_USE_GL - default ON
     Enables OpenGL support.
 
-FLTK_OPTION_USE_KDIALOG - default ON
+FLTK_USE_KDIALOG - default ON
     Under the KDE desktop, allows class Fl_Native_File_Chooser to use the
     kdialog utility program to construct its file dialog windows, when that
     utility is available at run time on the system. This option makes sense
     only under X11 or Wayland.
 
-FLTK_OPTION_USE_PANGO - default OFF (see note below)
+FLTK_USE_PANGO - default OFF (see note below)
     Enables use of the Pango library for drawing text. Pango supports all
     unicode-defined scripts and gives FLTK limited support of right-to-left
     scripts. This option makes sense only under X11 or Wayland, and also
     requires Xft.
     Note: Turned ON if Wayland or FLTK_OPTION_USE_CAIRO is enabled.
 
-FLTK_OPTION_USE_POLL - default OFF
+FLTK_USE_POLL - default OFF
     Deprecated: don't turn this option ON.
 
-FLTK_OPTION_USE_PTHREADS - default ON except on Windows.
+FLTK_USE_PTHREADS - default ON except on Windows.
     Enables multithreaded support with pthreads if available.
     This option is ignored (switched OFF internally) on Windows except
     when using Cygwin.
 
-FLTK_OPTION_USE_STD - default OFF
+FLTK_OPTION_STD - default OFF
     This option allows FLTK to use some specific features of modern C++
     like std::string in the public API of FLTK 1.4.x. Users turning this
     option ON can benefit from some new functions and methods that return
@@ -229,32 +244,24 @@ FLTK_OPTION_USE_STD - default OFF
     This option will be removed in the next minor (1.5.0) or major release
     which will default to use std::string and other modern C++ features.
 
-FLTK_OPTION_USE_SVG - default ON
+FLTK_OPTION_SVG - default ON
     FLTK has a built-in SVG library and can create (write) SVG image files.
     Turning this option off disables SVG (read and write) support.
 
-FLTK_OPTION_USE_XCURSOR  - default ON
-FLTK_OPTION_USE_XFIXES   - default ON
-FLTK_OPTION_USE_XFT      - default ON
-FLTK_OPTION_USE_XINERAMA - default ON
-FLTK_OPTION_USE_XRENDER  - default ON
+FLTK_USE_XCURSOR  - default ON
+FLTK_USE_XFIXES   - default ON
+FLTK_USE_XFT      - default ON
+FLTK_USE_XINERAMA - default ON
+FLTK_USE_XRENDER  - default ON
     These are X11 extended libraries. These libs are used if found on the
     build system unless the respective option is turned off.
 
-FLTK_OPTION_WAYLAND - default ON
-    Enables the use of Wayland for all window operations, of Cairo for all
-    graphics and of Pango for text drawing (Linux+FreeBSD only). Resulting FLTK
-    apps use Wayland when a Wayland compositor is available at run-time,
-    and use X11 for their window operations otherwise, but keep using
-    Cairo and Pango - see README.Wayland.txt.
-
-FLTK_OPTION_WAYLAND_GTK - default ON
+FLTK_BACKEND_WAYLAND_GTK - default ON
     Allow to use libdecor's GTK plugin to draw window titlebars (Wayland only).
     Otherwise, FLTK will not use GTK and apps will not need linking to GTK.
 
-FLTK_OPTION_WAYLAND_ONLY - default OFF
-    In conjunction with FLTK_OPTION_WAYLAND, restricts FLTK to support the
-    Wayland backend only.
+FLTK_BACKEND_WAYLAND_ONLY - obsolete
+    Please set FLTK_BACKEND_WAYLAND=ON and FLTK_BACKEND_X11=OFF instead.
 
 FLTK_USE_SYSTEM_LIBDECOR - default ON (Wayland only)
     This option makes FLTK use package libdecor-0-dev to draw window titlebars

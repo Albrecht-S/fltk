@@ -58,11 +58,11 @@ function (fl_create_example NAME SOURCES LIBRARIES)
 
   # create macOS bundle? 0 = no, 1 = yes
 
-  if (APPLE AND (NOT FLTK_APPLE_X11))
+  if (APPLE AND NOT FLTK_BACKEND_X11)
     set (MAC_BUNDLE 1)
   else ()
     set (MAC_BUNDLE 0)
-  endif (APPLE AND (NOT FLTK_APPLE_X11))
+  endif ()
 
   # filter input files for different handling (fluid, icon, plist, source)
 

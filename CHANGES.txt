@@ -138,20 +138,20 @@ Changes in FLTK 1.4.0                            Released: ??? ?? 2024
     which allows to draw most scripts supported by Unicode, including CJK
     and right-to-left scripts. FLTK now outputs PostScript that draws
     those scripts in vectorial form. The corresponding CMake option is
-    FLTK_OPTION_USE_PANGO. The corresponding configure option is --enable-pango.
+    FLTK_USE_PANGO. The corresponding configure option is --enable-pango.
     This option is OFF by default.
   - Configure option --enable-wayland allows to build the FLTK library for
     the new Wayland platform while remaining compatible with X11. The
-    corresponding CMake option is FLTK_OPTION_WAYLAND. This option is ON by default.
+    corresponding CMake option is FLTK_BACKEND_WAYLAND. This option is ON by default.
   - Configure options --enable-wayland --disable-x11 used together allow to
     build FLTK for the Wayland backend only (no x11 backend). Under CMake, the
-    equivalent is to set both FLTK_OPTION_WAYLAND and FLTK_OPTION_WAYLAND_ONLY.
+    equivalent option is to set FLTK_BACKEND_WAYLAND=ON and FLTK_BACKEND_X11=OFF.
   - The new configure option --disable-gdiplus removes the possibility to draw
     antialiased lines and curves on the Windows platform. The corresponding CMake
-    option is FLTK_OPTION_USE_GDIPLUS.
+    option is FLTK_USE_GDIPLUS.
   - The library can be built without support for reading SVG images or writing
     graphics in SVG format using the --disable-svg configure option
-    or turning off FLTK_OPTION_USE_SVG in CMake.
+    or turning off FLTK_OPTION_SVG in CMake.
   - The library can be built without support for PostScript, thus reducing
     its size, using the --disable-print configure option or turning off
     FLTK_OPTION_PRINT_SUPPORT in CMake. That makes classes Fl_PostScript_File_Device,
