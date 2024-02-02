@@ -37,13 +37,13 @@
 
 function (fl_expand_name out in min_len)
   string(LENGTH "${in}" len)
-  if (len LESS min_len)
-    set (spaces "                         ")
-    set (temp "${in}")
-    set (temp "${in}${spaces}${spaces}")
+  if(len LESS min_len)
+    set(spaces "                         ")
+    set(temp "${in}")
+    set(temp "${in}${spaces}${spaces}")
     string(SUBSTRING "${temp}" 0 ${min_len} temp)
-    set (${out} "${temp}" PARENT_SCOPE)
-  endif ()
+    set(${out} "${temp}" PARENT_SCOPE)
+  endif()
 endfunction (fl_expand_name)
 
 #######################################################################
@@ -65,9 +65,9 @@ endfunction (fl_expand_name)
 #######################################################################
 
 function (fl_debug_var name)
-  set (var "${name}")
+  set(var "${name}")
   fl_expand_name(var "${name}" 40)
-  message (STATUS "${var} = '${${name}}'")
+  message(STATUS "${var} = '${${name}}'")
 endfunction (fl_debug_var)
 
 
@@ -91,25 +91,25 @@ endfunction (fl_debug_var)
 #######################################################################
 
 function (fl_debug_target name)
-  message (STATUS "+++ fl_debug_target (${name})")
-  set (var "${name}")
+  message(STATUS "+++ fl_debug_target (${name})")
+  set(var "${name}")
   fl_expand_name(var "${name}" 40)
-  if (TARGET ${name})
-    message (STATUS "${var} = <target>")
+  if(TARGET ${name})
+    message(STATUS "${var} = <target>")
     foreach(prop
               ALIASED_TARGET
               INTERFACE_INCLUDE_DIRECTORIES
               INTERFACE_LINK_DIRECTORIES
               INTERFACE_LINK_LIBRARIES)
       get_target_property (${prop} ${name} ${prop})
-      if (NOT ${prop})
-        set (${prop} "")
-      endif ()
-      fl_debug_var (${prop})
+      if(NOT ${prop})
+        set(${prop} "")
+      endif()
+      fl_debug_var(${prop})
     endforeach()
-  else ()
-    message (STATUS "${var} = <not a target>")
-  endif ()
-  message (STATUS "")
+  else()
+    message(STATUS "${var} = <not a target>")
+  endif()
+  message(STATUS "")
 
 endfunction (fl_debug_target)

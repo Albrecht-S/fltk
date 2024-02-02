@@ -14,37 +14,37 @@
 #     https://www.fltk.org/bugs.php
 #
 
-set (DOCS)
-set (GENERATE_DOCS FALSE)
-set (GIT_REVISION "")
-set (YEAR "")
-set (CURRENT_DATE "")
+set(DOCS)
+set(GENERATE_DOCS FALSE)
+set(GIT_REVISION "")
+set(YEAR "")
+set(CURRENT_DATE "")
 
-if (FLTK_BUILD_HTML_DOCUMENTATION OR FLTK_BUILD_PDF_DOCUMENTATION)
-  set (GENERATE_DOCS TRUE)
-endif ()
+if(FLTK_BUILD_HTML_DOCUMENTATION OR FLTK_BUILD_PDF_DOCUMENTATION)
+  set(GENERATE_DOCS TRUE)
+endif()
 
-if (FLTK_INCLUDE_DRIVER_DOCUMENTATION)
-  set (DRIVER_DOCS "DriverDev")
-else ()
-  set (DRIVER_DOCS "")
-endif ()
+if(FLTK_INCLUDE_DRIVER_DOCUMENTATION)
+  set(DRIVER_DOCS "DriverDev")
+else()
+  set(DRIVER_DOCS "")
+endif()
 
 #------------------------------------------------
 # generate files used for both HTML and PDF docs
 #------------------------------------------------
 
-if (GENERATE_DOCS)
+if(GENERATE_DOCS)
 
   # create required variables
 
-  execute_process (COMMAND date "+%Y"
+  execute_process(COMMAND date "+%Y"
     OUTPUT_VARIABLE YEAR
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
   # note: current locale is used for abbreviated month
-  execute_process (COMMAND date "+%b %d, %Y"
+  execute_process(COMMAND date "+%b %d, %Y"
     OUTPUT_VARIABLE CURRENT_DATE
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
@@ -56,7 +56,7 @@ if (GENERATE_DOCS)
   #        In the future tarball/zip generation should create a file
   #        that contains the git revision.
 
-  execute_process (COMMAND
+  execute_process(COMMAND
     git --git-dir=${FLTK_SOURCE_DIR}/.git rev-parse --short=10 HEAD
     OUTPUT_VARIABLE GIT_REVISION
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -64,8 +64,8 @@ if (GENERATE_DOCS)
   )
 
   # set to "'unkown'" if git is not available
-  if (GIT_REVISION STREQUAL "")
-    set (GIT_REVISION "'unkown'")
+  if(GIT_REVISION STREQUAL "")
+    set(GIT_REVISION "'unkown'")
   endif()
 
   # Find "short" doxygen version if it was built from Git
@@ -75,56 +75,56 @@ if (GENERATE_DOCS)
   #       code once we require this as our minimal version and replace the
   #       variable DOXYGEN_VERSION_SHORT with DOXYGEN_VERSION below.
 
-  if (DOXYGEN_FOUND)
+  if(DOXYGEN_FOUND)
     # strip trailing git revision if doxygen was built from source
     string(REGEX REPLACE " .*$" "" DOXYGEN_VERSION_SHORT ${DOXYGEN_VERSION})
-  endif (DOXYGEN_FOUND)
+  endif(DOXYGEN_FOUND)
 
   # configure copyright.dox (includes current year)
-  configure_file (
+  configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/copyright.dox.in
     ${CMAKE_CURRENT_BINARY_DIR}/copyright.dox
     @ONLY
   )
 
   # configure generated.dox (includes date and versions)
-  configure_file (
+  configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/generated.dox.in
     ${CMAKE_CURRENT_BINARY_DIR}/generated.dox
     @ONLY
   )
 
-  if (0) # debug
-    fl_debug_var (YEAR)
-    fl_debug_var (CURRENT_DATE)
-    fl_debug_var (GIT_REVISION)
-    fl_debug_var (DOXYGEN_FOUND)
-    fl_debug_var (DOXYGEN_EXECUTABLE)
-    fl_debug_var (DOXYGEN_VERSION)
-    fl_debug_var (DOXYGEN_VERSION_SHORT)
-  endif ()
+  if(0) # debug
+    fl_debug_var(YEAR)
+    fl_debug_var(CURRENT_DATE)
+    fl_debug_var(GIT_REVISION)
+    fl_debug_var(DOXYGEN_FOUND)
+    fl_debug_var(DOXYGEN_EXECUTABLE)
+    fl_debug_var(DOXYGEN_VERSION)
+    fl_debug_var(DOXYGEN_VERSION_SHORT)
+  endif()
 
-endif (GENERATE_DOCS)
+endif(GENERATE_DOCS)
 
 #--------------------------
 # build html documentation
 #--------------------------
 
-if (FLTK_BUILD_HTML_DOCUMENTATION)
+if(FLTK_BUILD_HTML_DOCUMENTATION)
 
-  list (APPEND DOCS html)
+  list(APPEND DOCS html)
 
   # generate Doxygen file "Doxyfile"
 
-  set (GENERATE_HTML  YES)
-  set (GENERATE_LATEX NO)
-  set (LATEX_HEADER   "")
-  set (DOXYFILE       "Doxyfile")
-  set (LOGFILE        "${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}_error.log")
+  set(GENERATE_HTML  YES)
+  set(GENERATE_LATEX NO)
+  set(LATEX_HEADER   "")
+  set(DOXYFILE       "Doxyfile")
+  set(LOGFILE        "${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}_error.log")
 
   # configure Doxygen input file for HTML docs (Doxyfile.in)
 
-  configure_file (
+  configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     ${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}.in
     @ONLY
@@ -132,7 +132,7 @@ if (FLTK_BUILD_HTML_DOCUMENTATION)
 
   # convert Doxyfile to used doxygen version
 
-  add_custom_command (
+  add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/convert_doxyfile
@@ -146,34 +146,34 @@ if (FLTK_BUILD_HTML_DOCUMENTATION)
 
   # generate HTML documentation
 
-  add_custom_target (html
+  add_custom_target(html
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE}
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating HTML documentation" VERBATIM
   )
 
-endif (FLTK_BUILD_HTML_DOCUMENTATION)
+endif(FLTK_BUILD_HTML_DOCUMENTATION)
 
 #--------------------------
 # build pdf documentation
 #--------------------------
 
-if (FLTK_BUILD_PDF_DOCUMENTATION)
+if(FLTK_BUILD_PDF_DOCUMENTATION)
 
-  list (APPEND DOCS pdf)
+  list(APPEND DOCS pdf)
 
   # generate Doxygen input file "Doxybook"
 
-  set (GENERATE_HTML  NO)
-  set (GENERATE_LATEX YES)
-  set (LATEX_HEADER   "${CMAKE_CURRENT_BINARY_DIR}/fltk-book.tex")
-  set (DOXYFILE       "Doxybook")
-  set (LOGFILE        "${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}_error.log")
+  set(GENERATE_HTML  NO)
+  set(GENERATE_LATEX YES)
+  set(LATEX_HEADER   "${CMAKE_CURRENT_BINARY_DIR}/fltk-book.tex")
+  set(DOXYFILE       "Doxybook")
+  set(LOGFILE        "${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}_error.log")
 
   # configure Doxygen input file for PDF docs (Doxybook.in)
 
-  configure_file (
+  configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
     ${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}.in
     @ONLY
@@ -181,7 +181,7 @@ if (FLTK_BUILD_PDF_DOCUMENTATION)
 
   # convert Doxybook to current doxygen version
 
-  add_custom_command (
+  add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${DOXYFILE}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/convert_doxyfile
@@ -195,7 +195,7 @@ if (FLTK_BUILD_PDF_DOCUMENTATION)
 
   # generate LaTeX title fltk-title.tex
 
-  configure_file (
+  configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/fltk-title.tex.in
     ${CMAKE_CURRENT_BINARY_DIR}/fltk-title.tex
     @ONLY
@@ -203,7 +203,7 @@ if (FLTK_BUILD_PDF_DOCUMENTATION)
 
   # generate fltk.pdf
 
-  add_custom_command (
+  add_custom_command(
     OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/fltk.pdf
     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/make_header
             ${DOXYGEN_EXECUTABLE}
@@ -220,40 +220,40 @@ if (FLTK_BUILD_PDF_DOCUMENTATION)
 
   # add target 'pdf'
 
-  add_custom_target (pdf
+  add_custom_target(pdf
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/fltk.pdf
   )
 
-endif (FLTK_BUILD_PDF_DOCUMENTATION)
+endif(FLTK_BUILD_PDF_DOCUMENTATION)
 
 #----------------------------------
 # add target 'docs' for all docs
 #----------------------------------
 
-if (DOCS)
+if(DOCS)
 
-  add_custom_target (docs
+  add_custom_target(docs
     DEPENDS ${DOCS}
   )
 
-endif (DOCS)
+endif(DOCS)
 
 #----------------------------------
 # install html + pdf documentation
 #----------------------------------
 
-if (FLTK_INSTALL_HTML_DOCUMENTATION AND FLTK_BUILD_HTML_DOCUMENTATION)
+if(FLTK_INSTALL_HTML_DOCUMENTATION AND FLTK_BUILD_HTML_DOCUMENTATION)
 
-  install (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
     DESTINATION ${FLTK_DATADIR}/doc/fltk
   )
 
-endif (FLTK_INSTALL_HTML_DOCUMENTATION AND FLTK_BUILD_HTML_DOCUMENTATION)
+endif(FLTK_INSTALL_HTML_DOCUMENTATION AND FLTK_BUILD_HTML_DOCUMENTATION)
 
-if (FLTK_INSTALL_PDF_DOCUMENTATION AND FLTK_BUILD_PDF_DOCUMENTATION)
+if(FLTK_INSTALL_PDF_DOCUMENTATION AND FLTK_BUILD_PDF_DOCUMENTATION)
 
-  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/fltk.pdf
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fltk.pdf
     DESTINATION ${FLTK_DATADIR}/doc/fltk/
   )
 
-endif (FLTK_INSTALL_PDF_DOCUMENTATION AND FLTK_BUILD_PDF_DOCUMENTATION)
+endif(FLTK_INSTALL_PDF_DOCUMENTATION AND FLTK_BUILD_PDF_DOCUMENTATION)

@@ -41,7 +41,7 @@
 
 function (fl_add_library LIBNAME LIBTYPE SOURCES)
 
-  # message (STATUS "Building library  **************** ${LIBNAME} ${LIBTYPE}")
+  # message(STATUS "Building library  **************** ${LIBNAME} ${LIBTYPE}")
 
   set(suffix "")
   if(LIBTYPE STREQUAL "SHARED")
@@ -101,7 +101,7 @@ function (fl_add_library LIBNAME LIBTYPE SOURCES)
   # Set PUBLIC include and linker directories
 
   if(0) # DEBUG
-    message (STATUS "fl_add_library and alias         : fltk::${alias_name} ALIAS ${TARGET_NAME}")
+    message(STATUS "fl_add_library and alias         : fltk::${alias_name} ALIAS ${TARGET_NAME}")
     fl_debug_var(TARGET_NAME)
     fl_debug_var(FLTK_INCLUDE_DIRS)
     fl_debug_var(CMAKE_CURRENT_BINARY_DIR)
@@ -159,7 +159,7 @@ function (fl_add_library LIBNAME LIBTYPE SOURCES)
 
     # we must link fltk with cairo if Cairo or Wayland is enabled (or both)
     if(FLTK_HAVE_CAIRO OR FLTK_USE_CAIRO)
-      target_include_directories (${TARGET_NAME} PUBLIC ${PKG_CAIRO_INCLUDE_DIRS})
+      target_include_directories(${TARGET_NAME} PUBLIC ${PKG_CAIRO_INCLUDE_DIRS})
       target_link_directories(${TARGET_NAME} PUBLIC ${PKG_CAIRO_LIBRARY_DIRS})
     endif()
 
@@ -180,7 +180,7 @@ function (fl_add_library LIBNAME LIBTYPE SOURCES)
   # Set additional target properties for shared (dynamic) libraries (DLL's)
 
   if(LIBTYPE STREQUAL "SHARED")
-    set_target_properties (${TARGET_NAME} PROPERTIES
+    set_target_properties(${TARGET_NAME} PROPERTIES
       VERSION             ${FLTK_VERSION}
       SOVERSION           ${FLTK_VERSION_MAJOR}.${FLTK_VERSION_MINOR}
       OUTPUT_NAME         ${LIBNAME}
@@ -190,7 +190,7 @@ function (fl_add_library LIBNAME LIBTYPE SOURCES)
     )
     # Visual Studio only:
     if(MSVC)
-      set_target_properties (${TARGET_NAME} PROPERTIES
+      set_target_properties(${TARGET_NAME} PROPERTIES
         OUTPUT_NAME         ${LIBNAME}_dll
         OUTPUT_NAME_DEBUG   ${LIBNAME}_dlld
         OUTPUT_NAME_RELEASE ${LIBNAME}_dll
@@ -209,37 +209,37 @@ function (fl_add_library LIBNAME LIBTYPE SOURCES)
     get_target_property (XX_ONAME_RELEASE ${TARGET_NAME} OUTPUT_NAME_RELEASE)
     get_target_property (XX_EXPORT_NAME   ${TARGET_NAME} EXPORT_NAME)
 
-    message (STATUS "--- DEBUG_ONAME ---")
+    message(STATUS "--- DEBUG_ONAME ---")
     fl_debug_var(TARGET_NAME)
     fl_debug_var(XX_NAME)
     fl_debug_var(XX_ONAME)
     fl_debug_var(XX_ONAME_DEBUG)
     fl_debug_var(XX_ONAME_RELEASE)
     fl_debug_var(XX_EXPORT_NAME)
-    message (STATUS "--- /DEBUG_ONAME ---")
+    message(STATUS "--- /DEBUG_ONAME ---")
   endif(DEBUG_ONAME)
 
   if(MSVC)
     if(FLTK_OPTION_LARGE_FILE)
       fl_debug_var(FLTK_OPTION_LARGE_FILE)
       fl_debug_var(TARGET_NAME)
-      set_target_properties (${TARGET_NAME} PROPERTIES
+      set_target_properties(${TARGET_NAME} PROPERTIES
         LINK_FLAGS /LARGEADDRESSAWARE
       )
     endif(FLTK_OPTION_LARGE_FILE)
   endif(MSVC)
 
-  install (TARGETS ${TARGET_NAME} EXPORT FLTK-Targets
+  install(TARGETS ${TARGET_NAME} EXPORT FLTK-Targets
     RUNTIME DESTINATION ${FLTK_BINDIR}
     LIBRARY DESTINATION ${FLTK_LIBDIR}
     ARCHIVE DESTINATION ${FLTK_LIBDIR}
   )
 
   if(LIBTYPE STREQUAL "SHARED")
-    list (APPEND FLTK_LIBRARIES_SHARED "${TARGET_NAME}")
+    list(APPEND FLTK_LIBRARIES_SHARED "${TARGET_NAME}")
     set(FLTK_LIBRARIES_SHARED "${FLTK_LIBRARIES_SHARED}" PARENT_SCOPE)
   else()
-    list (APPEND FLTK_LIBRARIES "${TARGET_NAME}")
+    list(APPEND FLTK_LIBRARIES "${TARGET_NAME}")
     set(FLTK_LIBRARIES "${FLTK_LIBRARIES}" PARENT_SCOPE)
   endif()
 
@@ -248,7 +248,7 @@ function (fl_add_library LIBNAME LIBTYPE SOURCES)
     fl_debug_var(FLTK_LIBRARIES)
     fl_debug_var(FLTK_LIBRARIES_SHARED)
     fl_debug_var(fl_add_library_END)
-    message ("")
+    message("")
   endif()
 
 endfunction (fl_add_library LIBNAME LIBTYPE SOURCES)

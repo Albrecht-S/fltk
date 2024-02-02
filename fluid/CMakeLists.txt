@@ -14,7 +14,7 @@
 #     https://www.fltk.org/bugs.php
 #
 
-# Source files for 'fluid-lib' = all source files except the main file (fluid.cxx)
+# Source files for 'fluid-lib' = all source files except the main file(fluid.cxx)
 # Note: macOS (Xcode) needs at least one source file to link fluid properly
 # against fluid-lib
 
@@ -135,7 +135,7 @@ source_group("Documentation: Developer" FILES ${DEV_DOC_FILES})
 add_library(fluid-lib OBJECT EXCLUDE_FROM_ALL)
 target_sources(fluid-lib PRIVATE ${CPPFILES} ${HEADERFILES})
 target_include_directories(fluid-lib PUBLIC ${FLTK_INCLUDE_DIRS})
-target_link_libraries(fluid-lib INTERFACE fltk::images)
+# target_link_libraries(fluid-lib INTERFACE fltk::images)
 
 # Build fluid with all its variants
 
@@ -168,7 +168,7 @@ else()
 
 endif()
 
-target_link_libraries(fluid PRIVATE fluid-lib)
+target_link_libraries(fluid PRIVATE fluid-lib fltk::images)
 
 # Add fluid-cmd console app (Windows only) for converting .fl to .cxx/.h files.
 # This is done for all Windows targets, even if cross-compiling.
@@ -176,7 +176,7 @@ target_link_libraries(fluid PRIVATE fluid-lib)
 if(WIN32)
   list(APPEND FLUID_TARGETS fluid-cmd)
   add_executable(fluid-cmd fluid.cxx)
-  target_link_libraries(fluid-cmd PRIVATE fluid-lib)
+  target_link_libraries(fluid-cmd PRIVATE fluid-lib fltk::images)
 endif(WIN32)
 
 # Create aliases for all fluid executables
@@ -231,7 +231,7 @@ if(UNIX)
   install(FILES fluid.desktop
     DESTINATION ${FLTK_DATADIR}/applications
   )
-  # Install mime-type file (x-fluid.desktop method is deprecated)
+  # Install mime-type file(x-fluid.desktop method is deprecated)
   install(FILES fluid.xml
     DESTINATION ${FLTK_DATADIR}/mime/packages
   )

@@ -18,36 +18,36 @@
 include(../CMake/FLTK-Functions.cmake)
 include(../CMake/fl_create_example.cmake)
 
-set (EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/../bin/test)
-set (TESTFILE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../data)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/../bin/test)
+set(TESTFILE_PATH ${CMAKE_CURRENT_BINARY_DIR}/../data)
 
 # create data and binary directory to copy scripts and data files
 
-file (MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
-file (MAKE_DIRECTORY ${TESTFILE_PATH})
+file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+file(MAKE_DIRECTORY ${TESTFILE_PATH})
 
 #######################################################################
 # Define additional example programs for testing, for instance:
-#   set (extra_tests issue-276 str-1895)
+#   set(extra_tests issue-276 str-1895)
 # Use the source file test/'name'.cxx for each additional program.
 # These test programs will be built with image and GL libraries.
 # Leave the variable 'extra_tests' empty to disable extra test programs.
 
-set (extra_tests)
+set(extra_tests)
 
 #######################################################################
 # audio libs for test apps
-if (WIN32)
-  set (AUDIOLIBS winmm)
-elseif (APPLE)
-  set (AUDIOLIBS "-framework CoreAudio")
-elseif (HAVE_ALSA_ASOUNDLIB_H)
+if(WIN32)
+  set(AUDIOLIBS winmm)
+elseif(APPLE)
+  set(AUDIOLIBS "-framework CoreAudio")
+elseif(HAVE_ALSA_ASOUNDLIB_H)
   find_library(LIB_asound asound)
-  if (LIB_asound)
-    set (AUDIOLIBS ${LIB_asound})
-  endif (LIB_asound)
+  if(LIB_asound)
+    set(AUDIOLIBS ${LIB_asound})
+  endif(LIB_asound)
   mark_as_advanced (LIB_asound)
-endif (WIN32)
+endif(WIN32)
 
 #######################################################################
 # Define standard libraries for those OpenGL demos that can be built
@@ -57,25 +57,25 @@ endif (WIN32)
 # Note: use "${GLDEMO_LIBS}" for their library parameter
 #        or "${GLDEMO_SHARED}" to build with shared FLTK libraries
 
-if (OPENGL_FOUND)
-  set (GLDEMO_LIBS fltk::gl)
-  if (MSVC)
-    set (GLDEMO_SHARED fltk::fltk-shared)
-  else ()
-    set (GLDEMO_SHARED fltk::gl-shared)
-  endif ()
-else ()
-  set (GLDEMO_LIBS fltk::fltk)
-  set (GLDEMO_SHARED fltk::fltk-shared)
-endif ()
+if(OPENGL_FOUND)
+  set(GLDEMO_LIBS fltk::gl)
+  if(MSVC)
+    set(GLDEMO_SHARED fltk::fltk-shared)
+  else()
+    set(GLDEMO_SHARED fltk::gl-shared)
+  endif()
+else()
+  set(GLDEMO_LIBS fltk::fltk)
+  set(GLDEMO_SHARED fltk::fltk-shared)
+endif()
 
 # Similar approach for the 'forms' demo (shared lib not supported)
 
-if (FLTK_BUILD_FORMS)
-  set (FORMS_LIBS fltk::forms)
-else ()
-  set (FORMS_LIBS fltk::fltk)
-endif ()
+if(FLTK_BUILD_FORMS)
+  set(FORMS_LIBS fltk::forms)
+else()
+  set(FORMS_LIBS fltk::fltk)
+endif()
 
 #######################################################################
 
@@ -195,15 +195,15 @@ fl_create_example(unittests "${UNITTEST_SRCS}" "${GLDEMO_LIBS}")
 
 # Create additional test programs (used by developers for testing)
 
-if (extra_tests)
+if(extra_tests)
   foreach(name ${extra_tests})
     fl_create_example(${name} ${name}.cxx "fltk::images;${GLDEMO_LIBS}")
   endforeach()
-endif ()
+endif()
 
 # OpenGL demos. These programs can't be built w/o OpenGL
 
-if (OPENGL_FOUND)
+if(OPENGL_FOUND)
   fl_create_example(CubeView "CubeMain.cxx;CubeView.cxx;CubeViewUI.fl" "${GLDEMO_LIBS}")
   fl_create_example(cube cube.cxx "${GLDEMO_LIBS}")
   fl_create_example(fractals "fractals.cxx;fracviewer.cxx" "${GLDEMO_LIBS}")
@@ -211,23 +211,23 @@ if (OPENGL_FOUND)
   fl_create_example(glpuzzle glpuzzle.cxx "${GLDEMO_LIBS}")
   fl_create_example(gl_overlay gl_overlay.cxx "${GLDEMO_LIBS}")
   fl_create_example(shape shape.cxx "${GLDEMO_LIBS}")
-endif (OPENGL_FOUND)
+endif(OPENGL_FOUND)
 
 # Cairo demo - must also be built w/o Cairo (displays a message box)
-# ### if (FLTK_HAVE_CAIRO)
+# ### if(FLTK_HAVE_CAIRO)
 # ###   fl_create_example(cairo_test cairo_test.cxx "fltk;cairo")
-# ### else ()
+# ### else()
   fl_create_example(cairo_test cairo_test.cxx fltk::fltk)
-# ### endif (FLTK_HAVE_CAIRO)
+# ### endif(FLTK_HAVE_CAIRO)
 
 # *** EXPERIMENTAL ***
 # Build some of the demo programs linked against the shared FLTK lib(s).
 # This is currently pretty complicated and should be improved.
 # It will be simplified significantly when we use more "modern CMake".
 
-if (FLTK_BUILD_SHARED_LIBS)
+if(FLTK_BUILD_SHARED_LIBS)
 
-  if (MSVC) # MS Visual C++ aka. Visual Studio
+  if(MSVC) # MS Visual C++ aka. Visual Studio
 
     # We need to link with fl_call_main.c, but this must not be compiled with
     # macro FL_DLL, whereas the other source file(s) must be compiled with FL_DLL
@@ -245,41 +245,41 @@ if (FLTK_BUILD_SHARED_LIBS)
     add_library (CALL_MAIN OBJECT EXCLUDE_FROM_ALL ../src/fl_call_main.c)
 
     # define a list of shared targets so we can set COMPILE_DEFINITIONS in a loop
-    set (SHARED_TARGETS "")
+    set(SHARED_TARGETS "")
 
     fl_create_example(hello-shared hello.cxx "CALL_MAIN;fltk::fltk-shared")
     fl_create_example(pixmap_browser-shared pixmap_browser.cxx "CALL_MAIN;fltk::fltk-shared")
     fl_create_example(unittests-shared "${UNITTEST_SRCS}" "CALL_MAIN;${GLDEMO_SHARED}")
 
-    list (APPEND SHARED_TARGETS hello pixmap_browser unittests)
+    list(APPEND SHARED_TARGETS hello pixmap_browser unittests)
 
-    if (OPENGL_FOUND)
+    if(OPENGL_FOUND)
       fl_create_example(glpuzzle-shared glpuzzle.cxx "CALL_MAIN;${GLDEMO_SHARED}")
       fl_create_example(shape-shared shape.cxx "CALL_MAIN;${GLDEMO_SHARED}")
-      list (APPEND SHARED_TARGETS glpuzzle shape)
-    endif (OPENGL_FOUND)
+      list(APPEND SHARED_TARGETS glpuzzle shape)
+    endif(OPENGL_FOUND)
 
     # apply property COMPILE_DEFINITIONS "-D FL_DLL" in a loop for all necessary source files
     foreach(tgt ${SHARED_TARGETS})
       target_compile_definitions (${tgt}-shared PRIVATE "FL_DLL")
     endforeach()
 
-  else () # not MSVC
+  else() # not MSVC
 
     fl_create_example(hello-shared hello.cxx fltk::fltk-shared)
     fl_create_example(pixmap_browser-shared pixmap_browser.cxx "fltk::images-shared")
     fl_create_example(unittests-shared "${UNITTEST_SRCS}" "${GLDEMO_SHARED}")
 
-    if (OPENGL_FOUND)
+    if(OPENGL_FOUND)
       fl_create_example(glpuzzle-shared glpuzzle.cxx "${GLDEMO_SHARED}")
       fl_create_example(shape-shared shape.cxx "${GLDEMO_SHARED}")
-    endif (OPENGL_FOUND)
+    endif(OPENGL_FOUND)
 
     fl_create_example(cairo_test-shared cairo_test.cxx "fltk::fltk-shared")
 
-  endif (MSVC) # (not MSVC)
+  endif(MSVC) # (not MSVC)
 
-endif (FLTK_BUILD_SHARED_LIBS)
+endif(FLTK_BUILD_SHARED_LIBS)
 
 #####################################################
 # We need some support files for the demo programs
@@ -287,7 +287,7 @@ endif (FLTK_BUILD_SHARED_LIBS)
 
 # copy the required test files
 
-file (COPY
+file(COPY
   demo.menu rgb.txt browser.cxx editor.cxx valuators.fl
   help_dialog.html
   DESTINATION ${TESTFILE_PATH}
@@ -295,7 +295,7 @@ file (COPY
 
 # copy the image directory for help_dialog.html
 
-file (COPY
+file(COPY
   ${CMAKE_CURRENT_SOURCE_DIR}/images
   DESTINATION ${TESTFILE_PATH}
 )
