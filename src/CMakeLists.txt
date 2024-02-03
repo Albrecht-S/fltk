@@ -187,7 +187,7 @@ set(CPPFILES
   screen_xywh.cxx
 )
 
-if(FLTK_HAVE_CAIRO) # FLTK_OPTION_CAIRO or FLTK_OPTION_CAIROEXT
+if(FLTK_HAVE_CAIRO) # FLTK_OPTION_CAIRO_WINDOW or FLTK_OPTION_CAIRO_EXT
   list(APPEND CPPFILES Fl_Cairo.cxx)
 endif()
 
@@ -669,7 +669,7 @@ if(HAVE_XRENDER)
   list(APPEND OPTIONAL_LIBS ${X11_Xrender_LIB})
 endif(HAVE_XRENDER)
 
-### if(FLTK_HAVE_CAIRO) # FLTK_OPTION_CAIRO or FLTK_OPTION_CAIROEXT or Wayland
+### if(FLTK_HAVE_CAIRO) # FLTK_OPTION_CAIRO_WINDOW or FLTK_OPTION_CAIRO_EXT or Wayland
 ###   list(APPEND OPTIONAL_LIBS ${PKG_CAIRO_LIBRARIES})
 ### endif()
 
@@ -815,10 +815,10 @@ endif()
 
 #######################################################################
 
-if(OPENGL_FOUND)
+if(FLTK_USE_GL)
   fl_add_library(fltk_gl STATIC "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
   target_link_libraries(fltk_gl PUBLIC ${OPENGL_LIBRARIES} fltk::fltk)
-endif(OPENGL_FOUND)
+endif(FLTK_USE_GL)
 
 #######################################################################
 # Build shared libraries (optional)
@@ -881,10 +881,10 @@ if(FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
 
   ###################################################################
 
-  if(OPENGL_FOUND)
+  if(FLTK_USE_GL)
     fl_add_library(fltk_gl SHARED "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
     target_link_libraries(fltk_gl-shared PUBLIC ${OPENGL_LIBRARIES} fltk::fltk-shared)
-  endif(OPENGL_FOUND)
+  endif(FLTK_USE_GL)
 
 endif(FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
 

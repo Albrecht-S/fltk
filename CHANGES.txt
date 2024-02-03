@@ -148,7 +148,7 @@ Changes in FLTK 1.4.0                            Released: ??? ?? 2024
     equivalent option is to set FLTK_BACKEND_WAYLAND=ON and FLTK_BACKEND_X11=OFF.
   - The new configure option --disable-gdiplus removes the possibility to draw
     antialiased lines and curves on the Windows platform. The corresponding CMake
-    option is FLTK_USE_GDIPLUS.
+    option is FLTK_GRAPHICS_GDIPLUS.
   - The library can be built without support for reading SVG images or writing
     graphics in SVG format using the --disable-svg configure option
     or turning off FLTK_OPTION_SVG in CMake.

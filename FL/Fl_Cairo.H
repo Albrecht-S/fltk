@@ -51,7 +51,7 @@
   For internal use only.
   \note Only available when configure has the --enable-cairo or
        --enable-cairoext option or one or both of the CMake options
-       FLTK_OPTION_CAIRO or FLTK_OPTION_CAIROEXT is set (ON)
+       FLTK_OPTION_CAIRO_WINDOW or FLTK_OPTION_CAIRO_EXT is set (ON)
 */
 class FL_EXPORT Fl_Cairo_State {
 public:

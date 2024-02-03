@@ -17,7 +17,7 @@
 // This file implements the FLTK Cairo Window support (since 1.3.x):
 //
 // - ./configure --enable-cairo  and/or  --enable-cairoext
-// - cmake       -D FLTK_OPTION_CAIRO  and/or  -D FLTK_OPTION_CAIROEXT
+// - cmake       -D FLTK_OPTION_CAIRO_WINDOW  and/or  -D FLTK_OPTION_CAIRO_EXT
 //
 // Preprocessor macro FLTK_HAVE_CAIRO is defined for both options.
 // Preprocessor macro FLTK_HAVE_CAIRO_EXT is defined only for "cairoext".
@@ -70,7 +70,7 @@ void Fl_Cairo_State::autolink(bool b) {
   autolink_ = b;
 #else
   Fl::fatal("In Fl::autolink(bool): Cairo autolink() feature is only "
-            "available with CMake FLTK_OPTION_CAIROEXT "
+            "available with CMake FLTK_OPTION_CAIRO_EXT "
             "or the enable-cairoext configure option.\n"
             "Quitting now.");
 #endif
@@ -168,7 +168,7 @@ static cairo_surface_t *cairo_create_surface(void *gc, int W, int H) {
   Creates a Cairo context from a \a gc only, gets its window size or
   offscreen size if fl_window is null.
 
-  \note Only available if CMake FLTK_OPTION_CAIRO is enabled
+  \note Only available if CMake FLTK_OPTION_CAIRO_WINDOW is enabled
         or configure has the --enable-cairo option.
 */
 cairo_t *Fl::cairo_make_current(void *gc) {
@@ -211,7 +211,7 @@ cairo_t *Fl::cairo_make_current(void *gc) {
 /**
   Creates a Cairo context from a \p gc and the given size.
 
-  \note Only available if CMake FLTK_OPTION_CAIRO is enabled
+  \note Only available if CMake FLTK_OPTION_CAIRO_WINDOW is enabled
         or configure has the --enable-cairo option.
 */
 cairo_t *Fl::cairo_make_current(void *gc, int W, int H) {

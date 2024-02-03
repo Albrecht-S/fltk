@@ -22,75 +22,93 @@
 # above that may be changed if necessary.
 #
 
-set (FLTK_VERSION @FLTK_VERSION@)
+set(FLTK_VERSION @FLTK_VERSION@)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FLTK-Targets.cmake)
 
-set (FLTK_INCLUDE_DIRS "@INCLUDE_DIRS@")
-set (FLTK_LIBRARIES "@FLTK_LIBRARIES@")
+set(FLTK_INCLUDE_DIRS "@INCLUDE_DIRS@")
+set(FLTK_LIBRARIES "@FLTK_LIBRARIES@")
 
 # for compatibility with CMake's FindFLTK.cmake
 
-set (FLTK_INCLUDE_DIR "${FLTK_INCLUDE_DIRS}")
+set(FLTK_INCLUDE_DIR "${FLTK_INCLUDE_DIRS}")
 
-function (_fltk_make_alias target from)
-  if (TARGET ${from} AND NOT TARGET ${target})
-    # message (STATUS "FLTKConfig.cmake - create alias: ${target} from ${from}")
+function(_fltk_make_alias target from)
+  if(TARGET ${from} AND NOT TARGET ${target})
+    # message(STATUS "FLTKConfig.cmake - create alias: ${target} from ${from}")
     get_target_property(ttype ${from} TYPE)
-    if (ttype STREQUAL "EXECUTABLE")
-      add_executable (${target} ALIAS ${from})
-    else ()
-      add_library (${target} ALIAS ${from})
-    endif ()
+    if(ttype STREQUAL "EXECUTABLE")
+      add_executable(${target} ALIAS ${from})
+    else()
+      add_library(${target} ALIAS ${from})
+    endif()
   # else()
-  #   message (STATUS "FLTKConfig.cmake - alias: ${target} from ${from} - not created.")
-  endif ()
-endfunction (_fltk_make_alias target)
+  #   message(STATUS "FLTKConfig.cmake - alias: ${target} from ${from} - not created.")
+  endif()
+endfunction(_fltk_make_alias target)
 
-if (CMAKE_CROSSCOMPILING)
+if(CMAKE_CROSSCOMPILING)
 
-  find_file(FLUID_PATH
+  # Find a fluid executable on the host to be able to build fluid programs
+
+  find_file(FLUID_HOST
     NAMES fluid fluid.exe
     PATHS ENV PATH
     NO_CMAKE_FIND_ROOT_PATH
   )
-  add_executable(fluid IMPORTED)
-  set_target_properties(fluid
-    PROPERTIES IMPORTED_LOCATION ${FLUID_PATH}
-  )
-  add_executable(fltk::fluid ALIAS fluid)
-  ## set (FLTK_FLUID_EXECUTABLE ${FLUID_PATH})
-  set (FLTK_FLUID_EXECUTABLE fltk::fluid)
 
-else ()
+  if(FLUID_HOST)
+    # Import a special 'fluid' target called 'fluid_host'
+    # Note: this is "the same as" the CMake variable FLTK_FLUID_EXECUTABLE
+    if(1)
+      add_executable(fluid_host IMPORTED)
+      set_target_properties(fluid_host
+        PROPERTIES IMPORTED_LOCATION ${FLUID_HOST}
+      )
+      add_executable(fltk::fluid_host ALIAS fluid_host)
+    endif()
+    set(FLTK_FLUID_EXECUTABLE ${FLUID_HOST})
+  else()
+    message(STATUS "FLTKConfig.cmake (cross-compiling): fluid not found on the build host")
+    set(FLTK_FLUID_EXECUTABLE ${FLUID_HOST})
+  endif()
 
-  if (1)  # Create aliases for libraries and fluid ...
+else(CMAKE_CROSSCOMPILING)
 
-    if (NOT TARGET fltk::fltk)
-      message (FATAL "FLTKConfig.cmake: target fltk::fltk does not exist!")
-    endif ()
+  # Optional: create backwards compatible aliases for libraries and fluid
 
-    _fltk_make_alias (fltk fltk::fltk)
-    _fltk_make_alias (fltk-shared fltk::fltk-shared)
+  if(1) # create aliases
 
-    _fltk_make_alias (fluid fltk::fluid)
-    _fltk_make_alias (fluid-shared fltk::fluid-shared)
+    if(NOT TARGET fltk::fltk)
+      message(FATAL "FLTKConfig.cmake: target fltk::fltk does not exist!")
+    endif()
+
+    _fltk_make_alias(fltk fltk::fltk)
+    _fltk_make_alias(fltk-shared fltk::fltk-shared)
+
+    _fltk_make_alias(fluid fltk::fluid)
+    _fltk_make_alias(fluid-cmd fltk::fluid-cmd)
+
+    _fltk_make_alias(fltk-options fltk::options)
+    _fltk_make_alias(fltk-options-cmd fltk::options-cmd)
 
     foreach(target cairo forms gl images jpeg png z)
-      _fltk_make_alias (fltk_${target} fltk::${target})
-      _fltk_make_alias (fltk_${target}-shared fltk::${target}-shared)
+      _fltk_make_alias(fltk_${target} fltk::${target})
+      _fltk_make_alias(fltk_${target}-shared fltk::${target}-shared)
     endforeach()
 
-  endif () # Creating aliases ...
+  endif() # Creating aliases ...
 
   # set FLTK_FLUID_EXECUTABLE
 
-  if (TARGET fltk::fluid)
-    set (FLTK_FLUID_EXECUTABLE fltk::fluid)
-  else ()
-    set (FLTK_FLUID_EXECUTABLE fluid)
-  endif ()
+  if(TARGET fltk::fluid-cmd)
+    set(FLTK_FLUID_EXECUTABLE fltk::fluid-cmd)
+  elseif(TARGET fltk::fluid)
+    set(FLTK_FLUID_EXECUTABLE fltk::fluid)
+  else()
+    set(FLTK_FLUID_EXECUTABLE fluid)
+  endif()
 
-endif (CMAKE_CROSSCOMPILING)
+endif(CMAKE_CROSSCOMPILING)
 
-# message (STATUS "FLTKConfig.cmake: FLTK_FLUID_EXECUTABLE = '${FLTK_FLUID_EXECUTABLE}'")
+# message(STATUS "FLTKConfig.cmake: FLTK_FLUID_EXECUTABLE = '${FLTK_FLUID_EXECUTABLE}'")

@@ -142,27 +142,32 @@ FLTK_BACKEND_WAYLAND - default ON (only Unix/Linux)
 
 FLTK_BACKEND_X11 - default ON on Unix/Linux, OFF elsewhere (Windows, macOS).
     Enable or disable the X11 backend on platforms that support it.
-    - Unix/Linux: this can be used to disable the X11 backend when building
-      with Wayland support, otherwise this option must be ON.
+    - Unix/Linux: enable or disable the X11 backend when building with
+      Wayland (FLTK_BACKEND_WAYLAND), otherwise this option must be ON.
     - macOS: enable the X11 backend instead of standard system graphics.
       This requires XQuartz or a similar X11 installation. This option is
-      tested only with XQuartz. Use this only if you know what you do and
-      if you have installed X11.
+      tested only with XQuartz by the FLTK team.
+      Use this only if you know what you do and if you have installed X11.
     - Windows/Cygwin: enable X11 backend for Cygwin platforms. This option
       is currently (as of FLTK 1.4.0) not supported on Windows.
 
 FLTK_BUILD_EXAMPLES - default OFF
-    Builds the example programs in the 'examples' directory.
+    Build the example programs in the 'examples' directory.
 
 FLTK_BUILD_FLTK_OPTIONS - default ON
-    Builds the FLTK options editor ("fltk-options").
+    Build the FLTK options editor ("fltk-options").
 
 FLTK_BUILD_FLUID - default ON
-    Builds the Fast Light User-Interface Designer ("fluid").
+    Build the Fast Light User-Interface Designer ("fluid").
 
 FLTK_BUILD_FORMS - default ON
     Build the (X)Forms compatibility library. This option is ON by default
-    for backwards compatibility but can safely be turned OFF.
+    for backwards compatibility but can safely be turned OFF if you don't
+    need (X)Forms compatibility.
+
+FLTK_BUILD_GL - default ON
+    Build the OpenGL support library fltk_gl (fltk::gl) and enable OpenGL
+    support in user programs using fltk_gl.
 
 FLTK_BUILD_SHARED_LIBS - default OFF
     Normally FLTK is built as static libraries which makes more portable
@@ -171,22 +176,31 @@ FLTK_BUILD_SHARED_LIBS - default OFF
     "-shared" to FLTK target names as described in section 3.1 and 3.2.
 
 FLTK_BUILD_TEST - default ON in top-level build, OFF in sub-build
-    Builds the test and demo programs in the 'test' directory. The default
+    Build the test and demo programs in the 'test' directory. The default
     is ON if the FLTK build is in a top-level project so all test and demo
     programs are built. If FLTK is built as a subproject only the Library
     and the tools (fluid and fltk-config) are built by default.
 
-FLTK_MSVC_RUNTIME_DLL - default ON (Windows only for Visual Studio and NMake)
-    Selects whether the build uses the MS runtime DLL or not.
+FLTK_GRAPHICS_CAIRO - default OFF (Unix/Linux: X11 + Wayland only).
+    Make all drawing operations use the Cairo library (rather than Xlib),
+    producing antialiased graphics (X11 platform: implies FLTK_USE_PANGO).
+    When using Wayland this option is ignored (Wayland uses Cairo).
+
+FLTK_GRAPHICS_GDIPLUS - default ON (Windows only).
+    Make FLTK use GDI+ to draw oblique lines and curves resulting in
+    antialiased graphics. If this option is OFF standard GDI is used.
+
+FLTK_MSVC_RUNTIME_DLL - default ON (Windows only: Visual Studio and NMake).
+    Select whether the build uses the MS runtime DLL (ON) or not (OFF).
     Default is ON: either /MD or /MDd for Release or Debug, respectively.
     Select OFF for either /MT or /MTd for Release or Debug, respectively.
 
-FLTK_OPTION_CAIRO - default OFF
-    Enables support of class Fl_Cairo_Window (all platforms, requires the
-    Cairo library) - see README.Cairo.txt.
+FLTK_OPTION_CAIRO_EXT - default OFF
+    Enable extended libcairo support - see README.Cairo.txt.
 
-FLTK_OPTION_CAIROEXT - default OFF
-    Enables extended libcairo support - see README.Cairo.txt.
+FLTK_OPTION_CAIRO_WINDOW - default OFF
+    Enable support of class Fl_Cairo_Window (all platforms, requires the
+    Cairo library) - see README.Cairo.txt.
 
 FLTK_OPTION_FILESYSTEM_SUPPORT - default ON
 
@@ -203,18 +217,6 @@ FLTK_OPTION_PRINT_SUPPORT - default ON
     is somewhat smaller. This option makes sense only on the Unix/Linux
     platform or on macOS when FLTK_BACKEND_X11 is ON.
 
-FLTK_OPTION_USE_CAIRO - default OFF
-    Makes all drawing operations use the Cairo library (rather than Xlib)
-    producing antialiased graphics (X11 platform, implies FLTK_USE_PANGO).
-    When using Wayland this option is ignored. Wayland always uses Cairo.
-
-FLTK_USE_GDIPLUS - default ON (Windows only).
-    Makes FLTK use GDI+ to draw oblique lines and curves resulting in
-    antialiased graphics.
-
-FLTK_USE_GL - default ON
-    Enables OpenGL support.
-
 FLTK_USE_KDIALOG - default ON
     Under the KDE desktop, allows class Fl_Native_File_Chooser to use the
     kdialog utility program to construct its file dialog windows, when that
@@ -226,7 +228,8 @@ FLTK_USE_PANGO - default OFF (see note below)
     unicode-defined scripts and gives FLTK limited support of right-to-left
     scripts. This option makes sense only under X11 or Wayland, and also
     requires Xft.
-    Note: Turned ON if Wayland or FLTK_OPTION_USE_CAIRO is enabled.
+    This option is ignored (always enabled) if Wayland or FLTK_GRAPHICS_CAIRO
+    is ON.
 
 FLTK_USE_POLL - default OFF
     Deprecated: don't turn this option ON.
@@ -288,8 +291,8 @@ Documentation Options
   These options are only available if `doxygen' is installed and found.
   PDF related options require also `latex'.
 
-FLTK_BUILD_HTML_DOCUMENTATION - default ON
-FLTK_BUILD_PDF_DOCUMENTATION  - default ON
+FLTK_BUILD_HTML_DOCS - default ON
+FLTK_BUILD_PDF_DOCS  - default ON
     These options can be used to switch HTML documentation generation with
     doxygen on. If these are ON the build targets 'html', 'pdf', and 'docs'
     are generated but must be built explicitly. Technically the build targets
@@ -297,17 +300,17 @@ FLTK_BUILD_PDF_DOCUMENTATION  - default ON
     options ON if you want to save build time because the docs are not
     built automatically.
 
-FLTK_INCLUDE_DRIVER_DOCUMENTATION - default OFF
+FLTK_INCLUDE_DRIVER_DOCS - default OFF
     This option adds driver documentation to HTML and PDF docs (if ON). This
     option is marked as "advanced" since it is only useful for FLTK developers
     and advanced users. It is only used if at least one of the documentation
     options above is ON as well.
 
-FLTK_INSTALL_HTML_DOCUMENTATION - default OFF
-FLTK_INSTALL_PDF_DOCUMENTATION  - default OFF
+FLTK_INSTALL_HTML_DOCS - default OFF
+FLTK_INSTALL_PDF_DOCS  - default OFF
     If these options are ON then the HTML and/or PDF docs are installed
     when the 'install' target is executed, e.g. with `make install'. You
-    need to select above options OPTION_BUILD_*_DOCUMENTATION as well.
+    need to select above options OPTION_BUILD_*_DOCS as well.
 
 
 Special Options

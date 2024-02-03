@@ -14,9 +14,12 @@
 #     https://www.fltk.org/bugs.php
 #
 
-# Source files for 'fluid-lib' = all source files except the main file(fluid.cxx)
-# Note: macOS (Xcode) needs at least one source file to link fluid properly
-# against fluid-lib
+# Targets that will be built: fluid and fluid-cmd (Windows)
+set(TARGETS fluid)
+
+# Source files for 'fluid-lib' = all source files except the main file (fluid.cxx)
+# Note: macOS (Xcode) needs at least one source file (fluid.cxx) to link the main
+# program fluid properly
 
 set(CPPFILES
   CodeEditor.cxx
@@ -130,16 +133,13 @@ set(DEV_DOC_FILES
 source_group("Documentation: Developer" FILES ${DEV_DOC_FILES})
 
 # Build a local object library to avoid compiling all source files
-# multiple times for all fluid targets (fluid, fluid-cmd).
+# multiple times for all fluid targets on Windows (fluid + fluid-cmd).
 
 add_library(fluid-lib OBJECT EXCLUDE_FROM_ALL)
 target_sources(fluid-lib PRIVATE ${CPPFILES} ${HEADERFILES})
-target_include_directories(fluid-lib PUBLIC ${FLTK_INCLUDE_DIRS})
-# target_link_libraries(fluid-lib INTERFACE fltk::images)
+target_link_libraries(fluid-lib PUBLIC fltk::images)
 
-# Build fluid with all its variants
-
-set(FLUID_TARGETS fluid)               # fluid and optional fluid-cmd target
+# Build targets
 
 if(APPLE AND NOT FLTK_BACKEND_X11)
 
@@ -147,7 +147,7 @@ if(APPLE AND NOT FLTK_BACKEND_X11)
 
   set(ICON_NAME fluid.icns)
   set(ICON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_NAME}")
-  add_executable(fluid MACOSX_BUNDLE ${ICON_PATH} fluid.cxx)
+  add_executable(fluid MACOSX_BUNDLE fluid.cxx ${ICON_PATH})
 
   # create macOS bundle wrapper script
 
@@ -168,21 +168,20 @@ else()
 
 endif()
 
-target_link_libraries(fluid PRIVATE fluid-lib fltk::images)
+target_link_libraries(fluid PRIVATE fluid-lib)
 
-# Add fluid-cmd console app (Windows only) for converting .fl to .cxx/.h files.
+# Build the console app on Windows
 # This is done for all Windows targets, even if cross-compiling.
 
 if(WIN32)
-  list(APPEND FLUID_TARGETS fluid-cmd)
+  list(APPEND TARGETS fluid-cmd)
   add_executable(fluid-cmd fluid.cxx)
-  target_link_libraries(fluid-cmd PRIVATE fluid-lib fltk::images)
-endif(WIN32)
+  target_link_libraries(fluid-cmd PRIVATE fluid-lib)
+endif()
 
-# Create aliases for all fluid executables
+# Create aliases for all targets
 
-foreach(tgt ${FLUID_TARGETS})
-  message(STATUS "-----   add_executable(fltk::${tgt} ALIAS ${tgt}   -----")
+foreach(tgt ${TARGETS})
   add_executable(fltk::${tgt} ALIAS ${tgt})
 endforeach()
 
@@ -216,7 +215,7 @@ else()
 
   # install Fluid GUI and optional commandline tool 'fluid-cmd' (only on Windows)
 
-  install(TARGETS ${FLUID_TARGETS}
+  install(TARGETS ${TARGETS}
     EXPORT FLTK-Targets
     RUNTIME DESTINATION ${FLTK_BINDIR}
     LIBRARY DESTINATION ${FLTK_LIBDIR}

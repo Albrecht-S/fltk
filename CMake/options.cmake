@@ -221,8 +221,8 @@ else() # use system libpng and zlib
 
   # FIXME - Force search by unsetting the chache variable. Maybe use
   # FIXME - another cache variable to check for option changes?
+  # unset(HAVE_PNG_H CACHE) # force search
 
-  unset(HAVE_PNG_H CACHE) # force search
   check_include_file(png.h HAVE_PNG_H)
   mark_as_advanced(HAVE_PNG_H)
 
@@ -296,8 +296,8 @@ if(UNIX)
     else()
       set(FLTK_USE_X11 0) # to build a Wayland-only library
     endif(X11_FOUND)
-    unset(FLTK_OPTION_USE_CAIRO CACHE)
-    set(FLTK_OPTION_USE_CAIRO TRUE CACHE BOOL "all drawing to X11 windows uses Cairo")
+    unset(FLTK_GRAPHICS_CAIRO CACHE)
+    set(FLTK_GRAPHICS_CAIRO TRUE CACHE BOOL "all drawing to X11 windows uses Cairo")
     option(FLTK_USE_SYSTEM_LIBDECOR "use libdecor from the system" ON)
     set(USE_SYSTEM_LIBDECOR 1)
     unset(FLTK_USE_XRENDER CACHE)
@@ -334,9 +334,11 @@ if(UNIX)
     unset(FLTK_USE_PANGO CACHE)
     set(FLTK_USE_PANGO TRUE CACHE BOOL "use lib Pango")
     if(FLTK_USE_SYSTEM_LIBDECOR)
-      pkg_check_modules(SYSTEM_LIBDECOR libdecor-0>=0.2.0)
+      pkg_check_modules(SYSTEM_LIBDECOR libdecor-0>=0.2.0 QUIET)
       if(NOT SYSTEM_LIBDECOR_FOUND)
-        set(USE_SYSTEM_LIBDECOR 0)
+      message(STATUS "Warning: system libdecor doesn't satisfy version >= 0.2.0,")
+      message(STATUS "         using bundled libdecor library instead.")
+      set(USE_SYSTEM_LIBDECOR 0)
       else()
         pkg_get_variable(LIBDECOR_LIBDIR libdecor-0 libdir)
         set(LIBDECOR_PLUGIN_DIR ${LIBDECOR_LIBDIR}/libdecor/plugins-1)
@@ -365,13 +367,13 @@ if(UNIX)
 endif(UNIX)
 
 if(WIN32)
-  option(FLTK_USE_GDIPLUS "use GDI+ when possible for antialiased graphics" ON)
-  if(FLTK_USE_GDIPLUS)
+  option(FLTK_GRAPHICS_GDIPLUS "use GDI+ when possible for antialiased graphics" ON)
+  if(FLTK_GRAPHICS_GDIPLUS)
     set(USE_GDIPLUS TRUE)
     if(NOT MSVC)
       list(APPEND FLTK_LDLIBS "-lgdiplus")
     endif(NOT MSVC)
-  endif(FLTK_USE_GDIPLUS)
+  endif(FLTK_GRAPHICS_GDIPLUS)
 endif(WIN32)
 
 #######################################################################
@@ -454,42 +456,42 @@ endif()
 
 #######################################################################
 if(DOXYGEN_FOUND)
-  option(FLTK_BUILD_HTML_DOCUMENTATION "build html docs" ON)
-  option(FLTK_INSTALL_HTML_DOCUMENTATION "install html docs" OFF)
+  option(FLTK_BUILD_HTML_DOCS "build html docs" ON)
+  option(FLTK_INSTALL_HTML_DOCS "install html docs" OFF)
 
-  option(FLTK_INCLUDE_DRIVER_DOCUMENTATION "include driver (developer) docs" OFF)
-  mark_as_advanced(FLTK_INCLUDE_DRIVER_DOCUMENTATION)
+  option(FLTK_INCLUDE_DRIVER_DOCS "include driver (developer) docs" OFF)
+  mark_as_advanced(FLTK_INCLUDE_DRIVER_DOCS)
 
   if(LATEX_FOUND)
-    option(FLTK_BUILD_PDF_DOCUMENTATION "build pdf docs" ON)
-    option(FLTK_INSTALL_PDF_DOCUMENTATION "install pdf docs" OFF)
+    option(FLTK_BUILD_PDF_DOCS "build pdf docs" ON)
+    option(FLTK_INSTALL_PDF_DOCS "install pdf docs" OFF)
   endif(LATEX_FOUND)
 endif(DOXYGEN_FOUND)
 
-if(FLTK_BUILD_HTML_DOCUMENTATION OR FLTK_BUILD_PDF_DOCUMENTATION)
+if(FLTK_BUILD_HTML_DOCS OR FLTK_BUILD_PDF_DOCS)
   add_subdirectory(documentation)
-endif(FLTK_BUILD_HTML_DOCUMENTATION OR FLTK_BUILD_PDF_DOCUMENTATION)
+endif(FLTK_BUILD_HTML_DOCS OR FLTK_BUILD_PDF_DOCS)
 
 #######################################################################
 # Include optional Cairo support
 #######################################################################
 
-option(FLTK_OPTION_CAIRO "add support for Fl_Cairo_Window" OFF)
-option(FLTK_OPTION_CAIROEXT
+option(FLTK_OPTION_CAIRO_WINDOW "add support for Fl_Cairo_Window" OFF)
+option(FLTK_OPTION_CAIRO_EXT
   "use FLTK code instrumentation for Cairo extended use" OFF
 )
 
 set(FLTK_HAVE_CAIRO 0)
 set(FLTK_HAVE_CAIROEXT 0)
 
-if(FLTK_OPTION_CAIRO OR FLTK_OPTION_CAIROEXT)
+if(FLTK_OPTION_CAIRO_WINDOW OR FLTK_OPTION_CAIRO_EXT)
   pkg_search_module(PKG_CAIRO cairo)
 
   if(PKG_CAIRO_FOUND)
     set(FLTK_HAVE_CAIRO 1)
-    if(FLTK_OPTION_CAIROEXT)
+    if(FLTK_OPTION_CAIRO_EXT)
       set(FLTK_HAVE_CAIROEXT 1)
-    endif(FLTK_OPTION_CAIROEXT)
+    endif(FLTK_OPTION_CAIRO_EXT)
 
     list(APPEND FLTK_BUILD_INCLUDE_DIRECTORIES ${PKG_CAIRO_INCLUDE_DIRS})
 
@@ -512,7 +514,7 @@ if(FLTK_OPTION_CAIRO OR FLTK_OPTION_CAIROEXT)
 
     if(NOT MSVC)
       message(STATUS "*** Cairo was requested but not found - please check your cairo installation")
-      message(STATUS "***   or disable options FLTK_OPTION_CAIRO and OPTION_CAIRO_EXT.")
+      message(STATUS "***   or disable options FLTK_OPTION_CAIRO_WINDOW and OPTION_CAIRO_EXT.")
       message(FATAL_ERROR "*** Terminating: missing Cairo libs or headers.")
     endif()
 
@@ -543,9 +545,9 @@ if(FLTK_OPTION_CAIRO OR FLTK_OPTION_CAIROEXT)
     include_directories(${PKG_CAIRO_INCLUDE_DIRS})
 
     set(FLTK_HAVE_CAIRO 1)
-    if(FLTK_OPTION_CAIROEXT)
+    if(FLTK_OPTION_CAIRO_EXT)
       set(FLTK_HAVE_CAIROEXT 1)
-    endif(FLTK_OPTION_CAIROEXT)
+    endif(FLTK_OPTION_CAIRO_EXT)
 
   endif(PKG_CAIRO_FOUND)
 
@@ -570,23 +572,33 @@ if(FLTK_OPTION_CAIRO OR FLTK_OPTION_CAIROEXT)
     message(STATUS "--- End of Cairo related variables ---")
   endif() # 1 = DEBUG, ...
 
-endif(FLTK_OPTION_CAIRO OR FLTK_OPTION_CAIROEXT)
+endif(FLTK_OPTION_CAIRO_WINDOW OR FLTK_OPTION_CAIRO_EXT)
 
 #######################################################################
-option(FLTK_OPTION_SVG "read/write SVG files" ON)
+
+option(FLTK_OPTION_SVG "read/write SVG image files" ON)
 
 if(FLTK_OPTION_SVG)
   set(FLTK_USE_SVG 1)
+else()
+  set(FLTK_USE_SVG 0)
 endif(FLTK_OPTION_SVG)
 
 #######################################################################
+
+# FIXME: GL libs have already been searched in resources.cmake
+
 set(HAVE_GL LIB_GL OR LIB_MesaGL)
+set(FLTK_USE_GL FALSE)
 
 if(HAVE_GL)
-  option(FLTK_USE_GL "use OpenGL" ON)
-endif(HAVE_GL)
+  option(FLTK_BUILD_GL "use OpenGL and build fltk_gl library" ON)
+  if (FLTK_BUILD_GL)
+    set(FLTK_USE_GL TRUE)
+  endif()
+endif()
 
-if(FLTK_USE_GL)
+if(FLTK_BUILD_GL)
   if(FLTK_BACKEND_WAYLAND)
     pkg_check_modules(WLD_EGL wayland-egl)
     pkg_check_modules(PKG_EGL egl)
@@ -615,7 +627,7 @@ else()
   set(HAVE_GL FALSE)
   set(HAVE_GL_GLU_H FALSE)
   set(HAVE_GLXGETPROCADDRESSARB FALSE)
-endif(FLTK_USE_GL)
+endif(FLTK_BUILD_GL)
 
 if(OPENGL_FOUND)
   set(CMAKE_REQUIRED_INCLUDES ${OPENGL_INCLUDE_DIR}/GL)
@@ -770,17 +782,17 @@ if(X11_Xft_FOUND)
   option(FLTK_USE_XFT "use lib Xft" ON)
   option(FLTK_USE_PANGO "use lib Pango" OFF)
   if(NOT FLTK_BACKEND_WAYLAND)
-    option(FLTK_OPTION_USE_CAIRO "all drawing to X11 windows uses Cairo" OFF)
+    option(FLTK_GRAPHICS_CAIRO "all drawing to X11 windows uses Cairo" OFF)
   endif(NOT FLTK_BACKEND_WAYLAND)
 endif(X11_Xft_FOUND)
 
 # test option compatibility: Cairo for Xlib requires Pango
-if(FLTK_OPTION_USE_CAIRO)
+if(FLTK_GRAPHICS_CAIRO)
     unset(FLTK_USE_PANGO CACHE)
     set(FLTK_USE_PANGO TRUE CACHE BOOL "use lib Pango")
-endif(FLTK_OPTION_USE_CAIRO)
+endif(FLTK_GRAPHICS_CAIRO)
 
-if(FLTK_USE_PANGO OR FLTK_OPTION_USE_CAIRO)
+if(FLTK_USE_PANGO OR FLTK_GRAPHICS_CAIRO)
   if(FLTK_BACKEND_WAYLAND OR FLTK_BACKEND_X11)
     set(USE_PANGOXFT false)
   else()
@@ -901,7 +913,7 @@ if((X11_Xft_FOUND OR NOT USE_PANGOXFT) AND FLTK_USE_PANGO)
     endif(HAVE_LIB_PANGO AND HAVE_LIB_PANGOXFT AND HAVE_LIB_GOBJECT)
   endif((PANGOXFT_FOUND OR NOT USE_PANGOXFT) AND PANGOCAIRO_FOUND AND CAIRO_FOUND)
 
-  if(USE_PANGO AND (FLTK_OPTION_USE_CAIRO OR FLTK_BACKEND_WAYLAND))
+  if(USE_PANGO AND (FLTK_GRAPHICS_CAIRO OR FLTK_BACKEND_WAYLAND))
     set(FLTK_USE_CAIRO 1)
     # fl_debug_var(FLTK_USE_CAIRO)
   endif()

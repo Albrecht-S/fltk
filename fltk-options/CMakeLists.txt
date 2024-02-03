@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt to build fltk-options for the FLTK project using CMake (www.cmake.org)
 #
-# Copyright 2023 by Bill Spitzak and others.
+# Copyright 2023-2024 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -14,23 +14,16 @@
 #     https://www.fltk.org/bugs.php
 #
 
-set(CPPFILES
-  fltk-options.cxx
-)
+# Targets that will be built: fltk-options and fltk-options-cmd (Windows)
+set(TARGETS fltk-options)
 
-set(HEADERFILES
-)
-
-set(FLTK_OPTIONS_TARGETS fltk-options)  # fltk-options and optional fltk-options-cmd target
-set(FLTK_OPTIONS_LIBS fltk::fltk)       # libraries used to link fltk-options executables
-
-if(APPLE AND (NOT FLTK_BACKEND_X11))
+if(APPLE AND NOT FLTK_BACKEND_X11)
 
   # macOS
 
   set(ICON_NAME fltk-options.icns)
   set(ICON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_NAME}")
-  add_executable(fltk-options MACOSX_BUNDLE ${CPPFILES} ${HEADERFILES} ${ICON_PATH})
+  add_executable(fltk-options MACOSX_BUNDLE fltk-options.cxx ${ICON_PATH})
 
   # create macOS bundle wrapper script
 
@@ -46,34 +39,34 @@ if(APPLE AND (NOT FLTK_BACKEND_X11))
 
 else()
 
-  # option WIN32 builds a Windows GUI program, ignored on other platforms
-  add_executable(fltk-options WIN32 ${CPPFILES} ${HEADERFILES})
+  # Option WIN32 builds a Windows GUI program, ignored on other platforms
+  add_executable(fltk-options WIN32 fltk-options.cxx)
 
 endif()
 
-# we must link fltk-optons with cairo if option CAIRO is enabled
-if(FLTK_HAVE_CAIRO)
-  target_link_directories(fltk-options PRIVATE ${PKG_CAIRO_LIBRARY_DIRS})
-endif(FLTK_HAVE_CAIRO)
+target_link_libraries(fltk-options PRIVATE fltk::fltk)
 
-target_link_libraries(fltk-options PRIVATE ${FLTK_OPTIONS_LIBS})
-
-# Add fltk-options-cmd console app (Windows only) for editing FLTK options.
+# Add the console app (Windows only)
 # This is done for all Windows targets, even if cross-compiling.
 
 if(WIN32)
-  list(APPEND FLTK_OPTIONS_TARGETS fltk-options-cmd)
-  add_executable(fltk-options-cmd ${CPPFILES} ${HEADERFILES})
-  target_link_libraries(fltk-options-cmd PRIVATE ${FLTK_OPTIONS_LIBS})
-  if(FLTK_HAVE_CAIRO)
-    target_link_directories(fltk-options-cmd PRIVATE ${PKG_CAIRO_LIBRARY_DIRS})
-  endif(FLTK_HAVE_CAIRO)
+  list(APPEND TARGETS fltk-options-cmd)
+  add_executable(fltk-options-cmd fltk-options.cxx)
+  target_link_libraries(fltk-options-cmd PRIVATE fltk::fltk)
 endif()
 
+# Create aliases for all fltk-options executables,
+# replacing 'fltk-options' with 'fltk::options'
 
-# install fltk-options GUI and commandline tool
+foreach(tgt ${TARGETS})
+  string(REPLACE "fltk-options" "fltk::options" alias ${tgt})
+  add_executable(${alias} ALIAS ${tgt})
+  unset(alias)
+endforeach()
 
-if(APPLE AND (NOT FLTK_BACKEND_X11))
+# Install fltk-options GUI and commandline tool
+
+if(APPLE AND NOT FLTK_BACKEND_X11)
 
   # On macOS, fltk-options must be installed twice. The bundled version of
   # fltk-options needs to go into the /Applications folder to make it visible
@@ -93,7 +86,7 @@ if(APPLE AND (NOT FLTK_BACKEND_X11))
   # ## set_target_properties(fltk-options PROPERTIES RESOURCE ${ICON_PATH})
 
   # install fltk-options GUI and commandline tools
-  #install(TARGETS fltk-options DESTINATION "/Applications")
+  # install(TARGETS fltk-options DESTINATION "/Applications")
 
   # install command line tool
   install(PROGRAMS $<TARGET_FILE:fltk-options> DESTINATION ${FLTK_BINDIR})
@@ -103,16 +96,16 @@ else()
   # install fltk-options GUI and optional commandline tool 'fltk-options-cmd'
   # (only on Windows)
 
-  install(TARGETS ${FLTK_OPTIONS_TARGETS}
+  install(TARGETS ${TARGETS}
     EXPORT FLTK-Targets
     RUNTIME DESTINATION ${FLTK_BINDIR}
     LIBRARY DESTINATION ${FLTK_LIBDIR}
     ARCHIVE DESTINATION ${FLTK_LIBDIR}
   )
 
-  endif(APPLE AND (NOT FLTK_BACKEND_X11))
+endif(APPLE AND NOT FLTK_BACKEND_X11)
 
-# install desktop files
+# Install desktop files
 
 if(UNIX)
   install(FILES fltk-options.desktop
