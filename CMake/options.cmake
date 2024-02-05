@@ -97,15 +97,14 @@ if(MSVC)
 endif(MSVC)
 
 #######################################################################
-if(UNIX)
-  option(FLTK_BACKEND_X11 "use X11" ON)
-endif(UNIX)
 
 if(APPLE)
   option(FLTK_BACKEND_X11 "use X11" OFF)
   if(CMAKE_OSX_SYSROOT)
     list(APPEND FLTK_CFLAGS "-isysroot ${CMAKE_OSX_SYSROOT}")
   endif(CMAKE_OSX_SYSROOT)
+elseif(UNIX)
+  option(FLTK_BACKEND_X11 "use X11" ON)
 endif(APPLE)
 
 #######################################################################
