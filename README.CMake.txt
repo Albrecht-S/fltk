@@ -265,7 +265,11 @@ FLTK_USE_LIBDECOR_GTK - default ON (Wayland only).
     Allow to use libdecor's GTK plugin to draw window titlebars. Otherwise
     FLTK does not use GTK and apps will not need linking to GTK. This feature
     is always 'ON' if FLTK_USE_SYSTEM_LIBDECOR is 'ON'.
-touchor Wayland, and also
+
+FLTK_USE_PANGO - default OFF (see note below)
+    Enables use of the Pango library for drawing text. Pango supports all
+    unicode-defined scripts and gives FLTK limited support of right-to-left
+    scripts. This option makes sense only under X11 or Wayland, and also
     requires Xft.
     This option is ignored (always enabled) if Wayland or FLTK_GRAPHICS_CAIRO
     is ON.
