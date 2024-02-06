@@ -129,7 +129,12 @@ FLTK_ABI_VERSION - default EMPTY
     ABI version to select.
 
 FLTK_ARCHFLAGS - default EMPTY
-    Extra architecture flags.
+    Extra "architecture" flags used as C and C++ compiler flags.
+    These flags are also "exported" to fltk-config.
+
+FLTK_BACKEND_WAYLAND_GTK - default ON
+    Allow to use libdecor's GTK plugin to draw window titlebars (Wayland only).
+    Otherwise, FLTK will not use GTK and apps will not need linking to GTK.
 
 FLTK_BACKEND_WAYLAND - default ON (only Unix/Linux)
     Enable the Wayland backend for all window operations, Cairo for all
@@ -150,6 +155,10 @@ FLTK_BACKEND_X11 - default ON on Unix/Linux, OFF elsewhere (Windows, macOS).
       Use this only if you know what you do and if you have installed X11.
     - Windows/Cygwin: enable X11 backend for Cygwin platforms. This option
       is currently (as of FLTK 1.4.0) not supported on Windows.
+
+Note: On platforms that support Wayland you may set FLTK_BACKEND_WAYLAND=ON
+    (this is the default) and FLTK_BACKEND_X11=OFF to build a Wayland-only
+    library or vice versa for an X11-only library.
 
 FLTK_BUILD_EXAMPLES - default OFF
     Build the example programs in the 'examples' directory.
@@ -259,13 +268,6 @@ FLTK_USE_XRENDER  - default ON
     These are X11 extended libraries. These libs are used if found on the
     build system unless the respective option is turned off.
 
-FLTK_BACKEND_WAYLAND_GTK - default ON
-    Allow to use libdecor's GTK plugin to draw window titlebars (Wayland only).
-    Otherwise, FLTK will not use GTK and apps will not need linking to GTK.
-
-FLTK_BACKEND_WAYLAND_ONLY - obsolete
-    Please set FLTK_BACKEND_WAYLAND=ON and FLTK_BACKEND_X11=OFF instead.
-
 FLTK_USE_SYSTEM_LIBDECOR - default ON (Wayland only)
     This option makes FLTK use package libdecor-0-dev to draw window titlebars
     under Wayland. When OFF or when this package has a version < 0.2.0, FLTK
@@ -310,7 +312,7 @@ FLTK_INSTALL_HTML_DOCS - default OFF
 FLTK_INSTALL_PDF_DOCS  - default OFF
     If these options are ON then the HTML and/or PDF docs are installed
     when the 'install' target is executed, e.g. with `make install'. You
-    need to select above options OPTION_BUILD_*_DOCS as well.
+    need to select above options FLTK_BUILD_*_DOCS as well.
 
 
 Special Options

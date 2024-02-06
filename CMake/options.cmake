@@ -497,9 +497,9 @@ if(FLTK_OPTION_CAIRO_WINDOW OR FLTK_OPTION_CAIRO_EXT)
     # Cairo libs and flags for fltk-config
 
     # Hint: use either PKG_CAIRO_* or PKG_CAIRO_STATIC_* variables to
-    # create the list of libraries used to link programs with cairo
+    # create the list of libraries used to link programs with Cairo
     # by running fltk-config --use-cairo --compile ...
-    # Currently we're using the non-STATIC variables to link cairo shared.
+    # Currently we're using the non-STATIC variables to link Cairo shared.
 
     set(CAIROLIBS)
     foreach(lib ${PKG_CAIRO_LIBRARIES})
@@ -512,8 +512,8 @@ if(FLTK_OPTION_CAIRO_WINDOW OR FLTK_OPTION_CAIRO_EXT)
   else(PKG_CAIRO_FOUND)
 
     if(NOT MSVC)
-      message(STATUS "*** Cairo was requested but not found - please check your cairo installation")
-      message(STATUS "***   or disable options FLTK_OPTION_CAIRO_WINDOW and OPTION_CAIRO_EXT.")
+      message(STATUS "*** Cairo was requested but not found - please check your Cairo installation")
+      message(STATUS "***   or disable options FLTK_OPTION_CAIRO_WINDOW and FLTK_OPTION_CAIRO_EXT.")
       message(FATAL_ERROR "*** Terminating: missing Cairo libs or headers.")
     endif()
 
