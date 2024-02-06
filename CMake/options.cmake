@@ -350,9 +350,9 @@ if(UNIX)
     endif(FLTK_USE_SYSTEM_LIBDECOR)
 
     if(USE_SYSTEM_LIBDECOR)
-      set(FLTK_BACKEND_WAYLAND_GTK ON)
+      set(FLTK_USE_LIBDECOR_GTK ON)
     else()
-      option(FLTK_BACKEND_WAYLAND_GTK "Allow to use libdecor's GTK plugin" ON)
+      option(FLTK_USE_LIBDECOR_GTK "Allow to use libdecor's GTK plugin" ON)
     endif(USE_SYSTEM_LIBDECOR)
 
     if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "FreeBSD")
@@ -921,8 +921,8 @@ endif((X11_Xft_FOUND OR NOT USE_PANGOXFT) AND FLTK_USE_PANGO)
 
 if(FLTK_BACKEND_WAYLAND)
 
-  # Note: Disable FLTK_BACKEND_WAYLAND_GTK to get cairo titlebars rather than GTK
-  if(FLTK_BACKEND_WAYLAND_GTK)
+  # Note: Disable FLTK_USE_LIBDECOR_GTK to get cairo titlebars rather than GTK
+  if(FLTK_USE_LIBDECOR_GTK)
     pkg_check_modules(GTK gtk+-3.0)
     if(GTK_FOUND)
     list(APPEND FLTK_BUILD_INCLUDE_DIRECTORIES ${GTK_INCLUDE_DIRS})
@@ -930,7 +930,7 @@ if(FLTK_BACKEND_WAYLAND)
       message(WARNING "Installation of the development files for the GTK library "
       "(e.g., libgtk-3-dev) is recommended when using the gnome desktop.")
     endif(GTK_FOUND)
-  endif(FLTK_BACKEND_WAYLAND_GTK)
+  endif(FLTK_USE_LIBDECOR_GTK)
 
 endif()
 

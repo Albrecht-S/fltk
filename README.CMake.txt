@@ -9,24 +9,28 @@ README.CMake.txt - Building and using FLTK with CMake
 
   2     Using CMake to Build FLTK
 
-    2.1   Prerequisites
-    2.2   Options
-    2.3   Building under Linux with Unix Makefiles
-    2.4   Building under Windows with Visual Studio and/or NMake
-    2.4.1 Building under Windows with Visual Studio
-    2.4.2 Building under Windows with NMake
-    2.5   Building under Windows with MinGW using Makefiles
-    2.6   Building under MacOS with Xcode
-    2.7   Crosscompiling
+    2.1    Prerequisites
+    2.2    Options
+    2.2.1  General CMake Options
+    2.2.2  FLTK Specific Build Options
+    2.2.3  Documentation Options
+    2.2.4  Special Options
+    2.3    Building under Linux with Unix Makefiles
+    2.4    Building under Windows with Visual Studio and/or NMake
+    2.4.1  Building under Windows with Visual Studio
+    2.4.2  Building under Windows with NMake
+    2.5    Building under Windows with MinGW using Makefiles
+    2.6    Building under MacOS with Xcode
+    2.7    Crosscompiling
 
   3     Using CMake with FLTK
 
-    3.1   Library Names
-    3.2   Library Aliases
-    3.3   Exported and Imported Targets
-    3.4   Building a Simple "Hello World" Program with FLTK
-    3.5   Building a Program Using Fluid Files
-    3.6   Building a Program Using CMake's FetchContent Module
+    3.1    Library Names
+    3.2    Library Aliases
+    3.3    Exported and Imported Targets
+    3.4    Building a Simple "Hello World" Program with FLTK
+    3.5    Building a Program Using Fluid Files
+    3.6    Building a Program Using CMake's FetchContent Module
 
 
   4     FindFLTK.cmake and find_package(FLTK)
@@ -83,7 +87,8 @@ under Linux. Other platforms are just as easy to use.
 
  2.2  Options
 --------------
-Options can be specified to cmake with the -D flag:
+
+Options can be specified to CMake with the -D flag:
 
     cmake -D <OPTION_NAME>=<OPTION_VALUE>
 
@@ -94,7 +99,16 @@ Example:
 Notes: the space between '-D' and the option name can be omitted.
 Option values must be quoted if they contain spaces.
 
-All options have sensible defaults so you won't usually need to touch these.
+Other CMake tools are `ccmake` and `cmake-gui` but these are not
+described here.
+
+All options have sensible defaults so you won't usually need to specify
+them explicitly.
+
+
+ 2.2.1  General CMake Options
+------------------------------
+
 There are only three CMake options that you may want to specify:
 
 CMAKE_BUILD_TYPE
@@ -116,8 +130,15 @@ Note: the CMake variable BUILD_SHARED_LIBS is ignored by FLTK. FLTK builds
     static libs by default and can optionally build shared libs as well.
     Please see FLTK_BUILD_SHARED_LIBS instead.
 
-The following are the FLTK specific options. Platform specific options
-are ignored on other platforms.
+
+ 2.2.2  FLTK Specific Build Options
+------------------------------------
+
+Following are the FLTK specific options. Platform specific options are
+ignored on other platforms. For convenience the list of options is ordered
+alphabetically except "Documentation Options" and "Special Options" that
+follow in their own sections below.
+
 
 FLTK_ABI_VERSION - default EMPTY
     Use a numeric value corresponding to the FLTK ABI version you want to
@@ -131,10 +152,6 @@ FLTK_ABI_VERSION - default EMPTY
 FLTK_ARCHFLAGS - default EMPTY
     Extra "architecture" flags used as C and C++ compiler flags.
     These flags are also "exported" to fltk-config.
-
-FLTK_BACKEND_WAYLAND_GTK - default ON
-    Allow to use libdecor's GTK plugin to draw window titlebars (Wayland only).
-    Otherwise, FLTK will not use GTK and apps will not need linking to GTK.
 
 FLTK_BACKEND_WAYLAND - default ON (only Unix/Linux)
     Enable the Wayland backend for all window operations, Cairo for all
@@ -226,16 +243,29 @@ FLTK_OPTION_PRINT_SUPPORT - default ON
     is somewhat smaller. This option makes sense only on the Unix/Linux
     platform or on macOS when FLTK_BACKEND_X11 is ON.
 
+FLTK_OPTION_STD - default OFF
+    This option allows FLTK to use some specific features of modern C++
+    like std::string in the public API of FLTK 1.4.x. Users turning this
+    option ON can benefit from some new functions and methods that return
+    std::string or use std::string as input parameters.
+    Note: This option will be removed in the next minor (1.5.0) or major
+    release which will use std::string and other modern C++ features.
+
+FLTK_OPTION_SVG - default ON
+    FLTK has a built-in SVG library and can create (write) SVG image files.
+    Turning this option off disables SVG (read and write) support.
+
 FLTK_USE_KDIALOG - default ON
     Under the KDE desktop, allows class Fl_Native_File_Chooser to use the
     kdialog utility program to construct its file dialog windows, when that
     utility is available at run time on the system. This option makes sense
     only under X11 or Wayland.
 
-FLTK_USE_PANGO - default OFF (see note below)
-    Enables use of the Pango library for drawing text. Pango supports all
-    unicode-defined scripts and gives FLTK limited support of right-to-left
-    scripts. This option makes sense only under X11 or Wayland, and also
+FLTK_USE_LIBDECOR_GTK - default ON (Wayland only).
+    Allow to use libdecor's GTK plugin to draw window titlebars. Otherwise
+    FLTK does not use GTK and apps will not need linking to GTK. This feature
+    is always 'ON' if FLTK_USE_SYSTEM_LIBDECOR is 'ON'.
+touchor Wayland, and also
     requires Xft.
     This option is ignored (always enabled) if Wayland or FLTK_GRAPHICS_CAIRO
     is ON.
@@ -247,26 +277,6 @@ FLTK_USE_PTHREADS - default ON except on Windows.
     Enables multithreaded support with pthreads if available.
     This option is ignored (switched OFF internally) on Windows except
     when using Cygwin.
-
-FLTK_OPTION_STD - default OFF
-    This option allows FLTK to use some specific features of modern C++
-    like std::string in the public API of FLTK 1.4.x. Users turning this
-    option ON can benefit from some new functions and methods that return
-    std::string or use std::string as input parameters.
-    This option will be removed in the next minor (1.5.0) or major release
-    which will default to use std::string and other modern C++ features.
-
-FLTK_OPTION_SVG - default ON
-    FLTK has a built-in SVG library and can create (write) SVG image files.
-    Turning this option off disables SVG (read and write) support.
-
-FLTK_USE_XCURSOR  - default ON
-FLTK_USE_XFIXES   - default ON
-FLTK_USE_XFT      - default ON
-FLTK_USE_XINERAMA - default ON
-FLTK_USE_XRENDER  - default ON
-    These are X11 extended libraries. These libs are used if found on the
-    build system unless the respective option is turned off.
 
 FLTK_USE_SYSTEM_LIBDECOR - default ON (Wayland only)
     This option makes FLTK use package libdecor-0-dev to draw window titlebars
@@ -287,20 +297,29 @@ FLTK_USE_SYSTEM_ZLIB    - default ON (macOS and Windows: OFF)
     Note: if any one of libpng or zlib is not found on the system, both
     libraries are built using the bundled ones and a warning is issued.
 
+FLTK_USE_XCURSOR  - default ON
+FLTK_USE_XFIXES   - default ON
+FLTK_USE_XFT      - default ON
+FLTK_USE_XINERAMA - default ON
+FLTK_USE_XRENDER  - default ON
+    These are X11 extended libraries. These libs are used if found on the
+    build system unless the respective option is turned off.
 
-Documentation Options
+
+ 2.2.3  Documentation Options
+------------------------------
 
   These options are only available if `doxygen' is installed and found.
   PDF related options require also `latex'.
 
 FLTK_BUILD_HTML_DOCS - default ON
 FLTK_BUILD_PDF_DOCS  - default ON
-    These options can be used to switch HTML documentation generation with
-    doxygen on. If these are ON the build targets 'html', 'pdf', and 'docs'
+    These options can be used to enable HTML documentation generation with
+    doxygen. If these are ON the build targets 'html', 'pdf', and 'docs'
     are generated but must be built explicitly. Technically the build targets
-    are generated but excluded from 'ALL'. You can safely leave these two
-    options ON if you want to save build time because the docs are not
-    built automatically.
+    are generated but excluded from 'ALL'.
+    You can safely leave these two options ON if you want to save build time
+    because the docs are not built automatically.
 
 FLTK_INCLUDE_DRIVER_DOCS - default OFF
     This option adds driver documentation to HTML and PDF docs (if ON). This
@@ -315,7 +334,8 @@ FLTK_INSTALL_PDF_DOCS  - default OFF
     need to select above options FLTK_BUILD_*_DOCS as well.
 
 
-Special Options
+ 2.2.4  Special Options
+------------------------
 
 FLTK_INSTALL_LINKS - default OFF
     Deprecated: install "compatibility" links to compensate for typos in
@@ -368,6 +388,7 @@ generator with the -G"Visual Studio ..." command line switch, or the
 generator can be selected interactively in the GUI (cmake-gui). If you
 are not sure which one to select use `cmake --help` which lists all
 generators known to CMake on your system.
+
 
  2.4.1 Building under Windows with Visual Studio
 -------------------------------------------------
@@ -442,6 +463,7 @@ using the commandline switch, particularly if you are using a special
       the build directories (i.e. without "installation") you need
       to include both the build tree (first) and then the FLTK source
       tree in the compiler's header search list.
+
 
  2.4.2 Building under Windows with NMake
 -----------------------------------------
@@ -861,8 +883,8 @@ CMake command find_package(FLTK) does not yet support FLTK's new "Modern
 CMake" features.
 
 Unfortunately this module has to be used if the FLTK library wasn't built
-with CMake and CONFIG mode can't be used. In this case CMake falls back to
-MODUEL mode and find_package() uses this old CMake module.
+with CMake and thus CONFIG mode can't be used. In this case CMake falls back
+to MODULE mode and find_package() uses this old CMake module.
 
 There are plans to provide a FindFLTK.cmake module with FLTK 1.4.0 but this
 module is not yet written. Look here for further info if you need it...

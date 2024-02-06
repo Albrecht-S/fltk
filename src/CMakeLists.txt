@@ -560,9 +560,9 @@ if(FLTK_BACKEND_WAYLAND)
       "${FLTK_SOURCE_DIR}/libdecor/src/plugins")
     set(CDEFS "${CDEFS};USE_SYSTEM_LIBDECOR=0;LIBDECOR_PLUGIN_API_VERSION=1"
       "LIBDECOR_PLUGIN_DIR=\"\"")
-    if(GTK_FOUND AND FLTK_BACKEND_WAYLAND_GTK)
+    if(GTK_FOUND AND FLTK_USE_LIBDECOR_GTK)
       set(CDEFS "${CDEFS};HAVE_GTK")
-    endif(GTK_FOUND AND FLTK_BACKEND_WAYLAND_GTK)
+    endif(GTK_FOUND AND FLTK_USE_LIBDECOR_GTK)
     set_source_files_properties(
       ${FLTK_SOURCE_DIR}/libdecor/build/fl_libdecor.c
       ${FLTK_SOURCE_DIR}/libdecor/build/fl_libdecor-plugins.c
@@ -757,7 +757,7 @@ if(UNIX AND FLTK_BACKEND_WAYLAND)
   endif(FLTK_USE_GL)
   if(USE_SYSTEM_LIBDECOR)
     list(APPEND OPTIONAL_LIBS "-ldecor-0")
-  elseif(GTK_FOUND AND FLTK_BACKEND_WAYLAND_GTK)
+  elseif(GTK_FOUND AND FLTK_USE_LIBDECOR_GTK)
       list(APPEND OPTIONAL_LIBS ${GTK_LDFLAGS} )
   endif(USE_SYSTEM_LIBDECOR)
   list(APPEND OPTIONAL_LIBS "-lwayland-cursor -lwayland-client -lxkbcommon -ldl")
