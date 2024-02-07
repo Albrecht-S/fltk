@@ -55,7 +55,7 @@ if(WIN32)
   target_link_libraries(fltk-options-cmd PRIVATE fltk::fltk)
 endif()
 
-# Create aliases for all fltk-options executables,
+# Create aliases for all executables,
 # replacing 'fltk-options' with 'fltk::options'
 
 foreach(tgt ${TARGETS})
