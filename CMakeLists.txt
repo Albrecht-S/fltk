@@ -57,6 +57,11 @@ if(0)
   fl_debug_var(CMAKE_VERSION)
 endif()
 
+# Set FLTK_VERSION in the cache so user projects can access it,
+# for instance if FLTK is built as a subproject (FetchContent)
+
+set(FLTK_VERSION ${FLTK_VERSION} CACHE STRING "FLTK version" FORCE)
+
 #######################################################################
 # basic setup
 #######################################################################
