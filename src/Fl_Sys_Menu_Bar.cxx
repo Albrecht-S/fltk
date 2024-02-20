@@ -1,7 +1,7 @@
 //
-// system menu bar widget for the Fast Light Tool Kit (FLTK).
+// System menu bar widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2021 by Bill Spitzak and others.
+// Copyright 1998-2024 by Bill Spitzak and others.
 //
 // This library is free software. Distribution and use rights are outlined in
 // the file "COPYING" which should have been included with this file.  If this
@@ -25,7 +25,7 @@ Fl_Sys_Menu_Bar *fl_sys_menu_bar = 0;
 
 /**
  The constructor.
- On Mac OS X, all arguments are unused. On other platforms they are used as by Fl_Menu_Bar::Fl_Menu_Bar().
+ On macOS, all arguments are unused. On other platforms they are used as by Fl_Menu_Bar::Fl_Menu_Bar().
  */
 Fl_Sys_Menu_Bar::Fl_Sys_Menu_Bar(int x,int y,int w,int h,const char *l)
 : Fl_Menu_Bar(x,y,w,h,l)
@@ -174,7 +174,7 @@ void Fl_Sys_Menu_Bar::replace(int index, const char *name)
 
 /**
   Attaches a callback to the "About myprog" item of the system application menu.
- This cross-platform function is effective only under the MacOS platform.
+ This cross-platform function is effective only under the macOS platform.
  \param cb   a callback that will be called by "About myprog" menu item
        with NULL 1st argument.
  \param data   a pointer transmitted as 2nd argument to the callback.
@@ -211,15 +211,15 @@ Fl_Sys_Menu_Bar::window_menu_style_enum Fl_Sys_Menu_Bar::window_menu_style() {
  \li \c tabbing_mode_preferred : new windows are displayed in tabbed mode when first created
 
  The Window menu, if present, is entirely created and controlled by the FLTK library.
- Mac OS version 10.12 or later must be running for windows to be displayed in tabbed form.
- Under non MacOS platforms, this function does nothing.
+ macOS version 10.12 or later must be running for windows to be displayed in tabbed form.
+ Under non macOS platforms, this function does nothing.
  \version 1.4
  */
 void Fl_Sys_Menu_Bar::window_menu_style(Fl_Sys_Menu_Bar::window_menu_style_enum style) {
   if (driver()) Fl_Sys_Menu_Bar_Driver::window_menu_style(style);
 }
 
-/** Adds a Window menu, to the end of the system menu bar.
+/** Adds a Window menu to the end of the system menu bar on macOS.
  FLTK apps typically don't need to call this function which is automatically
  called by the library the first time a window is shown. The default system menu bar
  contains a Window menu with a "Merge All Windows" item.
@@ -228,13 +228,24 @@ void Fl_Sys_Menu_Bar::window_menu_style(Fl_Sys_Menu_Bar::window_menu_style_enum 
  Alternatively, an app can call create_window_menu() after having populated the system menu bar,
  for example with menu(const Fl_Menu_Item *), and before the first Fl_Window::show().
 
- This function does nothing on non MacOS platforms.
+ This method leaves the menu items in a safe storage (until they are modified again),
+ i.e. this method calls Fl_Menu_::menu_end() on the menu items of the menu bar.
+
+ On non macOS platforms calling this method is equivalent to calling Fl_Menu_::menu_end().
+
+ This ensures that the menu items are always stored in their own storage, no matter on
+ which platform this is called.
+
+ \see Fl_Menu_::menu_end()
  \version 1.4
  */
 void Fl_Sys_Menu_Bar::create_window_menu() {
   if (driver()) {
     fl_open_display();
     fl_sys_menu_bar->driver()->create_window_menu();
+  } else {
+    if (fl_sys_menu_bar)
+      fl_sys_menu_bar->menu_end();
   }
 }
 

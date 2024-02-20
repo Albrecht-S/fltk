@@ -221,6 +221,9 @@ void menu_linespacing_cb(Fl_Widget* w, void*) {
 Fl_Menu_* menus[4];
 
 void about_cb(Fl_Widget*, void*) {
+  printf("[%2d] smenubar->menu() = %p (about_cb)\n", 10, smenubar->menu());
+  smenubar->menu_end();
+  printf("[%2d] smenubar->menu() = %p (about_cb)\n", 11, smenubar->menu());
   fl_message("The menubar test app.");
 }
 
@@ -281,7 +284,6 @@ int main(int argc, char **argv) {
 
   window.end();
 
-  Fl_Sys_Menu_Bar::about(about_cb, NULL);
 #ifdef HAS_MAC_APP_MENU
   Fl_Menu_Item custom[] = {
     {"Preferences…",  0, test_cb, NULL, FL_MENU_DIVIDER},
@@ -290,7 +292,19 @@ int main(int argc, char **argv) {
     {0}
   };
   Fl_Mac_App_Menu::custom_application_menu_items(custom);
+  printf("[%2d] smenubar->menu() = %p\n", 1, smenubar->menu());
+  smenubar->menu_end();
+  printf("[%2d] smenubar->menu() = %p\n", 2, smenubar->menu());
   //Fl_Sys_Menu_Bar::window_menu_style(Fl_Sys_Menu_Bar::no_window_menu);
+
+  printf("[%2d] smenubar->menu() = %p\n", 3, smenubar->menu());
+  Fl_Sys_Menu_Bar::about(about_cb, NULL);
+  printf("[%2d] smenubar->menu() = %p\n", 4, smenubar->menu());
+  Fl_Sys_Menu_Bar::create_window_menu();
+  printf("[%2d] smenubar->menu() = %p\n", 5, smenubar->menu());
+  smenubar->menu_end();
+  printf("[%2d] smenubar->menu() = %p\n", 6, smenubar->menu());
+
 #endif
   window.show(argc, argv);
   return Fl::run();

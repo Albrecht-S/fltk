@@ -1,7 +1,7 @@
 //
-// MacOS system menu bar widget for the Fast Light Tool Kit (FLTK).
+// macOS system menu bar widget for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2021 by Bill Spitzak and others.
+// Copyright 1998-2024 by Bill Spitzak and others.
 //
 // This library is free software. Distribution and use rights are outlined in
 // the file "COPYING" which should have been included with this file.  If this
@@ -77,7 +77,7 @@ Fl_MacOS_Sys_Menu_Bar_Driver* Fl_MacOS_Sys_Menu_Bar_Driver::driver() {
     - if the system item's tag is >= 0, fl_sys_menu_bar->menu() + tag is the address
     of the relevant Fl_Menu_Item;
     - otherwise, the system item's representedObject is the Fl_Menu_Item's address.
-    This allows the MacOS system menu to use the same Fl_Menu_Item's as those used by FLTK menus,
+    This allows the macOS system menu to use the same Fl_Menu_Item's as those used by FLTK menus,
     the address of which can be relocated by the FLTK menu logic.
     The "representedObject" is used for non-relocatable Fl_Menu_Item's associated to FL_SUBMENU_POINTER.
     Sending the getFlItem message to a macOS system menu item (of class FLMenuItem) returns the address
@@ -427,6 +427,7 @@ static void convertToMenuBar(const Fl_Menu_Item *mm)
 
 void Fl_MacOS_Sys_Menu_Bar_Driver::update()
 {
+  bar->Fl_Menu_::menu_end();
   convertToMenuBar(bar->Fl_Menu_::menu());
 }
 
