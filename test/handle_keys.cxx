@@ -281,6 +281,10 @@ void clear_cb(Fl_Button *b, void *) {
   tty->printf("%s\n", headline_text); // helpful if copied to the clipboard
   tty->redraw();
   tty->take_focus();
+#if (0) // TEST and DEBUG only
+  printf("\n*** clear ***\n\n\n\n");
+  fflush(stdout);
+#endif // TEST and DEBUG only
 }
 
 // Copy button callback: copies the selected text to the clipboard

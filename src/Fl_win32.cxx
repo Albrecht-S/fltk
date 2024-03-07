@@ -108,6 +108,43 @@ extern void fl_cleanup_pens(void);
 #define round(A) int((A) + 0.5)
 #endif // _MSC_VER <= 1600
 
+// Debug options: these macros enable (detailed!) debug output
+// (printf statements) - see code below
+// define these as 0 or 1 - don't undefine them
+
+#define DEBUG_MESSAGE   0   // some Windows messages with their "names"
+#define DEBUG_KEYBOARD  0   // keyboard related stuff (a lot!)
+#define DEBUG_KEYNAMES  0   // some special key "names" as seen by Windows
+#define DEBUG_SCANCODE  0   // scancode of keys
+
+#if (DEBUG_MESSAGE || DEBUG_KEYBOARD || DEBUG_KEYNAMES || DEBUG_SCANCODE)
+#define FF fflush(stdout)
+#endif
+
+// The option USE_FL_ALT_GR "maps" the right 'Alt' key to FL_Alt_Gr which is
+// correct for international keyboards (DE, FR, ...) but not for e.g. US/UK an
+// other keyboards that have a 2nd (right) 'Alt' key (FL_Alt_R). Compiling this
+// in is insufficient, we need to test the keyboard layout or "ask" Windows (how?).
+
+#define USE_FL_ALT_GR   1   // define to 0 or 1 (don't undefine it) [Test (WIP)]
+
+// Manolo suggested to add VK_OEM_PLUS to the key table (maps to '+').
+// I'm not sure we need it in *this* updated version, but maybe in 1.4 (current
+// 'master' as of Sep. 2024) which is closer to the old (1.3) version.
+
+#define USE_OEM_PLUS    1   // define to 0 or 1 (don't undefine it) [Test (WIP)]
+
+
+// FL_CTRL_HACK is an attempt to "fix" control character handling by setting
+// Fl::event_text() to the empty string "" for all keys but 'a' to 'z'
+// when pressed together with Ctrl.
+// Unfortunately this doesn't work (yet?) because the Windows message(s) sent
+// by AltGr from international keyboards (DE, FR, ...) send CTRL + ALT and thus
+// set the FL_CTRL flag for "other" *valid* characters (keys) than 'a' to 'z'.
+// Therefore this hack doesn't work as expected and should be disabled (0).
+
+#define FL_CTRL_HACK    0   // set Fl::event_text() to "" for CTRL+{x != a-z}
+
 // Internal functions
 static void fl_clipboard_notify_target(HWND wnd);
 static void fl_clipboard_notify_untarget(HWND wnd);
@@ -1099,77 +1136,79 @@ static int mouse_event(Fl_Window *window, int what, int button,
 static const struct {
   unsigned short vk, fltk, extended;
 } vktab[] = {
-  {VK_BACK,     FL_BackSpace},
-  {VK_TAB,      FL_Tab},
-  {VK_CLEAR,    FL_KP+'5',      0xff0b/*XK_Clear*/},
-  {VK_RETURN,   FL_Enter,       FL_KP_Enter},
-  {VK_SHIFT,    FL_Shift_L,     FL_Shift_R},
-  {VK_CONTROL,  FL_Control_L,   FL_Control_R},
-  {VK_MENU,     FL_Alt_L,       FL_Alt_R},
-  {VK_PAUSE,    FL_Pause},
-  {VK_CAPITAL,  FL_Caps_Lock},
-  {VK_ESCAPE,   FL_Escape},
-  {VK_SPACE,    ' '},
-  {VK_PRIOR,    FL_KP+'9',      FL_Page_Up},
-  {VK_NEXT,     FL_KP+'3',      FL_Page_Down},
-  {VK_END,      FL_KP+'1',      FL_End},
-  {VK_HOME,     FL_KP+'7',      FL_Home},
-  {VK_LEFT,     FL_KP+'4',      FL_Left},
-  {VK_UP,       FL_KP+'8',      FL_Up},
-  {VK_RIGHT,    FL_KP+'6',      FL_Right},
-  {VK_DOWN,     FL_KP+'2',      FL_Down},
-  {VK_SNAPSHOT, FL_Print},      // does not work on NT
-  {VK_INSERT,   FL_KP+'0',      FL_Insert},
-  {VK_DELETE,   FL_KP+'.',      FL_Delete},
-  {VK_LWIN,     FL_Meta_L},
-  {VK_RWIN,     FL_Meta_R},
-  {VK_APPS,     FL_Menu},
-  {VK_SLEEP, FL_Sleep},
-  {VK_MULTIPLY, FL_KP+'*'},
-  {VK_ADD,      FL_KP+'+'},
-  {VK_SUBTRACT, FL_KP+'-'},
-  {VK_DECIMAL,  FL_KP+'.'},
-  {VK_DIVIDE,   FL_KP+'/'},
-  {VK_NUMLOCK,  FL_Num_Lock},
-  {VK_SCROLL,   FL_Scroll_Lock},
-#if defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0500)
-  {VK_BROWSER_BACK,     FL_Back},
-  {VK_BROWSER_FORWARD,  FL_Forward},
-  {VK_BROWSER_REFRESH,  FL_Refresh},
-  {VK_BROWSER_STOP,     FL_Stop},
-  {VK_BROWSER_SEARCH,   FL_Search},
-  {VK_BROWSER_FAVORITES, FL_Favorites},
-  {VK_BROWSER_HOME,     FL_Home_Page},
-  {VK_VOLUME_MUTE,      FL_Volume_Mute},
-  {VK_VOLUME_DOWN,      FL_Volume_Down},
-  {VK_VOLUME_UP,        FL_Volume_Up},
-  {VK_MEDIA_NEXT_TRACK, FL_Media_Next},
-  {VK_MEDIA_PREV_TRACK, FL_Media_Prev},
-  {VK_MEDIA_STOP,       FL_Media_Stop},
-  {VK_MEDIA_PLAY_PAUSE, FL_Media_Play},
-  {VK_LAUNCH_MAIL,      FL_Mail},
+  {VK_BACK,               FL_BackSpace},
+  {VK_TAB,                FL_Tab},
+  {VK_CLEAR,              FL_KP+'5',      0xff0b /*XK_Clear*/ },
+  {VK_RETURN,             FL_Enter,       FL_KP_Enter},
+  {VK_SHIFT,              FL_Shift_L,     FL_Shift_R},
+  {VK_CONTROL,            FL_Control_L,   FL_Control_R},
+#if (USE_FL_ALT_GR)
+  {VK_MENU,               FL_Alt_L,       FL_Alt_Gr},     // Test (WIP): may need keyboard layout check!
+#else
+  {VK_MENU,               FL_Alt_L,       FL_Alt_R},      // Original: missing explicit AltGr key support
 #endif
-  {0xba,        ';'},
-  {0xbb,        '='},
-  {0xbc,        ','},
-  {0xbd,        '-'},
-  {0xbe,        '.'},
-  {0xbf,        '/'},
-  {0xc0,        '`'},
-  {0xdb,        '['},
-  {0xdc,        '\\'},
-  {0xdd,        ']'},
-  {0xde,        '\''},
-  {VK_OEM_PLUS,  '+'},
-  {VK_OEM_102,  FL_Iso_Key}
+  {VK_PAUSE,              FL_Pause},
+  {VK_CAPITAL,            FL_Caps_Lock},
+  {VK_ESCAPE,             FL_Escape},
+  {VK_SPACE,              ' '},
+  {VK_PRIOR,              FL_KP+'9',      FL_Page_Up},
+  {VK_NEXT,               FL_KP+'3',      FL_Page_Down},
+  {VK_END,                FL_KP+'1',      FL_End},
+  {VK_HOME,               FL_KP+'7',      FL_Home},
+  {VK_LEFT,               FL_KP+'4',      FL_Left},
+  {VK_UP,                 FL_KP+'8',      FL_Up},
+  {VK_RIGHT,              FL_KP+'6',      FL_Right},
+  {VK_DOWN,               FL_KP+'2',      FL_Down},
+  {VK_SNAPSHOT,           FL_Print},      // does not work on NT
+  {VK_INSERT,             FL_KP+'0',      FL_Insert},
+  {VK_DELETE,             FL_KP+'.',      FL_Delete},
+  {VK_LWIN,               FL_Meta_L},
+  {VK_RWIN,               FL_Meta_R},
+  {VK_APPS,               FL_Menu},
+  {VK_SLEEP,              FL_Sleep},
+  {VK_MULTIPLY,           FL_KP+'*'},
+  {VK_ADD,                FL_KP+'+'},
+  {VK_SUBTRACT,           FL_KP+'-'},
+  {VK_DECIMAL,            FL_KP+'.'},
+  {VK_DIVIDE,             FL_KP+'/'},
+  {VK_NUMLOCK,            FL_Num_Lock},
+  {VK_SCROLL,             FL_Scroll_Lock},
+  {VK_BROWSER_BACK,       FL_Back},
+  {VK_BROWSER_FORWARD,    FL_Forward},
+  {VK_BROWSER_REFRESH,    FL_Refresh},
+  {VK_BROWSER_STOP,       FL_Stop},
+  {VK_BROWSER_SEARCH,     FL_Search},
+  {VK_BROWSER_FAVORITES,  FL_Favorites},
+  {VK_BROWSER_HOME,       FL_Home_Page},
+  {VK_VOLUME_MUTE,        FL_Volume_Mute},
+  {VK_VOLUME_DOWN,        FL_Volume_Down},
+  {VK_VOLUME_UP,          FL_Volume_Up},
+  {VK_MEDIA_NEXT_TRACK,   FL_Media_Next},
+  {VK_MEDIA_PREV_TRACK,   FL_Media_Prev},
+  {VK_MEDIA_STOP,         FL_Media_Stop},
+  {VK_MEDIA_PLAY_PAUSE,   FL_Media_Play},
+  {VK_LAUNCH_MAIL,        FL_Mail},
+  {0xe4,                  FL_Alt_Gr},     // 0xE3-E4: Windows docs: OEM specific
+#if (USE_OEM_PLUS)
+  {VK_OEM_PLUS,           '+'},           // (proposed by Manolo)
+#endif // (USE_OEM_PLUS)
+  {VK_OEM_102,            FL_Iso_Key}     // "the '<>' on standard US or '\|' on non-US
+                                          // 102 key keyboard", according to Windows docs
 };
+
+// Convert a Microsoft Windows "Virtual-Key Code" to an FLTK key code.
+// Link to Microsoft docs as of March 2024:
+// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+
 static int ms2fltk(WPARAM vk, int extended) {
   static unsigned short vklut[256];
   static unsigned short extendedlut[256];
-  if (!vklut[1]) { // init the table
+  // init the table only once
+  if (!vklut[0x20]) {
     unsigned int i;
-    for (i = 0; i < 256; i++)
+    for (i = 32; i < 128; i++) {
       vklut[i] = tolower(i);
+    }
     for (i = VK_F1; i <= VK_F16; i++)
       vklut[i] = i + (FL_F - (VK_F1 - 1));
     for (i = VK_NUMPAD0; i <= VK_NUMPAD9; i++)
@@ -1178,12 +1217,53 @@ static int ms2fltk(WPARAM vk, int extended) {
       vklut[vktab[i].vk] = vktab[i].fltk;
       extendedlut[vktab[i].vk] = vktab[i].extended;
     }
-    for (i = 0; i < 256; i++)
+    for (i = 0; i < 256; i++) {
       if (!extendedlut[i])
         extendedlut[i] = vklut[i];
+    }
   }
+#if (DEBUG_KEYNAMES)  // DEBUG special virtual key codes ("names")
+  const char *nm = NULL;
+  switch(vk) {
+    case (VK_OEM_PLUS)  : nm = "VK_OEM_PLUS"; break;
+    case (VK_OEM_102)   : nm = "VK_OEM_102";  break;
+    case (VK_CONTROL)   : nm = "VK_CONTROL";  break;
+    case (VK_MENU)      : nm = "VK_MENU (AltGr)"; break;
+    default: break;
+  }
+  if (nm) {
+    printf("  ---  ms2fltk: key = %s, extended = %s\n", nm, extended ? "TRUE" : "FALSE"); FF;
+  }
+#endif // DEBUG special virtual key codes ("names")
+
   return extended ? extendedlut[vk] : vklut[vk];
 }
+
+// Debug Window Messages - if DEBUG_MESSAGE is true (1)
+// print line number + WM_* message name + wParam + lParam
+// returns the message name (maybe "unknown") or "" if not enabled
+
+#if (DEBUG_MESSAGE)
+const char *msginfo(int line, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  static const char *m = "";
+  switch(uMsg) {
+    case WM_INPUTLANGCHANGE:  m = "WM_INPUTLANGCHANGE"; break;
+    case WM_KEYDOWN:          m = "WM_KEYDOWN"; break;
+    case WM_SYSKEYDOWN:       m = "WM_SYSKEYDOWN"; break;
+    case WM_KEYUP:            m = "WM_KEYUP"; break;
+    case WM_SYSKEYUP:         m = "WM_SYSKEYUP"; break;
+    case WM_DEADCHAR:         m = "WM_DEADCHAR"; break;
+    case WM_SYSDEADCHAR:      m = "WM_SYSDEADCHAR"; break;
+    case WM_CHAR:             m = "WM_CHAR"; break;
+    case WM_SYSCHAR:          m = "WM_SYSCHAR"; break;
+    default:
+      m = "unknown";
+  }
+  printf("\n*** [%s - %4d: %-18s (%3u)] ", __FILE__, line, m, uMsg);
+  printf("wParam = 0x%04llx, lParam = 0x%04llx\n", wParam, lParam); FF;
+  return m;
+}
+#endif // (DEBUG_MESSAGE)
 
 #if USE_COLORMAP
 extern HPALETTE fl_select_palette(void); // in fl_color_win32.cxx
@@ -1213,6 +1293,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
   float scale = (window ? Fl::screen_driver()->scale(Fl_Window_Driver::driver(window)->screen_num()) : 1);
 
   if (window) {
+
+    char e_text_set = 0;      // 1 after we set Fl::e_text (Fl::event_text())
+    static char buffer[1024]; // buffer for Fl::event_text()
+    BYTE keystate[256];       // keyboard state of max. 256 keys ("original")
+#if (DEBUG_MESSAGE)
+    const char *mname = "";   // message "name" for message debugging
+#endif
+
     switch (uMsg) {
 
       case WM_DPICHANGED: { // 0x02E0, after display re-scaling and followed by WM_DISPLAYCHANGE
@@ -1439,6 +1527,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
         break;
 
       case WM_INPUTLANGCHANGE:
+#if (DEBUG_MESSAGE)
+        mname = msginfo(__LINE__, uMsg, wParam, lParam); // debug and store message name
+#endif
         fl_get_codepage();
         break;
       case WM_IME_COMPOSITION:
@@ -1456,54 +1547,211 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       case WM_SYSKEYDOWN:
       case WM_KEYUP:
       case WM_SYSKEYUP:
+      {
+#if (DEBUG_MESSAGE)
+        mname = msginfo(__LINE__, uMsg, wParam, lParam); // debug and store message name
+#endif
+        WORD keyflags = HIWORD(lParam);
+        WORD scancode = LOBYTE(keyflags);     // keyboard scancode
+        GetKeyboardState(keystate);           // get current keyboard state
+
         // save the keysym until we figure out the characters:
-        Fl::e_keysym = Fl::e_original_keysym = ms2fltk(wParam, lParam & (1 << 24));
-        // Kludge to allow recognizing ctrl+'-' on keyboards with digits in uppercase positions (e.g. French)
-        if (Fl::e_keysym == '6' && (VkKeyScanA('-') & 0xff) == '6') {
-          Fl::e_keysym = '-';
+        int keysym = Fl::e_keysym = Fl::e_original_keysym = ms2fltk(wParam, lParam & (1 << 24));
+
+#if (DEBUG_KEYBOARD)
+        printf("    scancode = 0x%02x (%3d), ms2fltk returned Fl::e_keysym = 0x%04x (%3d)\n",
+               scancode, scancode, keysym, keysym);
+        FF;
+#endif
+
+        // Retrieve keycode and set Fl::e_keysym and Fl::e_text
+
+        // Make a copy of the keyboard state so we can change it to query keys
+        // w/o some modifiers, notably VK_CONTROL. Thus we can get the key value
+        // as if the modifiers were not set, e.g. '+' for ctrl/+.
+        // This is independent of the keyboard layout (language).
+        // Note: we might need to disable other modifiers like ALT but not SHIFT!
+
+        BYTE keystate2[256];
+        memcpy(keystate2, keystate, sizeof(keystate));
+        keystate2[VK_CONTROL] = 0;
+
+#if (DEBUG_SCANCODE)
+        // Map Virtual Keycode to scancode (obviously not required, see below)
+        printf("MapVirtualKeyW: scancode = %d -> ", scancode);
+        scancode = MapVirtualKeyW(wParam, MAPVK_VK_TO_VSC);
+        printf("%d\n", scancode);
+        FF;
+#endif // (DEBUG_SCANCODE)
+
+        // Convert Virtual-Key Code to Unicode (UTF-16)
+
+        wchar_t unicode[32];
+        int ulen = ToUnicode(wParam,              // virtual key code
+                              scancode,           // scancode
+                              keystate2,          // key state array
+                              unicode,            // output buffer (UTF-16)
+                              sizeof(unicode)/2,  // output buffer size
+                              0);                 // flags
+
+        if (ulen > 0) { // ToUnicode() success
+
+          // convert UTF-16 to UTF-8, set Fl::event_text()
+
+          unsigned tlen = fl_utf8fromwc(buffer, sizeof(buffer), unicode, ulen);
+          buffer[tlen] = 0;
+          Fl::e_text = buffer;
+          Fl::e_length = tlen;
+          e_text_set = 1;
+
+          // convert UTF-8 to Unicode (aka UCS), set Fl::event_key()
+          Fl::e_keysym = fl_utf8decode(buffer, buffer + tlen, NULL);
+
+#if (DEBUG_KEYBOARD)
+          printf("    ToUnicode() success: Fl::e_keysym = 0x%04x, text = '%s' (L=%d)\n",
+                  Fl::e_keysym, Fl::e_text, Fl::e_length);
+          FF;
+#endif
+
+        } // ToUnicode() success
+
+        else { // ToUnicode() returned a value <= 0
+
+#if (DEBUG_KEYBOARD)
+          DWORD errcd = GetLastError();
+          printf("    ToUnicode() failed: ulen = %d, GetLastError() = %d\n", ulen, (int)errcd);
+          char mbuf[200];
+          int msize = FormatMessageA(0, 0, errcd, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&mbuf, 0, NULL);
+          if (msize > 0) {
+            printf("    *message* '%s'\n", mbuf);
+          }
+          FF;
+#endif
+          buffer[0] = 0;
+          Fl::e_text = buffer;
+          Fl::e_length = 0;
+        } // ToUnicode()
+
+        // Special processing for number keys == scancodes 2 - 11
+        // (necessary to support keyboard layouts with digits in uppercase,
+        // e.g. French keyboards)
+        // and keypad keys (all keyboards)
+
+#if (DEBUG_KEYBOARD)
+        int keysym_sav = Fl::e_keysym; // FIXME: DEBUG ONLY (REMOVE)
+#endif
+        if ((keysym >= '0' && keysym <= '9') ||
+            (keysym >= FL_KP && keysym <= FL_KP_Last) ||
+            (keysym >= 0xff00 && keysym < FL_KP)
+           ) {
+          Fl::e_keysym = keysym; // restore initial keysym value
         }
+
+#if (DEBUG_KEYBOARD)
+        if (Fl::e_keysym != keysym_sav) { // FIXME: DEBUG ONLY (REMOVE)
+          printf("***** replaced Fl::e_keysym '%c' with '%c'\n", keysym_sav, Fl::e_keysym);
+        } // // FIXME: DEBUG ONLY (REMOVE)
+#endif
+
         // See if TranslateMessage turned it into a WM_*CHAR message:
+
         if (PeekMessageW(&fl_msg, hWnd, WM_CHAR, WM_SYSDEADCHAR, PM_REMOVE)) {
-          uMsg = fl_msg.message;
+          uMsg   = fl_msg.message;
           wParam = fl_msg.wParam;
           lParam = fl_msg.lParam;
+#if (DEBUG_MESSAGE)
+          printf("    Message translated to %d: %s\n", uMsg, uMsg == WM_CHAR ? "WM_CHAR" : "WM_XXX?");
+          FF;
+#endif
         }
+
+        else { // no WM_CHAR message, i.e. not a "printing" character
+
+#if (DEBUG_MESSAGE)
+          printf("    Message NOT translated. Continuing (FALLTHROUGH) ...\n");
+          FF;
+#endif
+        } // no WM_CHAR message
+
+      } // WM_*KEY_*
+
         // FALLTHROUGH ...
 
       case WM_DEADCHAR:
       case WM_SYSDEADCHAR:
       case WM_CHAR:
       case WM_SYSCHAR: {
+
+        if (uMsg == WM_CHAR || uMsg == WM_SYSCHAR) {
+#if (DEBUG_MESSAGE)
+          mname = msginfo(__LINE__, uMsg, wParam, lParam);  // debug and store message name
+#endif
+          GetKeyboardState(keystate);                       // update keyboard state
+        }
+
         ulong state = Fl::e_state & 0xff000000; // keep the mouse button state
-        // if GetKeyState is expensive we might want to comment some of these out:
-        if (GetKeyState(VK_SHIFT) & ~1)
+        if (keystate[VK_SHIFT] & ~1)
           state |= FL_SHIFT;
-        if (GetKeyState(VK_CAPITAL))
+        if (keystate[VK_CAPITAL])
           state |= FL_CAPS_LOCK;
-        if (GetKeyState(VK_CONTROL) & ~1)
+        if (keystate[VK_CONTROL] & ~1)
           state |= FL_CTRL;
-        // Alt gets reported for the Alt-GR switch on non-English keyboards.
+
+        // Alt gets reported for the Alt-GR switch on non-English keyboards
         // so we need to check the event as well to get it right:
-        if ((lParam & (1 << 29)) // same as GetKeyState(VK_MENU)
+        if ((lParam & (1 << 29)) // same as keystate[VK_MENU]
             && uMsg != WM_CHAR)
           state |= FL_ALT;
-        if (GetKeyState(VK_NUMLOCK))
+
+        if (keystate[VK_NUMLOCK])
           state |= FL_NUM_LOCK;
-        if ((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & ~1) {
+
+        if ((keystate[VK_LWIN] | keystate[VK_RWIN]) & ~1) {
           // Windows bug?  GetKeyState returns garbage if the user hit the
           // meta key to pop up start menu.  Sigh.
           if ((GetAsyncKeyState(VK_LWIN) | GetAsyncKeyState(VK_RWIN)) & ~1)
             state |= FL_META;
         }
-        if (GetKeyState(VK_SCROLL))
+
+        if (keystate[VK_SCROLL])
           state |= FL_SCROLL_LOCK;
+
         Fl::e_state = state;
-        static char buffer[1024];
+
         if (uMsg == WM_CHAR || uMsg == WM_SYSCHAR) {
+#if (DEBUG_MESSAGE)
+          printf("    [%-14s :%4d]\n", mname, __LINE__); FF;
+#endif
+#if (DEBUG_KEYBOARD)
+          for (int j = 0; j < Fl::e_length; j++) {
+            printf("  --XTX-- Fl::e_text[%2d] = 0x%02x\n", j, (uchar)Fl::e_text[j]);
+          }
+#endif
+
+#if (1) // ORIGINAL CODE: use wParam(WM_CHAR) as before - works well but not 100% correct
           wchar_t u = (wchar_t)wParam;
           Fl::e_length = fl_utf8fromwc(buffer, 1024, &u, 1);
           buffer[Fl::e_length] = 0;
-        } else if (Fl::e_keysym >= FL_KP && Fl::e_keysym <= FL_KP_Last) {
+#if (DEBUG_MESSAGE)
+          printf("    [%-14s :%4d]\n", mname, __LINE__); FF;
+#endif
+#else   // TEST: skip wParam(WM_CHAR) - doesn't work correctly
+#if (DEBUG_MESSAGE)
+          printf("    [%-14s :%4d]\n", mname, __LINE__); FF;
+          printf("    [%-14s :%4d] ##### skip wParam(WM_CHAR) #####\n", mname, __LINE__);
+#endif
+#endif   // TEST: skip wParam(WM_CHAR) ...
+#if (DEBUG_KEYBOARD)
+          for (int j = 0; j < Fl::e_length; j++) {
+            printf("  --TXT-- Fl::e_text[%2d] = 0x%02x\n", j, (uchar)Fl::e_text[j]);
+          }
+#endif
+        }
+
+        else if (Fl::e_keysym >= FL_KP && Fl::e_keysym <= FL_KP_Last) {
+#if (DEBUG_MESSAGE)
+          printf("    [%-14s :%4d]\n", mname, __LINE__); FF;
+#endif
           if (state & FL_NUM_LOCK) {
             // Convert to regular keypress...
             buffer[0] = Fl::e_keysym - FL_KP;
@@ -1552,8 +1800,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
                 break;
             }
           }
-        } else if ((lParam & (1 << 31)) == 0) {
-#ifdef FLTK_PREVIEW_DEAD_KEYS
+        }
+
+        else if ((lParam & (1 << 31)) == 0) {
+#if (DEBUG_MESSAGE)
+          printf("    [%-14s :%4d]\n", mname, __LINE__); FF;
+#endif
+#ifdef    FLTK_PREVIEW_DEAD_KEYS
           if ((lParam & (1 << 24)) == 0) { // clear if dead key (always?)
             wchar_t u = (wchar_t)wParam;
             Fl::e_length = fl_utf8fromwc(buffer, 1024, &u, 1);
@@ -1562,26 +1815,47 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
             buffer[0] = 0;
             Fl::e_length = 0;
           }
-#else
-          buffer[0] = 0;
-          Fl::e_length = 0;
-#endif
+#else     // FLTK_PREVIEW_DEAD_KEYS
+          if (!e_text_set) {
+            buffer[0] = 0;
+            Fl::e_length = 0;
+          }
+#endif    // FLTK_PREVIEW_DEAD_KEYS
         }
         Fl::e_text = buffer;
-        if (lParam & (1 << 31)) { // key up events.
-          if (Fl::handle(FL_KEYUP, window))
+        if (lParam & (1 << 31)) { // key up events
+          if (Fl::handle(FL_KEYUP, window)) {
             return 0;
+          }
           break;
         }
         while (window->parent())
           window = window->window();
-        if (Fl::handle(FL_KEYBOARD, window)) {
-          if (uMsg == WM_DEADCHAR || uMsg == WM_SYSDEADCHAR)
+
+#if (FL_CTRL_HACK)
+        if (Fl::e_state & FL_CTRL) {
+          // reset buffer if not ctrl-A .. ctrl-Z
+          if (Fl::e_length != 1 || buffer[0] < 1 || buffer[0] > 26) {
+            buffer[0] = '\0';
+            Fl::e_length = 0;
+          }
+        }
+#endif  // (FL_CTRL_HACK)
+
+#if (DEBUG_KEYBOARD)
+        printf("[%4d] FL_CTRL = %d, buffer[0] = %d, L=%d\n", __LINE__,
+               Fl::e_state & FL_CTRL ? 1 : 0, int(buffer[0]), Fl::e_length);
+#endif
+        int handle_keyboard = Fl::handle(FL_KEYBOARD, window);
+        if (handle_keyboard) {
+          if (uMsg == WM_DEADCHAR || uMsg == WM_SYSDEADCHAR) {
             Fl::compose_state = 1;
+          }
           return 0;
         }
-        break; // WM_KEYDOWN ... WM_SYSKEYUP, WM_DEADCHAR ... WM_SYSCHAR
       } // case WM_DEADCHAR ... WM_SYSCHAR
+
+      break; // WM_KEYDOWN ... WM_SYSKEYUP, WM_DEADCHAR ... WM_SYSCHAR
 
       case WM_MOUSEWHEEL: {
         static int delta = 0; // running total of all vertical mousewheel motion
