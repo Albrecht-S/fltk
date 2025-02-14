@@ -2,7 +2,7 @@
 # Main CMakeLists.txt to build the FLTK project using CMake (www.cmake.org)
 # Originally written by Michael Surette
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -279,10 +279,10 @@ endif()
 fl_summary("Installation prefix" "${CMAKE_INSTALL_PREFIX}")
 
 message("")
-#                "title"           name  system library if used
-fl_summary_image("Bundled Libraries" JPEG  LIB_jpeg)
-fl_summary_image(""                  PNG   LIB_png)
-fl_summary_image(""                  ZLIB  LIB_zlib)
+#                "title"             name  system library if used
+fl_summary_image("Bundled Libraries" JPEG  FLTK_JPEG_LIBRARIES)
+fl_summary_image(""                  PNG   FLTK_PNG_LIBRARIES)
+fl_summary_image(""                  ZLIB  FLTK_ZLIB_LIBRARIES)
 
 if(FLTK_BACKEND_WAYLAND)
   if(USE_SYSTEM_LIBDECOR)

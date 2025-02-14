@@ -1,8 +1,8 @@
 #
-# Macro used by the CMake build system for the Fast Light Tool Kit (FLTK).
+# A function used by the CMake build system for the Fast Light Tool Kit (FLTK).
 # Originally written by Michael Surette
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -124,7 +124,7 @@ function(fl_add_library LIBNAME LIBTYPE SOURCES)
     ### FIXME: why does the simplified else() block not work?
     ### Needs investigation, using 'if(1)' for now...
 
-    if(1)
+    if(1) # 1 = use workaround ...
 
       foreach(dir ${FLTK_BUILD_INCLUDE_DIRECTORIES})
         target_include_directories(${TARGET_NAME} PRIVATE

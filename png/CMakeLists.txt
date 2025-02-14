@@ -1,7 +1,7 @@
 #
 # PNG library CMake configuration for the Fast Light Toolkit (FLTK).
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -35,7 +35,7 @@ set(PNG_SRCS
 
 #######################################################################
 # Note: This file is used only if we build the bundled PNG library,
-#  and if we do this we MUST also build and use the *bundled* ZLIB,
+#  and *if* we do this we MUST also build and use the *bundled* ZLIB,
 #  hence we also link against the bundled ZLIB. Therefore there's
 #  no need to check which ZLIB version to use in this context.
 #######################################################################
@@ -83,24 +83,22 @@ list(APPEND PNG_SRCS
 set(compile_defs
       HAVE_PNG_H=1
       HAVE_PNG_GET_VALID=1
-      HAVE_PNG_SET_TRNS_TO_ALPHA=1
-)
+      HAVE_PNG_SET_TRNS_TO_ALPHA=1)
 
 set(include_dirs
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:include>
-)
+      $<INSTALL_INTERFACE:include/FL/images>)
 
 #######################################################################
 # Build the static library
 #######################################################################
 
 fl_add_library(fltk_png STATIC "${PNG_SRCS}")
-set(target     fltk_png)
+set(_target    fltk_png)
 
-target_link_libraries     (${target} PUBLIC fltk::z)
-target_compile_definitions(${target} PUBLIC ${compile_defs})
-target_include_directories(${target} PUBLIC ${include_dirs})
+target_link_libraries     (${_target} PUBLIC fltk::z)
+target_compile_definitions(${_target} PUBLIC ${compile_defs})
+target_include_directories(${_target} PUBLIC ${include_dirs})
 
 list(APPEND FLTK_IMAGE_LIBRARIES fltk::png)
 
@@ -114,15 +112,16 @@ set(FLTK_IMAGE_LIBRARIES ${FLTK_IMAGE_LIBRARIES} PARENT_SCOPE)
 
 if(FLTK_BUILD_SHARED_LIBS)
 
-  # ensure to export all symbols for Windows DLL's
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-
   fl_add_library(fltk_png SHARED "${PNG_SRCS}")
-  set(target     fltk_png-shared)
+  set(_target    fltk_png-shared)
 
-  target_link_libraries     (${target} PUBLIC fltk::z-shared)
-  target_compile_definitions(${target} PUBLIC ${compile_defs})
-  target_include_directories(${target} PUBLIC ${include_dirs})
+  # ensure to export all symbols for Windows DLL's
+  set_target_properties(${_target} PROPERTIES
+                        WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
+  target_link_libraries     (${_target} PUBLIC fltk::z-shared)
+  target_compile_definitions(${_target} PUBLIC ${compile_defs})
+  target_include_directories(${_target} PUBLIC ${include_dirs})
 
   list(APPEND FLTK_IMAGE_LIBRARIES_SHARED fltk::png-shared)
 
@@ -132,10 +131,11 @@ if(FLTK_BUILD_SHARED_LIBS)
 
 endif()
 
+unset(_target)
+
 #######################################################################
 # Install the library headers
 #######################################################################
 
 install(FILES png.h pngconf.h pnglibconf.h pngprefix.h
-        DESTINATION ${FLTK_INCLUDEDIR}/FL/images
-)
+        DESTINATION ${FLTK_INCLUDEDIR}/FL/images)

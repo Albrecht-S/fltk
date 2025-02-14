@@ -1,7 +1,7 @@
 #
 # JPEG library CMake configuration for the Fast Light Toolkit (FLTK).
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -23,8 +23,7 @@ set(systemdependent_SRCS jmemnobs.c)
 # library object files common to compression and decompression
 
 set(common_SRCS
-    jaricom.c jcomapi.c jutils.c jerror.c jmemmgr.c
-)
+    jaricom.c jcomapi.c jutils.c jerror.c jmemmgr.c)
 
 # compression library object files
 
@@ -32,8 +31,7 @@ set(compression_SRCS
     jcapimin.c jcapistd.c jcarith.c jctrans.c jcparam.c jdatadst.c jcinit.c
     jcmaster.c jcmarker.c jcmainct.c jcprepct.c jccoefct.c jccolor.c
     jcsample.c jchuff.c jcdctmgr.c jfdctfst.c jfdctflt.c
-    jfdctint.c
-)
+    jfdctint.c)
 
 # decompression library object files
 
@@ -41,8 +39,7 @@ set(decompression_SRCS
     jdapimin.c jdapistd.c jdarith.c jdtrans.c jdatasrc.c jdmaster.c
     jdinput.c jdmarker.c jdhuff.c jdmainct.c jdcoefct.c
     jdpostct.c jddctmgr.c jidctfst.c jidctflt.c jidctint.c
-    jdsample.c jdcolor.c jquant1.c jquant2.c jdmerge.c
-)
+    jdsample.c jdcolor.c jquant1.c jquant2.c jdmerge.c)
 
 list(APPEND BUILD_SRCS "${systemdependent_SRCS};${common_SRCS}")
 list(APPEND BUILD_SRCS "${compression_SRCS};${decompression_SRCS}")
@@ -53,8 +50,7 @@ list(APPEND BUILD_SRCS "${compression_SRCS};${decompression_SRCS}")
 
 set(_include_dirs
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:include>
-)
+    $<INSTALL_INTERFACE:include/FL/images>)
 
 # Suppress Visual Studio compiler warnings
 
@@ -65,12 +61,12 @@ set(msvc_warnings /wd4267)
 #######################################################################
 
 fl_add_library(fltk_jpeg STATIC "${BUILD_SRCS}")
-set(target     fltk_jpeg)
+set(_target    fltk_jpeg)
 
-target_include_directories(${target} PUBLIC ${_include_dirs})
+target_include_directories(${_target} PUBLIC ${_include_dirs})
 
 if(MSVC)
-  target_compile_options(${target} PRIVATE ${msvc_warnings})
+  target_compile_options(${_target} PRIVATE ${msvc_warnings})
 endif(MSVC)
 
 list(APPEND FLTK_IMAGE_LIBRARIES fltk::jpeg)
@@ -85,16 +81,17 @@ set(FLTK_IMAGE_LIBRARIES ${FLTK_IMAGE_LIBRARIES} PARENT_SCOPE)
 
 if(FLTK_BUILD_SHARED_LIBS)
 
-  # ensure to export all symbols for Windows DLL's
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-
   fl_add_library(fltk_jpeg SHARED "${BUILD_SRCS}")
-  set(target     fltk_jpeg-shared)
+  set(_target    fltk_jpeg-shared)
 
-  target_include_directories(${target} PUBLIC ${_include_dirs})
+  # ensure to export all symbols for Windows DLL's
+  set_target_properties(${_target} PROPERTIES
+                        WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
+  target_include_directories(${_target} PUBLIC ${_include_dirs})
 
   if(MSVC)
-    target_compile_options(${target} PRIVATE ${msvc_warnings})
+    target_compile_options(${_target} PRIVATE ${msvc_warnings})
   endif(MSVC)
 
   list(APPEND FLTK_IMAGE_LIBRARIES_SHARED fltk::jpeg-shared)
@@ -112,5 +109,4 @@ endif(FLTK_BUILD_SHARED_LIBS)
 install(FILES
           jconfig.h jerror.h jmorecfg.h jpeglib.h fltk_jpeg_prefix.h
         DESTINATION
-          ${FLTK_INCLUDEDIR}/FL/images
-)
+          ${FLTK_INCLUDEDIR}/FL/images)

@@ -2,7 +2,7 @@
 # Resource definitions to build the FLTK project using CMake (www.cmake.org)
 # Originally written by Michael Surette
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -216,25 +216,32 @@ mark_as_advanced(FREETYPE_PATH)
 
 #######################################################################
 # libraries
+#######################################################################
+
 find_library(LIB_dl dl)
+mark_as_advanced(LIB_dl)
+
 if((NOT APPLE) OR FLTK_BACKEND_X11)
   find_library(LIB_fontconfig fontconfig)
+  mark_as_advanced(LIB_fontconfig)
 endif((NOT APPLE) OR FLTK_BACKEND_X11)
-find_library(LIB_freetype freetype)
-find_library(LIB_GL GL)
-find_library(LIB_MesaGL MesaGL)
-find_library(LIB_jpeg jpeg)
-find_library(LIB_png png)
-find_library(LIB_zlib z)
-find_library(LIB_m m)
 
-mark_as_advanced(LIB_dl LIB_fontconfig LIB_freetype)
-mark_as_advanced(LIB_GL LIB_MesaGL)
-mark_as_advanced(LIB_jpeg LIB_png LIB_zlib)
+find_library(LIB_freetype freetype)
+mark_as_advanced(LIB_freetype)
+
+find_library(LIB_GL GL)
+mark_as_advanced(LIB_GL)
+
+find_library(LIB_MesaGL MesaGL)
+mark_as_advanced(LIB_MesaGL)
+
+find_library(LIB_m m)
 mark_as_advanced(LIB_m)
 
 #######################################################################
 # functions
+#######################################################################
+
 include(CheckFunctionExists)
 
 # Save CMAKE_REQUIRED_LIBRARIES
@@ -254,40 +261,33 @@ if(HAVE_DLFCN_H)
 endif(HAVE_DLFCN_H)
 
 set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_DL_LIBS})
-check_symbol_exists(dlsym       "dlfcn.h"            HAVE_DLSYM)
+check_symbol_exists(dlsym       "dlfcn.h"       HAVE_DLSYM)
 set(CMAKE_REQUIRED_LIBRARIES)
 
-check_symbol_exists(localeconv  "locale.h"           HAVE_LOCALECONV)
+check_symbol_exists(localeconv  "locale.h"      HAVE_LOCALECONV)
 
-if(LIB_png)
-  set(CMAKE_REQUIRED_LIBRARIES ${LIB_png})
-  check_symbol_exists(png_get_valid          "png.h"   HAVE_PNG_GET_VALID)
-  check_symbol_exists(png_set_tRNS_to_alpha  "png.h"   HAVE_PNG_SET_TRNS_TO_ALPHA)
-  set(CMAKE_REQUIRED_LIBRARIES)
-endif(LIB_png)
-
-check_symbol_exists(scandir       "dirent.h"          HAVE_SCANDIR)
-check_symbol_exists(snprintf      "stdio.h"           HAVE_SNPRINTF)
+check_symbol_exists(scandir     "dirent.h"      HAVE_SCANDIR)
+check_symbol_exists(snprintf    "stdio.h"       HAVE_SNPRINTF)
 
 # not really true but we convert strcasecmp calls to _stricmp calls in flstring.h
 if(MSVC)
    set(HAVE_STRCASECMP 1)
 endif(MSVC)
 
-check_symbol_exists(strcasecmp   "strings.h"     HAVE_STRCASECMP)
+check_symbol_exists(strcasecmp  "strings.h"     HAVE_STRCASECMP)
 
-check_symbol_exists(strlcat      "string.h"      HAVE_STRLCAT)
-check_symbol_exists(strlcpy      "string.h"      HAVE_STRLCPY)
-check_symbol_exists(vsnprintf    "stdio.h"       HAVE_VSNPRINTF)
+check_symbol_exists(strlcat     "string.h"      HAVE_STRLCAT)
+check_symbol_exists(strlcpy     "string.h"      HAVE_STRLCPY)
+check_symbol_exists(vsnprintf   "stdio.h"       HAVE_VSNPRINTF)
 
-check_symbol_exists(setenv       "stdlib.h"      HAVE_SETENV)
+check_symbol_exists(setenv      "stdlib.h"      HAVE_SETENV)
 
 # Windows doesn't require '-lm' for trunc(), other platforms do
 if(LIB_m AND NOT WIN32)
   set(CMAKE_REQUIRED_LIBRARIES ${LIB_m})
 endif()
 
-check_symbol_exists(trunc        "math.h"        HAVE_TRUNC)
+check_symbol_exists(trunc       "math.h"        HAVE_TRUNC)
 
 set(CMAKE_REQUIRED_LIBRARIES)
 

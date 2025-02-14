@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt to build fluid for the FLTK project using CMake (www.cmake.org)
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -92,22 +92,24 @@ set(HEADERFILES
 )
 
 # Add ExternalCodeEditor: platform specific files
+# Note: currently all platforms but Windows use the 'UNIX' source files
 
 if(WIN32)
-  list(APPEND CPPFILES ExternalCodeEditor_WIN32.cxx)
-  list(APPEND HEADERFILES ExternalCodeEditor_WIN32.h)
+  set(platform WIN32)
 else()
-  list(APPEND CPPFILES ExternalCodeEditor_UNIX.cxx)
-  list(APPEND HEADERFILES ExternalCodeEditor_UNIX.h)
-endif(WIN32)
+  set(platform UNIX)
+endif()
+list(APPEND CPPFILES    ExternalCodeEditor_${platform}.cxx)
+list(APPEND HEADERFILES ExternalCodeEditor_${platform}.h)
+unset(platform)
 
 source_group("Header Files" FILES ${HEADERFILES})
 
 # Build a local object library to avoid compiling all source files
 # multiple times for all fluid targets on Windows (fluid + fluid-cmd).
 
-add_library(fluid-lib OBJECT EXCLUDE_FROM_ALL)
-target_sources(fluid-lib PRIVATE ${CPPFILES} ${HEADERFILES})
+add_library(          fluid-lib OBJECT EXCLUDE_FROM_ALL)
+target_sources(       fluid-lib PRIVATE ${CPPFILES} ${HEADERFILES})
 target_link_libraries(fluid-lib PUBLIC fltk::images)
 
 # Build targets
@@ -139,7 +141,7 @@ else()
 
 endif()
 
-target_link_libraries(fluid PRIVATE fluid-lib)
+target_link_libraries(fluid PRIVATE fluid-lib fltk::images)
 
 # Build the console app on Windows
 # This is done for all Windows targets, even if cross-compiling.

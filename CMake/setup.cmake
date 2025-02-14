@@ -50,7 +50,6 @@ set(FLTK_DOCDIR ${CMAKE_INSTALL_DATADIR}/doc CACHE PATH
 #######################################################################
 
 set(FLTK_BUILD_INCLUDE_DIRECTORIES "")
-set(FLTK_IMAGE_INCLUDE_DIRECTORIES "")
 set(FLTK_IMAGE_LIBRARIES "")
 set(FLTK_IMAGE_LIBRARIES_SHARED "")
 
