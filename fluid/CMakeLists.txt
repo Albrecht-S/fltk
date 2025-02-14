@@ -126,12 +126,13 @@ set(MAIN_FILES main.cxx main.h)
 # Add ExternalCodeEditor: platform specific files
 
 if(WIN32)
-  list(APPEND CPPFILES tools/ExternalCodeEditor_WIN32.cxx)
-  list(APPEND HEADERFILES tools/ExternalCodeEditor_WIN32.h)
+  set(platform WIN32)
 else()
-  list(APPEND CPPFILES tools/ExternalCodeEditor_UNIX.cxx)
-  list(APPEND HEADERFILES tools/ExternalCodeEditor_UNIX.h)
-endif(WIN32)
+  set(platform UNIX)
+endif()
+list(APPEND CPPFILES    tools/ExternalCodeEditor_${platform}.cxx)
+list(APPEND HEADERFILES tools/ExternalCodeEditor_${platform}.h)
+unset(platform)
 
 source_group(
   TREE

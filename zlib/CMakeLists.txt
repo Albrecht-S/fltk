@@ -1,7 +1,7 @@
 #
 # ZLIB library CMake configuration for the Fast Light Toolkit (FLTK).
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -35,20 +35,29 @@ set(ZLIB_SRCS
 )
 
 #######################################################################
+# Set common variables for static and shared builds
+#######################################################################
 
 # Suppress some Visual Studio compiler warnings
 
 set(msvc_warnings /wd4267 /wd4996)
+
+set(include_dirs
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/FL/images>)
 
 #######################################################################
 # Build the static library
 #######################################################################
 
 fl_add_library(fltk_z STATIC "${ZLIB_SRCS}")
+set(_target    fltk_z)
 
 if(MSVC)
-  target_compile_options(fltk_z PRIVATE ${msvc_warnings})
+  target_compile_options(${_target} PRIVATE ${msvc_warnings})
 endif(MSVC)
+
+target_include_directories(${_target} PUBLIC ${include_dirs})
 
 #######################################################################
 # Build the shared library (optional)
@@ -56,24 +65,29 @@ endif(MSVC)
 
 if(FLTK_BUILD_SHARED_LIBS)
 
-  # ensure to export all symbols for Windows DLL's
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-
   fl_add_library(fltk_z SHARED "${ZLIB_SRCS}")
+  set(_target    fltk_z-shared)
+
+  # ensure to export all symbols for Windows DLL's
+  set_target_properties(${_target} PROPERTIES
+                        WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
   if(MSVC)
-    target_compile_options(fltk_z-shared PRIVATE ${msvc_warnings})
+    target_compile_options(${_target} PRIVATE ${msvc_warnings})
   endif(MSVC)
+
+  target_include_directories(${_target} PUBLIC ${include_dirs})
 
 endif(FLTK_BUILD_SHARED_LIBS)
 
 set(FLTK_LIBRARIES ${FLTK_LIBRARIES} PARENT_SCOPE)
 set(FLTK_LIBRARIES_SHARED ${FLTK_LIBRARIES_SHARED} PARENT_SCOPE)
 
+unset(_target)
+
 #######################################################################
 # Install the library headers
 #######################################################################
 
 install(FILES zconf.h zlib.h zutil.h
-        DESTINATION ${FLTK_INCLUDEDIR}/FL/images
-)
+        DESTINATION ${FLTK_INCLUDEDIR}/FL/images)

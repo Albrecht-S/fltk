@@ -657,6 +657,7 @@ endif()
 set(OPTIONAL_LIBS)
 set(OPTIONAL_INCLUDES)
 
+# Note: This can't be a function because it uses global variables.
 macro(append_optional_libs targets)
   foreach(_target ${targets})
     get_target_property(_link_libraries ${_target} INTERFACE_LINK_LIBRARIES)
@@ -674,8 +675,9 @@ macro(append_optional_libs targets)
 endmacro()
 
 # Add the required properties for ${OPTIONAL_LIBS} to the given target.
-# Note: we must use 'PUBLIC', see GitHub Issue #1173
+# We must use 'PUBLIC', see GitHub Issue #1173
 
+# Note: This can't be a function because it uses global variables.
 macro(add_optional_libs target)
   target_link_libraries     (${target} PUBLIC ${OPTIONAL_LIBS})
   target_include_directories(${target} PUBLIC ${OPTIONAL_INCLUDES})
@@ -843,40 +845,48 @@ if(0)
 endif()
 
 fl_add_library(fltk_images STATIC "${IMGCPPFILES}")
-target_link_libraries(fltk_images PUBLIC  fltk::fltk)
-target_link_libraries(fltk_images PRIVATE ${FLTK_IMAGE_LIBRARIES})
+set(_target    fltk_images)
+
+target_link_libraries(${_target} PUBLIC fltk::fltk)
+target_link_libraries(${_target} PUBLIC ${FLTK_IMAGE_LIBRARIES})
 
 if(FLTK_USE_BUNDLED_JPEG)
-  target_include_directories(fltk_images PUBLIC
-    $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/jpeg>
-    $<INSTALL_INTERFACE:include/FL/images>)
+  target_include_directories(${_target} PUBLIC
+                             $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/jpeg>
+                             $<INSTALL_INTERFACE:install/FL/images>)
 endif()
 
 if(FLTK_USE_BUNDLED_PNG)
-  target_include_directories(fltk_images PUBLIC
-    $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/png>
-    $<INSTALL_INTERFACE:include/FL/images>)
+  target_include_directories(${_target} PUBLIC
+                             $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/png>
+                             $<INSTALL_INTERFACE:install/FL/images>)
 endif()
 
 if(FLTK_USE_BUNDLED_ZLIB)
-  target_include_directories(fltk_images PUBLIC
-    $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/zlib>
-    $<INSTALL_INTERFACE:include/FL/images>)
+  target_include_directories(${_target} PUBLIC
+                             $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/zlib>
+                             $<INSTALL_INTERFACE:install/FL/images>)
 endif()
+
+unset(_target)
 
 #######################################################################
 
 if(FLTK_USE_GL)
   fl_add_library(fltk_gl STATIC "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
-  target_link_libraries(fltk_gl PUBLIC ${OPENGL_LIBRARIES} fltk::fltk)
-  target_include_directories(fltk_gl PUBLIC ${OPENGL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
+  set(_target    fltk_gl)
+
+  target_include_directories(${_target} PUBLIC ${OPENGL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
+  target_link_libraries(     ${_target} PUBLIC ${OPENGL_LIBRARIES}   fltk::fltk)
 
   # Add "optional libs" (FIXME: this can be optimized, we don't need *all* these libs here)
-  add_optional_libs(fltk_gl)
+  add_optional_libs(${_target})
 
   if(FLTK_OPENGL_GLU_INCLUDE_DIR)
-    target_include_directories(fltk_gl PUBLIC ${FLTK_OPENGL_GLU_INCLUDE_DIR})
+    target_include_directories(${_target} PUBLIC ${FLTK_OPENGL_GLU_INCLUDE_DIR})
   endif()
+
+  unset(_target)
 endif(FLTK_USE_GL)
 
 #######################################################################
@@ -900,44 +910,43 @@ if(FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
   ###################################################################
 
   fl_add_library(fltk_images SHARED "${IMGCPPFILES}")
-  target_link_libraries(fltk_images-shared PUBLIC fltk::fltk-shared)
+  set(_target    fltk_images-shared)
 
-  target_link_libraries(fltk_images PUBLIC ${FLTK_JPEG_LIBRARIES})
-  target_link_libraries(fltk_images PUBLIC ${FLTK_PNG_LIBRARIES})
-  target_link_libraries(fltk_images PUBLIC ${FLTK_IMAGE_LIBRARIES})
+  target_link_libraries(${_target} PUBLIC fltk::fltk-shared)
 
   if(FLTK_USE_BUNDLED_JPEG)
-    target_include_directories(fltk_images-shared PUBLIC
-      $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/jpeg>
-      # $<INSTALL_INTERFACE:include>
-    )
-  endif()
-
-  if(FLTK_USE_BUNDLED_JPEG)
-    target_link_libraries(fltk_images-shared PUBLIC fltk::jpeg-shared)
+    target_link_libraries(${_target} PUBLIC fltk::jpeg-shared)
   else()
-    target_link_libraries(fltk_images-shared PUBLIC ${JPEG_LIBRARIES})
+    target_include_directories(${_target} PUBLIC ${JPEG_INCLUDE_DIRS})
+    target_link_libraries(     ${_target} PUBLIC ${JPEG_LIBRARIES})
   endif()
 
   if(FLTK_USE_BUNDLED_PNG)
-    target_link_libraries(fltk_images-shared PUBLIC fltk::png-shared)
+    target_link_libraries(${_target} PUBLIC fltk::png-shared)
   else()
-    target_link_libraries(fltk_images-shared PUBLIC ${PNG_LIBRARIES})
+    target_include_directories(${_target} PUBLIC ${PNG_INCLUDE_DIRS})
+    target_link_libraries(     ${_target} PUBLIC ${PNG_LIBRARIES})
   endif()
+
+  # Note: PNG depends on ZLIB, hence we don't need ZLIB here
+
+  unset(_target)
 
   ###################################################################
 
   if(FLTK_USE_GL)
     fl_add_library(fltk_gl SHARED "${GLCPPFILES};${GL_HEADER_FILES};${GL_DRIVER_HEADER_FILES}")
-    target_link_libraries(fltk_gl-shared PUBLIC ${OPENGL_LIBRARIES} fltk::fltk-shared)
-    target_include_directories(fltk_gl-shared PUBLIC ${OPENGL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
+    set(_target    fltk_gl-shared)
 
-    # Add "optional libs" (FIXME: this can be optimized, we don't need *all* these libs here)
-    add_optional_libs(fltk_gl-shared)
+    target_include_directories(${_target} PUBLIC ${OPENGL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
+    target_link_libraries(     ${_target} PUBLIC ${OPENGL_LIBRARIES} fltk::fltk-shared)
+    add_optional_libs(         ${_target})
 
     if(FLTK_OPENGL_GLU_INCLUDE_DIR)
-      target_include_directories(fltk_gl-shared PUBLIC ${FLTK_OPENGL_GLU_INCLUDE_DIR})
+      target_include_directories(${_target} PUBLIC ${FLTK_OPENGL_GLU_INCLUDE_DIR})
     endif()
+
+    unset(_target)
   endif(FLTK_USE_GL)
 
 endif(FLTK_BUILD_SHARED_LIBS AND NOT MSVC)
@@ -961,31 +970,83 @@ if(FLTK_BUILD_SHARED_LIBS AND MSVC)
   endif(OPENGL_FOUND)
 
   fl_add_library(fltk SHARED "${SOURCES}")
-  add_optional_libs(fltk-shared)
 
+  set(_target fltk-shared)
+
+  add_optional_libs(${_target})
+
+  ######################
   if(FLTK_USE_BUNDLED_JPEG)
-    target_link_libraries(fltk-shared PUBLIC fltk::jpeg-shared)
-  else()
-    target_link_libraries(fltk-shared PUBLIC ${FLTK_JPEG_LIBRARIES})
   endif()
 
   if(FLTK_USE_BUNDLED_PNG)
-    target_link_libraries(fltk-shared PUBLIC fltk::png-shared)
+  endif()
+
+  if(FLTK_USE_BUNDLED_ZLIB)
+  endif()
+
+  ######################
+
+  if(FLTK_USE_BUNDLED_JPEG)
+    target_include_directories(${_target} PUBLIC
+                               $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/jpeg>
+                               $<INSTALL_INTERFACE:install/FL/images>)
+
+    target_link_libraries(${_target} PUBLIC fltk::jpeg-shared)
   else()
-    target_link_libraries(fltk-shared PUBLIC ${FLTK_PNG_LIBRARIES})
+    target_link_libraries(${_target} PUBLIC ${FLTK_JPEG_LIBRARIES})
+  endif()
+
+  if(FLTK_USE_BUNDLED_PNG)
+    target_include_directories(${_target} PUBLIC
+                               $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/png>
+                               $<INSTALL_INTERFACE:install/FL/images>)
+
+    target_link_libraries(${_target} PUBLIC fltk::png-shared)
+  else()
+    target_link_libraries(${_target} PUBLIC ${FLTK_PNG_LIBRARIES})
+  endif()
+
+  if(FLTK_USE_BUNDLED_ZLIB)
+    target_include_directories(${_target} PUBLIC
+                               $<BUILD_INTERFACE:${FLTK_SOURCE_DIR}/zlib>
+                               $<INSTALL_INTERFACE:install/FL/images>)
+
+    target_link_libraries(${_target} PUBLIC fltk::z-shared)
+  else()
+    target_link_libraries(${_target} PUBLIC ${FLTK_ZLIB_LIBRARIES})
   endif()
 
   if(OPENGL_FOUND)
-    target_link_libraries(fltk-shared PUBLIC ${OPENGL_LIBRARIES})
-    target_include_directories(fltk-shared PUBLIC ${OPENGL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
+    target_include_directories(${_target} PUBLIC ${OPENGL_INCLUDE_DIR} ${OPENGL_INCLUDE_DIRS})
+    target_link_libraries(     ${_target} PUBLIC ${OPENGL_LIBRARIES})
     if(FLTK_OPENGL_GLU_INCLUDE_DIR)
-      target_include_directories(fltk-shared PUBLIC ${FLTK_OPENGL_GLU_INCLUDE_DIR})
+      target_include_directories(${_target} PUBLIC ${FLTK_OPENGL_GLU_INCLUDE_DIR})
     endif()
   endif(OPENGL_FOUND)
+
+  unset(_target)
 
 endif(FLTK_BUILD_SHARED_LIBS AND MSVC)
 
 #######################################################################
+
+if(0) # debug library targets
+  foreach(_target fltk::fltk fltk::images fltk::gl fltk::forms)
+    fl_debug_target(${_target})
+    if(FLTK_BUILD_SHARED_LIBS)
+      fl_debug_target(${_target}-shared)
+    endif()
+  endforeach()
+
+  foreach(_target fltk::jpeg fltk::png fltk::z)
+    fl_debug_target(${_target})
+    if(FLTK_BUILD_SHARED_LIBS)
+      fl_debug_target(${_target}-shared)
+    endif()
+  endforeach()
+
+endif() # debug library targets
 
 set(FLTK_LIBRARIES ${FLTK_LIBRARIES} PARENT_SCOPE)
 set(FLTK_LIBRARIES_SHARED ${FLTK_LIBRARIES_SHARED} PARENT_SCOPE)

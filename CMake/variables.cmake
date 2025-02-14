@@ -2,7 +2,7 @@
 # This file sets variables for common use in export.cmake and install.cmake
 # Originally written by Michael Surette
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -19,7 +19,7 @@
 
 set(DEBUG_VARIABLES_CMAKE 0)
 if(DEBUG_VARIABLES_CMAKE)
-  message(STATUS "[** variables.cmake **]")
+  message(STATUS "------------------- [** variables.cmake **] ------------------")
   fl_debug_var(HAVE_DLSYM)
   fl_debug_var(CMAKE_DL_LIBS)
   fl_debug_var(CMAKE_EXE_LINKER_FLAGS)
@@ -28,10 +28,11 @@ if(DEBUG_VARIABLES_CMAKE)
   fl_debug_var(IMAGELIBS)
   fl_debug_var(STATICIMAGELIBS)
   fl_debug_var(FLTK_LDLIBS)
-  fl_debug_var(LIB_jpeg)
-  fl_debug_var(LIB_png)
-  fl_debug_var(LIB_zlib)
+  fl_debug_var(FLTK_JPEG_LIBRARIES)
+  fl_debug_var(FLTK_PNG_LIBRARIES)
+  fl_debug_var(FLTK_ZLIB_LIBRARIES)
   fl_debug_var(FLTK_LIBRARIES)
+  message(STATUS "----------------- / [** variables.cmake **] ------------------")
 endif(DEBUG_VARIABLES_CMAKE)
 
 #######################################################################
@@ -88,32 +89,30 @@ if(FLTK_USE_BUNDLED_JPEG)
   list(APPEND IMAGELIBS -lfltk_jpeg)
   list(APPEND STATICIMAGELIBS \$libdir/libfltk_jpeg.a)
 else()
-  if(LIB_jpeg)
-    # fl_debug_var(LIB_jpeg)
-    list(APPEND IMAGELIBS ${LIB_jpeg})
-    list(APPEND STATICIMAGELIBS ${LIB_jpeg})
-  endif(LIB_jpeg)
+  if(JPEG_FOUND)
+    list(APPEND IMAGELIBS ${JPEG_LIBRARIES})
+    list(APPEND STATICIMAGELIBS ${JPEG_LIBRARIES})
+  endif()
 endif(FLTK_USE_BUNDLED_JPEG)
 
 if(FLTK_USE_BUNDLED_PNG)
   list(APPEND IMAGELIBS -lfltk_png)
   list(APPEND STATICIMAGELIBS \$libdir/libfltk_png.a)
 else()
-  if(LIB_png)
-    # fl_debug_var(LIB_png)
-    list(APPEND IMAGELIBS ${LIB_png})
-    list(APPEND STATICIMAGELIBS ${LIB_png})
-  endif(LIB_png)
+  if(PNG_FOUND)
+    list(APPEND IMAGELIBS ${PNG_LIBRARIES})
+    list(APPEND STATICIMAGELIBS ${PNG_LIBRARIES})
+  endif()
 endif(FLTK_USE_BUNDLED_PNG)
 
 if(FLTK_USE_BUNDLED_ZLIB)
   list(APPEND IMAGELIBS -lfltk_z)
   list(APPEND STATICIMAGELIBS \$libdir/libfltk_z.a)
 else()
-  if(LIB_zlib)
-    list(APPEND IMAGELIBS ${LIB_zlib})
-    list(APPEND STATICIMAGELIBS ${LIB_zlib})
-  endif(LIB_zlib)
+  if(ZLIB_FOUND)
+    list(APPEND IMAGELIBS ${ZLIB_LIBRARIES})
+    list(APPEND STATICIMAGELIBS ${ZLIB_LIBRARIES})
+  endif()
 endif(FLTK_USE_BUNDLED_ZLIB)
 
 # remove duplicates from CMake "list" variables for fltk-config
