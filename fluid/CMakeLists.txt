@@ -236,7 +236,9 @@ else()
   set(FLTK_FLUID_EXECUTABLE fltk::fluid)
 endif()
 
-# Add the "shared" executable (linked against the shared FLTK libs)
+# Add the "shared" executable (linked against the shared FLTK libs).
+# Note 1: only the GUI version is built as "shared" executable.
+# Note 2: For MSVC we need the special object library 'call_main'.
 
 if(FLTK_BUILD_SHARED_LIBS)
 
@@ -249,7 +251,11 @@ if(FLTK_BUILD_SHARED_LIBS)
     target_link_libraries(fluid-lib-shared PUBLIC fltk::images-shared)
   endif(MSVC)
 
-  make_target(fluid-shared TRUE "${MAIN_FILES}" fluid-lib-shared fluid-shared)
+  if(MSVC)
+    make_target(fluid-shared TRUE "${MAIN_FILES}" "fluid-lib-shared;call_main" fluid-shared)
+  else()
+    make_target(fluid-shared TRUE "${MAIN_FILES}" fluid-lib-shared fluid-shared)
+  endif()
 
   # experimental
   if(NOT WIN32)

@@ -275,56 +275,29 @@ if(CMAKE_CXX_COMPILER_ID IN_LIST _compilers)
 endif() # GNU or Clang (-Wshadow test)
 unset(_compilers)
 
-
 # *** EXPERIMENTAL ***
 # Build some of the demo programs linked against the shared FLTK lib(s).
-# This is currently pretty complicated and should be improved.
-# It will be simplified significantly when we use more "modern CMake".
 
 if(FLTK_BUILD_SHARED_LIBS)
 
   if(MSVC) # MS Visual C++ aka. Visual Studio
 
-    # We need to link with fl_call_main.c, but this must not be compiled with
-    # macro FL_DLL, whereas the other source file(s) must be compiled with FL_DLL
-    # to link against the shared libs.
-    #
-    #  ;-)  I *love* Visual Studio (MSVC)  ;-)
-    #
-    # Trick: build an object library with just this one file and link the executable
-    # against the shared library plus this object library. Another way would be to
-    # add the extra source file fl_call_main.c to the source files of all targets
-    # and set the FL_DLL compile_definition property only on the main *source* files
-    # but this doesn't work since the same file must be compiled for the "static"
-    # and the "shared" target, for instance hello.cxx for "hello" and "hello-shared".
+    # We need to link with fl_call_main.c which is available as an object
+    # library 'call_main' when built with MSVC (see main CMakeLists.txt).
 
-    add_library(CALL_MAIN OBJECT EXCLUDE_FROM_ALL ../src/fl_call_main.c)
-
-    # define a list of shared targets so we can set COMPILE_DEFINITIONS in a loop
-    set(SHARED_TARGETS "")
-
-    fl_create_example(hello-shared hello.cxx "CALL_MAIN;fltk::fltk-shared")
-    fl_create_example(pixmap_browser-shared pixmap_browser.cxx "CALL_MAIN;fltk::fltk-shared")
-    fl_create_example(unittests-shared "${UNITTEST_SRCS}" "CALL_MAIN;${GLDEMO_SHARED}")
+    fl_create_example(hello-shared hello.cxx "call_main;fltk::fltk-shared")
+    fl_create_example(pixmap_browser-shared pixmap_browser.cxx "call_main;fltk::fltk-shared")
+    fl_create_example(unittests-shared "${UNITTEST_SRCS}" "call_main;${GLDEMO_SHARED}")
 
     # Games
-    fl_create_example(blocks-shared "blocks.cxx;blocks.plist;blocks.icns" "CALL_MAIN;fltk::fltk-shared;${AUDIOLIBS}")
-    fl_create_example(checkers-shared "checkers.cxx;checkers_pieces.fl;checkers.icns" "CALL_MAIN;fltk::fltk-shared")
-    fl_create_example(sudoku-shared "sudoku.cxx;sudoku.plist;sudoku.icns;sudoku.rc" "CALL_MAIN;fltk::fltk-shared;${AUDIOLIBS}")
-
-    list(APPEND SHARED_TARGETS
-         hello pixmap_browser unittests blocks checkers sudoku)
+    fl_create_example(blocks-shared "blocks.cxx;blocks.plist;blocks.icns" "call_main;fltk::fltk-shared;${AUDIOLIBS}")
+    fl_create_example(checkers-shared "checkers.cxx;checkers_pieces.fl;checkers.icns" "call_main;fltk::fltk-shared")
+    fl_create_example(sudoku-shared "sudoku.cxx;sudoku.plist;sudoku.icns;sudoku.rc" "call_main;fltk::fltk-shared;${AUDIOLIBS}")
 
     if(OPENGL_FOUND)
-      fl_create_example(glpuzzle-shared glpuzzle.cxx "CALL_MAIN;${GLDEMO_SHARED}")
-      fl_create_example(shape-shared shape.cxx "CALL_MAIN;${GLDEMO_SHARED}")
-      list(APPEND SHARED_TARGETS glpuzzle shape)
+      fl_create_example(glpuzzle-shared glpuzzle.cxx "call_main;${GLDEMO_SHARED}")
+      fl_create_example(shape-shared shape.cxx "call_main;${GLDEMO_SHARED}")
     endif(OPENGL_FOUND)
-
-    # apply property COMPILE_DEFINITIONS "-D FL_DLL" in a loop for all necessary source files
-    foreach(tgt ${SHARED_TARGETS})
-      target_compile_definitions (${tgt}-shared PRIVATE "FL_DLL")
-    endforeach()
 
   else() # not MSVC
 

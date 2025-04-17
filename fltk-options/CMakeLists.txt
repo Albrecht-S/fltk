@@ -99,10 +99,16 @@ if(WIN32)
 endif()
 
 # Add the "shared" executable (linked against the shared FLTK libs).
-# Only the GUI version is built as "shared" executable
+# Note 1: only the GUI version is built as "shared" executable.
+# Note 2: For MSVC we need the special object library 'call_main'.
 
 if(FLTK_BUILD_SHARED_LIBS)
-  make_target(fltk-options-shared TRUE "${SOURCES}" fltk::fltk-shared options-shared)
+  if(MSVC)
+    set(libs fltk::fltk-shared call_main)
+  else()
+    set(libs fltk::fltk-shared)
+  endif()
+  make_target(fltk-options-shared TRUE "${SOURCES}" "${libs}" options-shared)
 endif()
 
 # Create aliases for all executables,
