@@ -309,8 +309,8 @@ if(FLTK_BUILD_SHARED_LIBS)
 
     # Games
     fl_create_example(blocks-shared "blocks.cxx;blocks.plist;blocks.icns" "CALL_MAIN;fltk::fltk-shared;${AUDIOLIBS}")
-    fl_create_example(checkers-shared "checkers.cxx;checkers_pieces.fl;checkers.icns" "CALL_MAIN;fltk::images-shared")
-    fl_create_example(sudoku-shared "sudoku.cxx;sudoku.plist;sudoku.icns;sudoku.rc" "CALL_MAIN;fltk::images-shared;${AUDIOLIBS}")
+    fl_create_example(checkers-shared "checkers.cxx;checkers_pieces.fl;checkers.icns" "CALL_MAIN;fltk::fltk-shared")
+    fl_create_example(sudoku-shared "sudoku.cxx;sudoku.plist;sudoku.icns;sudoku.rc" "CALL_MAIN;fltk::fltk-shared;${AUDIOLIBS}")
 
     list(APPEND SHARED_TARGETS
          hello pixmap_browser unittests blocks checkers sudoku)

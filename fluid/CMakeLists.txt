@@ -243,7 +243,11 @@ if(FLTK_BUILD_SHARED_LIBS)
   add_library(fluid-lib-shared OBJECT EXCLUDE_FROM_ALL)
   target_sources(fluid-lib-shared PRIVATE ${CPPFILES} ${HEADERFILES})
   target_include_directories(fluid-lib-shared PUBLIC .)
-  target_link_libraries(fluid-lib-shared PUBLIC fltk::images-shared)
+  if(MSVC)
+    target_link_libraries(fluid-lib-shared PUBLIC fltk::fltk-shared)
+  else()
+    target_link_libraries(fluid-lib-shared PUBLIC fltk::images-shared)
+  endif(MSVC)
 
   make_target(fluid-shared TRUE "${MAIN_FILES}" fluid-lib-shared fluid-shared)
 
