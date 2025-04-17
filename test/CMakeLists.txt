@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt used to build test and demo apps by the CMake build system
 #
-# Copyright 2004-2024 by Bill Spitzak and others.
+# Copyright 2004-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -84,14 +84,12 @@ fl_create_example(arc arc.cxx fltk::fltk)
 fl_create_example(animated animated.cxx fltk::fltk)
 fl_create_example(ask ask.cxx fltk::fltk)
 fl_create_example(bitmap bitmap.cxx fltk::fltk)
-fl_create_example(blocks "blocks.cxx;blocks.plist;blocks.icns" "fltk::fltk;${AUDIOLIBS}")
 fl_create_example(boxtype boxtype.cxx fltk::fltk)
 fl_create_example(browser browser.cxx fltk::fltk)
 fl_create_example(button button.cxx fltk::fltk)
 fl_create_example(buttons buttons.cxx fltk::fltk)
 # Cairo demo, built with and w/o Cairo (libcairo is linked implicitly - or not at all)
 fl_create_example(cairo_test cairo_test.cxx fltk::fltk)
-fl_create_example(checkers "checkers.cxx;checkers_pieces.fl;checkers.icns" fltk::images)
 fl_create_example(clipboard clipboard.cxx fltk::images)
 fl_create_example(clock clock.cxx fltk::fltk)
 fl_create_example(colbrowser colbrowser.cxx fltk::fltk)
@@ -161,7 +159,6 @@ fl_create_example(resize-example5c "resize-example5c.cxx;resize-arrows.cxx" fltk
 fl_create_example(rotated_text rotated_text.cxx fltk::fltk)
 fl_create_example(scroll scroll.cxx fltk::fltk)
 fl_create_example(subwindow subwindow.cxx fltk::fltk)
-fl_create_example(sudoku "sudoku.cxx;sudoku.plist;sudoku.icns;sudoku.rc" "fltk::images;${AUDIOLIBS}")
 fl_create_example(symbols symbols.cxx fltk::fltk)
 fl_create_example(tabs tabs.fl fltk::fltk)
 fl_create_example(table table.cxx fltk::fltk)
@@ -175,6 +172,14 @@ fl_create_example(utf8 utf8.cxx fltk::fltk)
 fl_create_example(valuators valuators.fl fltk::fltk)
 fl_create_example(windowfocus windowfocus.cxx fltk::fltk)
 fl_create_example(wizard wizard.cxx fltk::fltk)
+
+# games
+
+if(NOT FLTK_BUILD_SHARED_LIBS)
+  fl_create_example(blocks "blocks.cxx;blocks.plist;blocks.icns" "fltk::fltk;${AUDIOLIBS}")
+  fl_create_example(checkers "checkers.cxx;checkers_pieces.fl;checkers.icns" fltk::images)
+  fl_create_example(sudoku "sudoku.cxx;sudoku.plist;sudoku.icns;sudoku.rc" "fltk::images;${AUDIOLIBS}")
+endif()
 
 # unittests uses multiple source files and can be built with or w/o OpenGL and "shared"
 
@@ -213,7 +218,9 @@ if(OPENGL_FOUND)
   fl_create_example(cube cube.cxx "${GLDEMO_LIBS}")
   fl_create_example(fractals "fractals.cxx;fracviewer.cxx" "${GLDEMO_LIBS}")
   fl_create_example(glut_test glut_test.cxx "${GLDEMO_LIBS}")
-  fl_create_example(glpuzzle glpuzzle.cxx "${GLDEMO_LIBS}")
+  if(NOT FLTK_BUILD_SHARED_LIBS)
+    fl_create_example(glpuzzle glpuzzle.cxx "${GLDEMO_LIBS}")
+  endif()
   fl_create_example(gl_overlay gl_overlay.cxx "${GLDEMO_LIBS}")
   fl_create_example(shape shape.cxx "${GLDEMO_LIBS}")
 endif(OPENGL_FOUND)
@@ -291,7 +298,7 @@ if(FLTK_BUILD_SHARED_LIBS)
     # but this doesn't work since the same file must be compiled for the "static"
     # and the "shared" target, for instance hello.cxx for "hello" and "hello-shared".
 
-    add_library (CALL_MAIN OBJECT EXCLUDE_FROM_ALL ../src/fl_call_main.c)
+    add_library(CALL_MAIN OBJECT EXCLUDE_FROM_ALL ../src/fl_call_main.c)
 
     # define a list of shared targets so we can set COMPILE_DEFINITIONS in a loop
     set(SHARED_TARGETS "")
@@ -300,7 +307,13 @@ if(FLTK_BUILD_SHARED_LIBS)
     fl_create_example(pixmap_browser-shared pixmap_browser.cxx "CALL_MAIN;fltk::fltk-shared")
     fl_create_example(unittests-shared "${UNITTEST_SRCS}" "CALL_MAIN;${GLDEMO_SHARED}")
 
-    list(APPEND SHARED_TARGETS hello pixmap_browser unittests)
+    # Games
+    fl_create_example(blocks-shared "blocks.cxx;blocks.plist;blocks.icns" "CALL_MAIN;fltk::fltk-shared;${AUDIOLIBS}")
+    fl_create_example(checkers-shared "checkers.cxx;checkers_pieces.fl;checkers.icns" "CALL_MAIN;fltk::images-shared")
+    fl_create_example(sudoku-shared "sudoku.cxx;sudoku.plist;sudoku.icns;sudoku.rc" "CALL_MAIN;fltk::images-shared;${AUDIOLIBS}")
+
+    list(APPEND SHARED_TARGETS
+         hello pixmap_browser unittests blocks checkers sudoku)
 
     if(OPENGL_FOUND)
       fl_create_example(glpuzzle-shared glpuzzle.cxx "CALL_MAIN;${GLDEMO_SHARED}")
@@ -320,11 +333,15 @@ if(FLTK_BUILD_SHARED_LIBS)
     fl_create_example(pixmap_browser-shared pixmap_browser.cxx fltk::images-shared)
     fl_create_example(unittests-shared "${UNITTEST_SRCS}" "${GLDEMO_SHARED}")
 
+    # Games
+    fl_create_example(blocks-shared "blocks.cxx;blocks.plist;blocks.icns" "fltk::fltk-shared;${AUDIOLIBS}")
+    fl_create_example(checkers-shared "checkers.cxx;checkers_pieces.fl;checkers.icns" fltk::images-shared)
+    fl_create_example(sudoku-shared "sudoku.cxx;sudoku.plist;sudoku.icns;sudoku.rc" "fltk::images-shared;${AUDIOLIBS}")
+
     if(OPENGL_FOUND)
       fl_create_example(glpuzzle-shared glpuzzle.cxx "${GLDEMO_SHARED}")
       fl_create_example(shape-shared shape.cxx "${GLDEMO_SHARED}")
     endif(OPENGL_FOUND)
-
 
   endif(MSVC) # (not MSVC)
 

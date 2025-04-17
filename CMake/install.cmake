@@ -121,11 +121,32 @@ if(UNIX OR MSYS OR MINGW)
   INSTALL_MAN (fltk-config 1)
   INSTALL_MAN (fltk 3)
 
-  if(FLTK_BUILD_TEST AND FLTK_BUILD_FLUID)
-    # Don't (!) install man pages of games (GitHub issue #23)
-    # INSTALL_MAN (blocks 6)
-    # INSTALL_MAN (checkers 6)
-    # INSTALL_MAN (sudoku 6)
+  # Install the games
+
+  if(FLTK_BUILD_TEST OR FLTK_BUILD_GAMES)
+
+    set(FLTK_GAMES blocks checkers sudoku)
+    if(FLTK_USE_GL)
+      list(APPEND FLTK_GAMES glpuzzle)
+    endif()
+
+    foreach(game ${FLTK_GAMES})
+      if(FLTK_BUILD_SHARED_LIBS)
+        set(tgt_ "${game}-shared")
+        set_target_properties(${tgt_} PROPERTIES RUNTIME_OUTPUT_NAME ${game})
+      else()
+        set(tgt_ ${game})
+      endif()
+      install(TARGETS ${tgt_}
+              EXPORT  FLTK-Targets
+              RUNTIME DESTINATION ${FLTK_BINDIR}
+              LIBRARY DESTINATION ${FLTK_LIBDIR}
+              ARCHIVE DESTINATION ${FLTK_LIBDIR}
+              BUNDLE  DESTINATION ${FLTK_BINDIR} # macOS: bundles
+      )
+
+      INSTALL_MAN (${game} 6)
+    endforeach()
   endif()
 
 endif(UNIX OR MSYS OR MINGW)
