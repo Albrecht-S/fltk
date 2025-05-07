@@ -158,6 +158,7 @@ fl_create_example(resize-example5b "resize-example5b.cxx;resize-arrows.cxx" fltk
 fl_create_example(resize-example5c "resize-example5c.cxx;resize-arrows.cxx" fltk::fltk)
 fl_create_example(rotated_text rotated_text.cxx fltk::fltk)
 fl_create_example(scroll scroll.cxx fltk::fltk)
+fl_create_example(scroll_new scroll_new.cxx fltk::fltk)
 fl_create_example(subwindow subwindow.cxx fltk::fltk)
 fl_create_example(symbols symbols.cxx fltk::fltk)
 fl_create_example(tabs tabs.fl fltk::fltk)
