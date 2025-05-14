@@ -61,12 +61,16 @@ FLTK requires C++11 anyway.
 For more details please see \ref migration_1_4_fl_override.
 
 
-\section migration_1_5_deprecated Deprecated methods and functions removed
+\section migration_1_5_removed Removed Methods and Functions
 
 Methods, functions, and global symbols that have been deprecated in FLTK 1.3
-or earlier have been removed. If you need help with those functions because
-your old code still uses one or more of them, please consult the FLTK 1.3 or
-1.4 documentation for how to replace them with newer functions/methods.
+or earlier have been removed in FLTK 1.5.0.
+
+If you need help with these functions because old code still uses them, please
+consult the table below for a quick solution. If this doesn't help please read
+the FLTK 1.3 or 1.4 documentation to find out how to replace them with newer
+functions or methods, for instance https://www.fltk.org/doc-1.4/deprecated.html.
+
 
 The following (likely incomplete) list may help to identify such removed
 methods and functions:
@@ -75,28 +79,32 @@ Removed symbol                                         | Replace with ...
 -------------------------------------------------------|-------------------------
 Fl::release()                                          | Fl::grab(0)
 Fl::set_idle(Fl_Old_Idle_Handler cb)                   | Fl::add_idle(cb [, data])
-<b>Symbols yet to be removed in 1.5.0 follow below ... | ... </b>
 fl_ask(const char *fmt,...)                            | fl_choice()
 fl_clip(int, int, int, int)                            | fl_push_clip(int x, int y, int w, int h)
 Fl_Group::focus(Fl_Widget *W)                          | (Fl_Widget*) W->take_focus()
+Fl_Widget::color2() const                              | Fl_Widget::selection_color() const
+Fl_Widget::color2(unsigned)                            | Fl_Widget::selection_color(unsigned)
+.                                                      | &nbsp;
+<b>Symbols yet to be removed in 1.5.0 follow below     | ... </b>
+.                                                      | &nbsp;
+Fl_Window::icon()                                      | ?
+Fl_Window::icon(const void *ic)                        | ?
+.                                                      | &nbsp;
 Fl_Menu_Item::check()                                  | ?
 Fl_Menu_Item::checked() const                          | ?
 Fl_Menu_Item::setonly()                                | ?
 Fl_Menu_::setonly(Fl_Menu_Item*) [1.]                  | ?
 Fl_Menu_Item::uncheck()                                | ?
+.                                                      | &nbsp;
 Fl_Tree::first_visible()                               | in 1.3.3 ABI
 Fl_Tree::first_visible_item()                          | ?
 Fl_Tree::item_clicked(Fl_Tree_Item *val)               | callback_item()
 Fl_Tree::item_clicked()                                | callback_item()
 Fl_Tree::last_visible()                                | last_visible_item()
+.                                                      | &nbsp;
 Fl_Tree_Item::Fl_Tree_Item(const Fl_Tree_Prefs &prefs) | Fl_Tree_Item(Fl_Tree*) [2.]
 Fl_Tree_Item::next_displayed(Fl_Tree_Prefs &prefs)     | next_visible()
 Fl_Tree_Item::prev_displayed(Fl_Tree_Prefs &prefs)     | prev_visible()
-Fl_Widget::color2() const                              | selection_color()
-Fl_Widget::color2(unsigned a)                          | selection_color(unsigned)
-Fl_Window::free_position()                             | force_position(0)
-Fl_Window::icon()                                      | ?
-Fl_Window::icon(const void *ic)                        | ?
 
 
  -# This is dangerous if radio items are first in the menu.
