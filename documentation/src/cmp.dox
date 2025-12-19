@@ -1,7 +1,109 @@
 // vim:syntax=doxygen
 /**
-
  \page cmp FLTK Code Management Plan (CMP)
+
+Unicode examples:  (verbatim)
+\verbatim
+// 45678901234567890123456789012345678901234567890123456789012345678901234567890
+// -----------------------------------------------------------------------------
+Fl_Window window(400, 300, "Hello 側経意責");  // Mixed ASCII and Chinese
+Fl_Window window(400, 300, "Hello 旅ロ京青");  // Mixed ASCII and Japanese
+// MMMMMMMMMM
+// iiiiiiiiii
+// ----------
+\endverbatim
+
+Unicode examples:  (code)
+\code
+// 45678901234567890123456789012345678901234567890123456789012345678901234567890
+// -----------------------------------------------------------------------------
+Fl_Window window(400, 300, "Hello 側経意責");  // Mixed ASCII and Chinese
+Fl_Window window(400, 300, "Hello 旅ロ京青");  // Mixed ASCII and Japanese
+// MMMMMMMMMM
+// iiiiiiiiii
+// ----------
+\endcode
+
+Unicode examples:  (text)
+
+// 45678901234567890123456789012345678901234567890123456789012345678901234567890\n
+// \-----------------------------------------------------------------------------\n
+Fl_Window window(400, 300, "Hello 側経意責");  // Mixed ASCII and Chinese\n
+Fl_Window window(400, 300, "Hello 旅ロ京青");  // Mixed ASCII and Japanese\n
+// MMMMMMMMMM\n
+// iiiiiiiiii\n
+// ----------\n
+
+Greek:
+Λορεμ ιπσθμ δολορ σιτ
+
+Japanese:
+旅ロ京青利セムレ弱改フヨス波
+
+Russian:
+Лорем ипсум долор сит амет
+
+Chinese:
+側経意責家方宇
+
+<!--
+Korean:
+국민경제의
+
+Indian:
+पढाए हिंदी रहारुप अनुवाद कार्यलय मुख्य संस्था
+
+Armenian:
+լոռեմ իպսում դոլոռ սիթ ամեթ,
+
+Arab:
+عظمى واعتلاء. انه كل وإقامة المواد
+
+Hebrew:
+ ויש בקלות ואמנות אירועים או, אל אינו כלכלה שתי.
+
+-->
+
+\latexonly
+  \newpage
+\endlatexonly
+
+Character table (monospaced):  (verbatim)
+\verbatim
++---+---------------------------------+
+|hex| 0 1 2 3 4 5 6 7 8 9 A B C D E F |
++---+---------------------------------+
+| 8 | € . . ‚ ƒ „ … † ‡ ˆ ‰ Š ‹ Œ . Ž |
+| 9 | . ‘ ’ “ ” • – — ˜ ™ š › œ . ž Ÿ |
+| A |   ¡ ¢ £ ¤ ¥ ¦ § ¨ © ª « ¬ ? ® ¯ |
+| B | ° ± ² ³ ´ µ ¶ · ¸ ¹ º » ¼ ½ ¾ ¿ |
+| C | À Á Â Ã Ä Å Æ Ç È É Ê Ë Ì Í Î Ï |
+| D | Ð Ñ Ò Ó Ô Õ Ö × Ø Ù Ú Û Ü Ý Þ ß |
+| E | à á â ã ä å æ ç è é ê ë ì í î ï |
+| F | ð ñ ò ó ô õ ö ÷ ø ù ú û ü ý þ ÿ |
++---+---------------------------------+
+\endverbatim
+
+Character table (monospaced):  (code)
+\code
++---+---------------------------------+
+|hex| 0 1 2 3 4 5 6 7 8 9 A B C D E F |
++---+---------------------------------+
+| 8 | € . . ‚ ƒ „ … † ‡ ˆ ‰ Š ‹ Œ . Ž |
+| 9 | . ‘ ’ “ ” • – — ˜ ™ š › œ . ž Ÿ |
+| A |   ¡ ¢ £ ¤ ¥ ¦ § ¨ © ª « ¬ ? ® ¯ |
+| B | ° ± ² ³ ´ µ ¶ · ¸ ¹ º » ¼ ½ ¾ ¿ |
+| C | À Á Â Ã Ä Å Æ Ç È É Ê Ë Ì Í Î Ï |
+| D | Ð Ñ Ò Ó Ô Õ Ö × Ø Ù Ú Û Ü Ý Þ ß |
+| E | à á â ã ä å æ ç è é ê ë ì í î ï |
+| F | ð ñ ò ó ô õ ö ÷ ø ù ú û ü ý þ ÿ |
++---+---------------------------------+
+\endcode
+
+\latexonly
+  \newpage
+\endlatexonly
+
 
 <center><h2>*** WORK IN PROGRESS ***</h2></center>
 
