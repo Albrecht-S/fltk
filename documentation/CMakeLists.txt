@@ -77,7 +77,63 @@ if(GENERATE_DOCS)
     @ONLY
   )
 
-  if(0) # debug
+  # determine Doxygen's LATEX_CMD == LaTeX Compiler (path)
+  # this command name will be substituted in Doxyfile.in
+
+  if(LUALATEX_COMPILER)
+    set(FLTK_LATEX_CMD lualatex)    # or full path: ${LUALATEX_COMPILER})
+  else()
+    set(FLTK_LATEX_CMD latex)       # or full path: ${LUALATEX_COMPILER})
+  endif()
+
+  # check if required fonts are installed
+
+  # set default font names
+  set(MAIN_FONT    "Helvetica")
+  set(SANS_FONT    "Helvetica")
+  set(MONO_FONT    "Courier New")
+  # set system specific font names
+  if(APPLE)
+    set(MAIN_FONT    "Helvetica")
+    set(SANS_FONT    "Helvetica")
+    set(MONO_FONT    "Andale Mono")  # or "Monaco" or "Courier New"
+  elseif(UNIX)
+    set(MAIN_FONT    "Noto Serif")
+    set(SANS_FONT    "Noto Sans")
+    set(MONO_FONT    "Noto Mono")
+  else() # FIXME: default - Windows etc.
+  endif()
+
+  # now search for installed fonts
+  # FIXME: Windows ???
+
+  include(fl_find_font)
+
+  fl_find_font("${MAIN_FONT}" MAIN_FONT_FOUND)
+  fl_find_font("${SANS_FONT}" SANS_FONT_FOUND)
+  fl_find_font("${MONO_FONT}" MONO_FONT_FOUND)
+
+  # write LuaLaTeX specific include file
+
+  message(STATUS "---- writing file xxxx.tex ----")
+
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/xxxx.tex "
+%  FLTK --------------  snip  ----  Use LuaTeX  ------------
+\\RequirePackage{iftex}
+\\ifLuaTeX
+  \\usepackage{luatexja}
+  \\usepackage{polyglossia}
+  \\setmainfont{${MAIN_FONT}}
+  \\setsansfont{${SANS_FONT}}
+  \\setmonofont{${MONO_FONT}}
+\\fi
+% /FLTK --------------  snip  -----------------
+
+\\begin{document}
+"
+  )
+
+  if(1) # debug
     fl_debug_var(YEAR)
     fl_debug_var(CURRENT_DATE)
     fl_debug_var(PDF_DATE)
@@ -87,6 +143,18 @@ if(GENERATE_DOCS)
     fl_debug_var(DOXYGEN_EXECUTABLE)
     fl_debug_var(DOXYGEN_VERSION)
     fl_debug_var(DOXYGEN_VERSION_SHORT)
+    fl_debug_var(LATEX_COMPILER)
+    fl_debug_var(PDFLATEX_COMPILER)
+    fl_debug_var(LUALATEX_COMPILER)
+    fl_debug_var(FLTK_LATEX_CMD)
+
+    fl_debug_var(MAIN_FONT)
+    fl_debug_var(SANS_FONT)
+    fl_debug_var(MONO_FONT)
+
+    fl_debug_var(MAIN_FONT_FOUND)
+    fl_debug_var(SANS_FONT_FOUND)
+    fl_debug_var(MONO_FONT_FOUND)
   endif()
 
 endif(GENERATE_DOCS)

@@ -29,7 +29,12 @@ DOXY_CMD="$1"
 FLTK_HEAD="$2"
 DOXY_HEAD="$3"
 # temp file
-DOXY_TEMP="doxy-header.tex.$$"
+DOXY_TEMP1="doxy-header1.tex.$$"
+DOXY_TEMP2="doxy-header2.tex.$$"
+
+echo
+echo "--- make_header $@ using $DOXY_TEMP1, $DOXY_TEMP2"
+echo
 
 if test x$FLTK_HEAD = x; then
   echo "usage: $0 fltk-header-file output-file"
@@ -48,16 +53,26 @@ fi
 # with our PDF document title page (LaTeX code) and write the
 # result to $DOXY_HEAD.
 
-"$DOXY_CMD" -w latex $DOXY_TEMP /dev/null /dev/null
+"$DOXY_CMD" -w latex $DOXY_TEMP1 /dev/null /dev/null
+
+# insert the lualatex and font setup stuff before the line
+# using '( ... ) > $DOXY_TEMP2' to write (concatenate)
+# all three parts to one file
+
+( sed -e'/begin{document}/,$d' < $DOXY_TEMP1
+  cat xxxx.tex
+  sed -e'1,/begin{document}/d' < $DOXY_TEMP1
+) > $DOXY_TEMP2
 
 # combine three parts of these files to the output file
 # using '( ... ) > $DOXY_HEAD' to write (concatenate)
 # all three parts to one file
 
-( sed -e'/begin{titlepage}/,$d' < $DOXY_TEMP
+( sed -e'/begin{titlepage}/,$d' < $DOXY_TEMP2
   cat $FLTK_HEAD
-  sed -e'1,/end{titlepage}/d' < $DOXY_TEMP
+  sed -e'1,/end{titlepage}/d' < $DOXY_TEMP2
 ) > $DOXY_HEAD
 
 # cleanup
-rm -f $DOXY_TEMP
+# rm -f $DOXY_TEMP1
+# rm -f $DOXY_TEMP2

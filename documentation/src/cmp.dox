@@ -6,8 +6,9 @@ Unicode examples:  (verbatim)
 \verbatim
 // 45678901234567890123456789012345678901234567890123456789012345678901234567890
 // -----------------------------------------------------------------------------
-Fl_Window window(400, 300, "Hello 側経意責");  // Mixed ASCII and Chinese
-Fl_Window window(400, 300, "Hello 旅ロ京青");  // Mixed ASCII and Japanese
+Fl_Window window(400, 300, "Hello 側経 意責");  // Mixed ASCII and Chinese
+Fl_Window window(400, 300, "Hello 旅ロ 京青");  // Mixed ASCII and Japanese
+Fl_Window window(400, 300, "Hello 국민 경제");  // Mixed ASCII and Korean
 // MMMMMMMMMM
 // iiiiiiiiii
 // ----------
@@ -17,8 +18,9 @@ Unicode examples:  (code)
 \code
 // 45678901234567890123456789012345678901234567890123456789012345678901234567890
 // -----------------------------------------------------------------------------
-Fl_Window window(400, 300, "Hello 側経意責");  // Mixed ASCII and Chinese
-Fl_Window window(400, 300, "Hello 旅ロ京青");  // Mixed ASCII and Japanese
+Fl_Window window(400, 300, "Hello 側経 意責");  // Mixed ASCII and Chinese
+Fl_Window window(400, 300, "Hello 旅ロ 京青");  // Mixed ASCII and Japanese
+Fl_Window window(400, 300, "Hello 국민 경제");  // Mixed ASCII and Korean
 // MMMMMMMMMM
 // iiiiiiiiii
 // ----------
@@ -28,8 +30,9 @@ Unicode examples:  (text)
 
 // 45678901234567890123456789012345678901234567890123456789012345678901234567890\n
 // \-----------------------------------------------------------------------------\n
-Fl_Window window(400, 300, "Hello 側経意責");  // Mixed ASCII and Chinese\n
-Fl_Window window(400, 300, "Hello 旅ロ京青");  // Mixed ASCII and Japanese\n
+Fl_Window window(400, 300, "Hello 側経 意責");  // Mixed ASCII and Chinese\n
+Fl_Window window(400, 300, "Hello 旅ロ 京青");  // Mixed ASCII and Japanese\n
+Fl_Window window(400, 300, "Hello 국민 경제");  // Mixed ASCII and Korean\n
 // MMMMMMMMMM\n
 // iiiiiiiiii\n
 // ----------\n
@@ -40,7 +43,7 @@ Greek:
 Japanese:
 旅ロ京青利セムレ弱改フヨス波
 
-Russian:
+Russian (Cyrillic):
 Лорем ипсум долор сит амет
 
 Chinese:
@@ -61,7 +64,6 @@ Arab:
 
 Hebrew:
  ויש בקלות ואמנות אירועים או, אל אינו כלכלה שתי.
-
 -->
 
 \latexonly
@@ -103,7 +105,6 @@ Character table (monospaced):  (code)
 \latexonly
   \newpage
 \endlatexonly
-
 
 <center><h2>*** WORK IN PROGRESS ***</h2></center>
 

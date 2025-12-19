@@ -27,8 +27,12 @@
 # Used in: Makefile and CMakeLists.txt
 
 run_pdflatex() {
-  pdflatex --interaction=nonstopmode \
-    "\pdfinfo{/CreationDate(@PDF_DATE@)/ModDate(@PDF_DATE@)}\input{refman.tex}"
+  if false ; then
+    pdflatex --interaction=nonstopmode \
+      "\pdfinfo{/CreationDate(@PDF_DATE@)/ModDate(@PDF_DATE@)}\input{refman.tex}"
+  else
+    lualatex --interaction=nonstopmode refman.tex
+  fi
 }
 
 ( cd latex
