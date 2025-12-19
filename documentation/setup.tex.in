@@ -1,0 +1,20 @@
+% ----- FLTK LaTeX / LuaLaTeX and pdfinfo setup -----
+%
+%   The latter sets the creation and modification date and time.
+%   File 'setup.tex' is generated from setup.tex.in by CMake.
+%
+\RequirePackage{iftex}
+\ifLuaTeX
+  \usepackage{luatexja}
+  \usepackage{polyglossia}
+  \setmainfont{@MAIN_FONT@}
+  \setsansfont{@SANS_FONT@}
+  \setmonofont{@MONO_FONT@}
+  \pdfextension info { /CreationDate(@PDF_DATE@) /ModDate(@PDF_DATE@) }
+\else
+  % assume latex or pdflatex (ignore xetex)
+  \pdfinfo{ /CreationDate(@PDF_DATE@) /ModDate(@PDF_DATE@)}
+\fi
+% End of FLTK LuaLaTeX setup  ----------
+
+\begin{document}

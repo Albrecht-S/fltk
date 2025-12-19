@@ -2,7 +2,7 @@
 #
 # Makefile helper script for the Fast Light Tool Kit (FLTK) documentation.
 #
-# Copyright 1998-2020 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -24,14 +24,27 @@
 #
 # Working directory: fltk/documentation
 #
-# Used in: Makefile and CMakeLists.txt
+# Used in: documentation/CMakeLists.txt
+#
+# Usage:
+#
+#   $ make_pdf
+#
+# Note: FLTK_LATEX_CMD (below) is substituted by CMake to either 'latex' or 'lualatex'.
+#   If it is 'latex', then 'pdflatex' is actually used to build the PDF file.
+#
+
+LATEX_CMD="@FLTK_LATEX_CMD@"
 
 run_pdflatex() {
-  if false ; then
-    pdflatex --interaction=nonstopmode \
-      "\pdfinfo{/CreationDate(@PDF_DATE@)/ModDate(@PDF_DATE@)}\input{refman.tex}"
+
+  echo "--- make_pdf in $PWD - executing 'run_pdflatex() with LATEX_CMD = '$LATEX_CMD'"
+  echo "--- ...   using PDF_DATE = \"@PDF_DATE@\"."
+
+  if [ x$LATEX_CMD = "xlatex" ] ; then
+    pdflatex --interaction=nonstopmode refman
   else
-    lualatex --interaction=nonstopmode refman.tex
+    $LATEX_CMD --interaction=nonstopmode refman
   fi
 }
 

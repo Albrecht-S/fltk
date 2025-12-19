@@ -2,9 +2,22 @@
 #
 # Create a new LaTeX header file for doxygen PDF docs
 #
-# Note: this LaTeX file depends on Doxygen and LaTeX versions, resp.
-# and needs therefore to be created with current Doxygen and LaTeX
-# versions on the build system.
+# Copyright 1998-2025 by Bill Spitzak and others.
+#
+# This library is free software. Distribution and use rights are outlined in
+# the file "COPYING" which should have been included with this file.  If this
+# file is missing or damaged, see the license at:
+#
+#     https://www.fltk.org/COPYING.php
+#
+# Please see the following page on how to report bugs and issues:
+#
+#      https://www.fltk.org/bugs.php
+#
+
+#
+# Note: the created LaTeX file depends on Doxygen and LaTeX versions, resp. and
+# must be created on the build system with the current Doxygen and version.
 #
 # Usage:
 #
@@ -21,19 +34,25 @@
 #
 #=======================================================================
 # This script requires a posix shell and uses the following commands:
-# cat, rm and sed and (obviously) doxygen
+# cat, rm and sed and (obviously) doxygen.
+#=======================================================================
+# To do: investigate if this can be simplified by using CMake directly.
+# This is possible since 1.5 (we don't use configure/make anymore).
 #=======================================================================
 
-# input and output file names
+# Doxygen command, input and output file names
+
 DOXY_CMD="$1"
 FLTK_HEAD="$2"
 DOXY_HEAD="$3"
-# temp file
-DOXY_TEMP1="doxy-header1.tex.$$"
-DOXY_TEMP2="doxy-header2.tex.$$"
+
+# temp files
+
+DOXY_TEMP1="doxy-temp1.tex.$$"
+DOXY_TEMP2="doxy-temp2.tex.$$"
 
 echo
-echo "--- make_header $@ using $DOXY_TEMP1, $DOXY_TEMP2"
+echo "--- make_header $@ // $DOXY_TEMP1, $DOXY_TEMP2"
 echo
 
 if test x$FLTK_HEAD = x; then
@@ -46,27 +65,28 @@ if test x$DOXY_HEAD = x; then
   exit 1
 fi
 
-# Create the doxygen LaTeX header template and replace the LaTeX
-# code between (and including) the lines containing
-# - 'begin{titlepage}' and
-# - 'end{titlepage}'
-# with our PDF document title page (LaTeX code) and write the
-# result to $DOXY_HEAD.
+# (1) Create the doxygen LaTeX header template and
+# (2) insert LaTeX setup code before '\begin{document}' and
+# (3) replace the LaTeX code between (and including) the lines containing
+#     - 'begin{titlepage}' and
+#     - 'end{titlepage}'
+#     with our own PDF document title page (LaTeX code)
+# and write the result to $DOXY_HEAD.
+
+# (1) create standard doxygen / LaTeX template (output: $DOXY_TEMP1)
 
 "$DOXY_CMD" -w latex $DOXY_TEMP1 /dev/null /dev/null
 
-# insert the lualatex and font setup stuff before the line
-# using '( ... ) > $DOXY_TEMP2' to write (concatenate)
-# all three parts to one file
+# (2) insert the LuaLaTeX and font setup stuff before the line
+# '\begin{document}' (output: $DOXY_TEMP2)
 
 ( sed -e'/begin{document}/,$d' < $DOXY_TEMP1
-  cat xxxx.tex
+  cat setup.tex
   sed -e'1,/begin{document}/d' < $DOXY_TEMP1
 ) > $DOXY_TEMP2
 
-# combine three parts of these files to the output file
-# using '( ... ) > $DOXY_HEAD' to write (concatenate)
-# all three parts to one file
+# (3) replace the doxygen standard title page with our own title page
+# output: $DOXY_HEAD
 
 ( sed -e'/begin{titlepage}/,$d' < $DOXY_TEMP2
   cat $FLTK_HEAD
@@ -74,5 +94,5 @@ fi
 ) > $DOXY_HEAD
 
 # cleanup
-# rm -f $DOXY_TEMP1
-# rm -f $DOXY_TEMP2
+
+rm -f $DOXY_TEMP1 $DOXY_TEMP2

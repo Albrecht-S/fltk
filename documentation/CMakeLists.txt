@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt to build docs for the FLTK project using CMake (www.cmake.org)
 #
-# Copyright 1998-2024 by Bill Spitzak and others.
+# Copyright 1998-2025 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -46,8 +46,8 @@ if(GENERATE_DOCS)
 
   # Find "short" doxygen version if it was built from Git
   # Note: this is still needed in CMake 3.15 but later CMake versions
-  #       (notably 3.25) remove the Git revision in 'DOXYGEN_VERSION'.
-  # Todo: Find the "first good" CMake version and remove this redundant
+  #       (notably 3.25) remove the Git revision from 'DOXYGEN_VERSION'.
+  # Todo: Find the first "good" CMake version and remove this redundant
   #       code once we require this as our minimal version and replace the
   #       variable DOXYGEN_VERSION_SHORT with DOXYGEN_VERSION below.
 
@@ -77,61 +77,102 @@ if(GENERATE_DOCS)
     @ONLY
   )
 
-  # determine Doxygen's LATEX_CMD == LaTeX Compiler (path)
-  # this command name will be substituted in Doxyfile.in
+  # determine Doxygen's LATEX_CMD == LaTeX Compiler (path).
+  # This command name will be substituted in Doxyfile or Doxybook, respectively.
+
+  set(FLTK_LATEX_CMD latex)       # Default: use 'latex' or 'pdflatex'
+
+  # If 'lualatex' is installed (LUALATEX_COMPILER is set) and all required fonts
+  # are available, then PDF generation uses 'lualatex' instead of 'latex'.
 
   if(LUALATEX_COMPILER)
-    set(FLTK_LATEX_CMD lualatex)    # or full path: ${LUALATEX_COMPILER})
-  else()
-    set(FLTK_LATEX_CMD latex)       # or full path: ${LUALATEX_COMPILER})
-  endif()
 
-  # check if required fonts are installed
+    # check if required fonts are installed
 
-  # set default font names
-  set(MAIN_FONT    "Helvetica")
-  set(SANS_FONT    "Helvetica")
-  set(MONO_FONT    "Courier New")
-  # set system specific font names
-  if(APPLE)
+    # set default font names
     set(MAIN_FONT    "Helvetica")
     set(SANS_FONT    "Helvetica")
-    set(MONO_FONT    "Andale Mono")  # or "Monaco" or "Courier New"
-  elseif(UNIX)
-    set(MAIN_FONT    "Noto Serif")
-    set(SANS_FONT    "Noto Sans")
-    set(MONO_FONT    "Noto Mono")
-  else() # FIXME: default - Windows etc.
+    set(MONO_FONT    "Courier New")
+
+    # set system specific font names
+    if(APPLE)
+      set(MAIN_FONT    "Helvetica")
+      set(SANS_FONT    "Helvetica")
+      set(MONO_FONT    "Andale Mono")  # or "Monaco" or "Courier New"
+    elseif(UNIX)
+      set(MAIN_FONT    "Noto Serif")
+      set(SANS_FONT    "Noto Sans")
+      set(MONO_FONT    "Noto Mono")
+    else()
+      # FIXME: Windows etc. ? Keep defaults ...
+    endif()
+
+    # now search for installed fonts
+    # FIXME: Windows ???
+
+    include(fl_find_font)
+
+    fl_find_font("${MAIN_FONT}" MAIN_FONT_FOUND)
+    fl_find_font("${SANS_FONT}" SANS_FONT_FOUND)
+    fl_find_font("${MONO_FONT}" MONO_FONT_FOUND)
+
+    # only if all required fonts are present: set FLTK_LATEX_CMD = "lualatex"
+
+    if(MAIN_FONT_FOUND AND SANS_FONT_FOUND AND MONO_FONT_FOUND) # all fonts available
+
+      set(FLTK_LATEX_CMD lualatex)
+
+    else()
+
+      message(STATUS "At least one required font for 'LuaLaTeX' was not found.")
+      message(STATUS "Falling back to 'latex' or 'pdflatex', resp.")
+
+      fl_debug_var(MAIN_FONT)
+      fl_debug_var(MAIN_FONT_FOUND)
+
+      fl_debug_var(SANS_FONT)
+      fl_debug_var(SANS_FONT_FOUND)
+
+      fl_debug_var(MONO_FONT)
+      fl_debug_var(MONO_FONT_FOUND)
+
+    endif() # all fonts available
+
+  else(LUALATEX_COMPILER)
+
+    message(STATUS "LuaLaTeX not found, falling back to 'latex' or 'pdflatex', resp.")
+
   endif()
 
-  # now search for installed fonts
-  # FIXME: Windows ???
+  # ----- test / debug -----
 
-  include(fl_find_font)
+  # uncomment the following two commands to set an arbitrary date/time string
+  # for reproducible builds and then use
+  #   $ pdfinfo documentation/fltk.pdf
+  # to verify the creation date (if installed) or an equivalent command
 
-  fl_find_font("${MAIN_FONT}" MAIN_FONT_FOUND)
-  fl_find_font("${SANS_FONT}" SANS_FONT_FOUND)
-  fl_find_font("${MONO_FONT}" MONO_FONT_FOUND)
+  ### string(TIMESTAMP PDF_DATE "D:20251212030303Z" UTC)
+  ### string(TIMESTAMP TODAY "December 12, 2025" UTC)
 
-  # write LuaLaTeX specific include file
+  # uncomment the following command to force fallback to 'latex' ('pdflatex') for testing
 
-  message(STATUS "---- writing file xxxx.tex ----")
+  ### set(FLTK_LATEX_CMD latex)
 
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/xxxx.tex "
-%  FLTK --------------  snip  ----  Use LuaTeX  ------------
-\\RequirePackage{iftex}
-\\ifLuaTeX
-  \\usepackage{luatexja}
-  \\usepackage{polyglossia}
-  \\setmainfont{${MAIN_FONT}}
-  \\setsansfont{${SANS_FONT}}
-  \\setmonofont{${MONO_FONT}}
-\\fi
-% /FLTK --------------  snip  -----------------
+  # ----- end of test/debug section -----
 
-\\begin{document}
-"
+
+  # write LaTeX and LuaLaTeX specific setup file (used by both LaTeX compilers)
+
+  set(latex_setup_file setup.tex)
+  message(STATUS "--- generating ${CMAKE_CURRENT_BINARY_DIR}${latex_setup_file} from ${latex_setup_file}.in ---")
+
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/${latex_setup_file}.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${latex_setup_file}
+    @ONLY
   )
+
+  unset(latex_setup_file)
 
   if(1) # debug
     fl_debug_var(YEAR)
@@ -148,12 +189,15 @@ if(GENERATE_DOCS)
     fl_debug_var(LUALATEX_COMPILER)
     fl_debug_var(FLTK_LATEX_CMD)
 
-    fl_debug_var(MAIN_FONT)
-    fl_debug_var(SANS_FONT)
-    fl_debug_var(MONO_FONT)
+    # required fonts for PDF generation with 'LuaLaTex'
 
+    fl_debug_var(MAIN_FONT)
     fl_debug_var(MAIN_FONT_FOUND)
+
+    fl_debug_var(SANS_FONT)
     fl_debug_var(SANS_FONT_FOUND)
+
+    fl_debug_var(MONO_FONT)
     fl_debug_var(MONO_FONT_FOUND)
   endif()
 
