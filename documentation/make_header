@@ -16,21 +16,25 @@
 #
 
 #
-# Note: the created LaTeX file depends on Doxygen and LaTeX versions, resp. and
-# must be created on the build system with the current Doxygen and version.
+# Note: the created LaTeX file must be created on the *build* system with
+# the same Doxygen version that is used to generate the PDF docs.
 #
 # Usage:
 #
 #   $ sh make_header doxygen_path input-file output-file
 #
 # where
+#
 # - 'doxygen_path' is the full path to the doxygen executable
 #   or just 'doxygen'. If the full path is used an arbitrary
 #   doxygen executable and thus doxygen version can be used.
-# - 'input-file' is the pure (LaTeX) title page (template)
-# - 'output-file' is the generated (LaTeX) title page (template)
-#   that is used by `make' or `cmake` to generate the final LaTeX
-#   page header (combined doxygen template + FLTK title page).
+# - 'input-file' is the FLTK (LaTeX) title page (template)
+# - 'output-file' is the generated (LaTeX) title page that is used
+#   by `doxygen` to generate the FLTK page header (combined doxygen
+#   template + FLTK title page).
+#
+# Note: `setup.tex` (created from `setup.tex.in` by CMake) is included
+#   internally before `\begin{document}`. For details see code below.
 #
 #=======================================================================
 # This script requires a posix shell and uses the following commands:
@@ -45,6 +49,8 @@
 DOXY_CMD="$1"
 FLTK_HEAD="$2"
 DOXY_HEAD="$3"
+
+SETUP_FILE="setup.tex"
 
 # temp files
 
@@ -81,7 +87,7 @@ fi
 # '\begin{document}' (output: $DOXY_TEMP2)
 
 ( sed -e'/begin{document}/,$d' < $DOXY_TEMP1
-  cat setup.tex
+  cat $SETUP_FILE
   sed -e'1,/begin{document}/d' < $DOXY_TEMP1
 ) > $DOXY_TEMP2
 

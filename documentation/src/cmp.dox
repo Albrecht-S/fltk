@@ -70,6 +70,14 @@ Hebrew:
   \newpage
 \endlatexonly
 
+Example text: ... fonts are different for Chinese, Japanese and Korean.
+  Possible choices for Chinese include:
+
+  - gbsn (简体宋体, simpliﬁed Chinese)
+  - gkai (简体楷体, simpliﬁed Chinese)
+  - bsmi (繁体细上海宋体, traditional Chinese)
+  - bkai (繁体标楷体, traditional Chinese)
+
 Character table (monospaced):  (verbatim)
 \verbatim
 +---+---------------------------------+

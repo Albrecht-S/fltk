@@ -144,21 +144,39 @@ if(GENERATE_DOCS)
 
   endif()
 
-  # ----- test / debug -----
+  # ############################################################################
+  # ----- test/debug -----
+  # ############################################################################
+  #
+  # (1) set '_test_reproducible' to 1 to test "reproducible builds" (see below for details)
+  # (2) set '_force_pdflatex'    to 1 to ignore `lualatex` and build PDF docs with `pdflatex`
+  #
+  # (1) Reproducible builds would use a given (creation) date for building the PDF docs and
+  #     set the included metadata accordingly. To test this you can set an arbitrary time
+  #     in the statements below and verify that the generated PDF includes that timestamp
+  #     with tools like `pdfinfo` (Linux and/or macOS).
+  #     You can edit the timestamp below, but take care to use the correct syntax.
+  #
+  # (2) This version of CMakeLists.txt detects if `lualatex` and all needed fonts are
+  #     installed and enables PDF generation with `lualatex` if possible, otherwise it
+  #     falls back to using the "old" command `latex` (internally: `pdflatex`) to build
+  #     the PDF docs. Setting _force_pdflatex to 1 *enforces* the fallback.
 
-  # uncomment the following two commands to set an arbitrary date/time string
-  # for reproducible builds and then use
-  #   $ pdfinfo documentation/fltk.pdf
-  # to verify the creation date (if installed) or an equivalent command
+  set(_test_reproducible 0)  # 1 = "reprocucible build" with timestamp as given below
+  set(_force_pdflatex    0)  # 1 = enforce fallback to latex / pdflatex
 
-  ### string(TIMESTAMP PDF_DATE "D:20251212030303Z" UTC)
-  ### string(TIMESTAMP TODAY "December 12, 2025" UTC)
+  if(_test_reproducible)
+    string(TIMESTAMP PDF_DATE "D:20251212030303Z" UTC)
+    string(TIMESTAMP TODAY "December 12, 2025" UTC)
+  endif()
 
-  # uncomment the following command to force fallback to 'latex' ('pdflatex') for testing
+  if(_force_pdflatex)
+    set(FLTK_LATEX_CMD latex)
+  endif()
 
-  ### set(FLTK_LATEX_CMD latex)
-
+  # ############################################################################
   # ----- end of test/debug section -----
+  # ############################################################################
 
 
   # write LaTeX and LuaLaTeX specific setup file (used by both LaTeX compilers)
