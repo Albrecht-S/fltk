@@ -1465,6 +1465,11 @@ bool Fl_Wayland_Window_Driver::process_menu_or_tooltip(struct wld_window *new_wi
   return false;
 }
 
+// DEBUG only
+static const char* win_kind[] = {
+  "DECORATED", "SUBWINDOW", "POPUP", "UNFRAMED", "UNKNOWN", "UNKNOWN", "UNKNOWN", "UNKNOWN"
+};
+
 
 void Fl_Wayland_Window_Driver::makeWindow()
 {
@@ -1472,6 +1477,11 @@ void Fl_Wayland_Window_Driver::makeWindow()
   struct wld_window *new_window;
   bool is_floatingtitle = false;
   wait_for_expose_value = 1;
+
+  fprintf(stderr, "[%5d] --> makeWindow(%4d, %4d), border = %d, \"%s\"\n", __LINE__,
+          pWindow->w(), pWindow->h(), pWindow->border(),
+          pWindow->label() ? pWindow->label() : "No Label");
+  fflush(stdout);
 
   if (pWindow->parent() && !pWindow->window()) return;
   if (pWindow->parent() && !pWindow->window()->shown()) return;
@@ -1485,7 +1495,7 @@ void Fl_Wayland_Window_Driver::makeWindow()
   Fl_Wayland_Screen_Driver *scr_driver = (Fl_Wayland_Screen_Driver*)Fl::screen_driver();
 
   new_window->wl_surface = wl_compositor_create_surface(scr_driver->wl_compositor);
-//printf("makeWindow:%p %s %s\n", pWindow, pWindow->parent()?"SUB":"", pWindow->as_gl_window()?"GL":"");
+  // printf("makeWindow:%p %s %s\n", pWindow, pWindow->parent()?"SUB":"", pWindow->as_gl_window()?"GL":"");
   wl_surface_add_listener(new_window->wl_surface, &surface_listener, new_window);
 
   if (!shape()) { // rectangular FLTK windows are opaque
@@ -1497,7 +1507,7 @@ void Fl_Wayland_Window_Driver::makeWindow()
 
   if (pWindow->user_data() == &Fl_Screen_Driver::transient_scale_display &&
       Fl::first_window()) {
-  // put transient scale win at center of top window by making it a tooltip of top
+    // put transient scale win at center of top window by making it a tooltip of top
     Fl_Screen_Driver::transient_scale_parent = Fl::first_window();
     pWindow->set_tooltip_window();
     set_popup_window();
@@ -1508,7 +1518,11 @@ void Fl_Wayland_Window_Driver::makeWindow()
 
   if (popup_window()) { // a menu window or tooltip
     is_floatingtitle = process_menu_or_tooltip(new_window);
-
+    fprintf(stderr, "[%5d] --- makeWindow(%4d, %4d), popup_window: border = %d, kind = %s, \"%s\"\n", __LINE__,
+            pWindow->w(), pWindow->h(), pWindow->border(),
+            win_kind[new_window->kind],
+            pWindow->label() ? pWindow->label() : "No Label");
+    fflush(stdout);
   } else if (pWindow->border() && !pWindow->parent() ) { // a decorated window
     new_window->kind = DECORATED;
     new_window->frame = libdecor_decorate(scr_driver->libdecor_context, new_window->wl_surface,
@@ -1532,7 +1546,7 @@ void Fl_Wayland_Window_Driver::makeWindow()
     new_window->subsurface = wl_subcompositor_get_subsurface(scr_driver->wl_subcompositor,
                                                              new_window->wl_surface,
                                                              parent->wl_surface);
-//fprintf(stderr, "makeWindow: subsurface=%p\n", new_window->subsurface);
+    // fprintf(stderr, "makeWindow: subsurface=%p\n", new_window->subsurface);
     float f = Fl::screen_scale(pWindow->top_window()->screen_num());
     wl_subsurface_set_position(new_window->subsurface, pWindow->x() * f, pWindow->y() * f);
     wl_subsurface_set_desync(new_window->subsurface); // important
@@ -1546,14 +1560,18 @@ void Fl_Wayland_Window_Driver::makeWindow()
       wl_surface_commit(parent->wl_surface);
     }
     wait_for_expose_value = 0;
+#if (0)
     pWindow->border(0);
+#else
+    fprintf(stderr, "[%5d] --- SUBWINDOW --- DO NOT call pWindow->border(0); ---\n", __LINE__);
+#endif
     checkSubwindowFrame(); // make sure subwindow doesn't leak outside parent
 
   } else { // a window without decoration
     new_window->kind = UNFRAMED;
     new_window->xdg_surface = xdg_wm_base_get_xdg_surface(scr_driver->xdg_wm_base,
                                                           new_window->wl_surface);
-//fprintf(stderr, "makeWindow: xdg_wm_base_get_xdg_surface=%p\n", new_window->xdg_surface);
+    // fprintf(stderr, "makeWindow: xdg_wm_base_get_xdg_surface=%p\n", new_window->xdg_surface);
     xdg_surface_add_listener(new_window->xdg_surface, &xdg_surface_listener, new_window);
     new_window->xdg_toplevel = xdg_surface_get_toplevel(new_window->xdg_surface);
     xdg_toplevel_add_listener(new_window->xdg_toplevel, &xdg_toplevel_listener, new_window);
@@ -1561,9 +1579,17 @@ void Fl_Wayland_Window_Driver::makeWindow()
                             pWindow->xclass() ? pWindow->xclass() : get_prog_name());
     if (pWindow->label()) xdg_toplevel_set_title(new_window->xdg_toplevel, pWindow->label());
     wl_surface_commit(new_window->wl_surface);
+#if (0)
     pWindow->border(0);
+#else
+    fprintf(stderr, "[%5d] --- UNFRAMED --- DO NOT call pWindow->border(0); ---\n", __LINE__);
+#endif
   }
-
+  fprintf(stderr, "[%5d] <-- makeWindow(%4d, %4d), border = %d, kind = %s, \"%s\"\n", __LINE__,
+          pWindow->w(), pWindow->h(), pWindow->border(),
+          win_kind[new_window->kind],
+          pWindow->label() ? pWindow->label() : "No Label");
+  fflush(stdout);
   Fl_Window *old_first = Fl::first_window();
   struct wld_window * first_xid = (old_first ? fl_wl_xid(old_first) : NULL);
   Fl_X *xp = new Fl_X;

@@ -549,6 +549,11 @@ void Fl_Window::label(const char *name, const char *mininame) {
 }
 
 void Fl_Window::show() {
+  fprintf(stderr, "[%5d] --> Fl_Window::show(%4d, %4d), border = %d, parent: %s, label: \"%s\"\n", __LINE__,
+          w(), h(), border(), parent() ? "YES" : "NO ",
+          label() ? label() : "No Label");
+  fflush(stdout);
+
   image(Fl::scheme_bg_);
   if (Fl::scheme_bg_) {
     labeltype(FL_NORMAL_LABEL);
@@ -560,6 +565,10 @@ void Fl_Window::show() {
   if (!shown())
     default_size_range();
   pWindowDriver->show();
+  fprintf(stderr, "[%5d] <-- Fl_Window::show(%4d, %4d), border = %d, parent: %s, label: \"%s\"\n\n", __LINE__,
+          w(), h(), border(), parent() ? "YES" : "NO ",
+          label() ? label() : "No Label");
+  fflush(stdout);
 }
 
 void Fl_Window::resize(int X,int Y,int W,int H) {

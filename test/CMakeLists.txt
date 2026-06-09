@@ -37,7 +37,7 @@ file(MAKE_DIRECTORY ${TESTFILE_PATH})
 # can also add it with `list(APPEND extra_tests test1 test2)` etc..
 # See commented example at the end of this paragraph.
 
-set(extra_tests)
+set(extra_tests subwin-test)
 
 # Uncomment the following statement to set the C++ standard for your
 # extra test(s), or add more such lines, using "TEST_cxx_standard" as
