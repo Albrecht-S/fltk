@@ -59,6 +59,8 @@
 #include <FL/Fl_Browser.H>
 #include <stdio.h>
 
+#include "list_windows.cxx"
+
 #if HAVE_GL
 #include <FL/gl.h>
 #include <FL/Fl_Gl_Window.H>
@@ -358,6 +360,8 @@ int main(int argc, char **argv) {
 
   window.end();
   window.show(argc,argv);
+
+  Fl::add_timeout(1.0, list_windows);
 
   return Fl::run();
 }
