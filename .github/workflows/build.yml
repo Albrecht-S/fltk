@@ -24,6 +24,7 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install -y \
+        libjpeg-dev \
         libasound2-dev \
         libglew-dev \
         libglu1-mesa-dev \
@@ -51,13 +52,14 @@ jobs:
         cmake $GITHUB_WORKSPACE \
         -G Ninja \
         -D CMAKE_BUILD_TYPE=$BUILD_TYPE \
-        -D FLTK_BACKEND_WAYLAND=OFF \
         -D CMAKE_CXX_STANDARD=11 \
         -D CMAKE_CXX_EXTENSIONS=OFF \
-        -D FLTK_BUILD_FORMS=ON \
-        -D FLTK_OPTION_CAIRO_WINDOW=ON \
         -D CMAKE_C_FLAGS_INIT="-Wall -Wunused" \
-        -D CMAKE_CXX_FLAGS_INIT="-Wall -Wunused"
+        -D CMAKE_CXX_FLAGS_INIT="-Wall -Wunused -Wsuggest-override" \
+        -D FLTK_BACKEND_WAYLAND=OFF \
+        -D FLTK_BUILD_SHARED_LIBS:BOOL=ON \
+        -D FLTK_BUILD_FORMS=ON \
+        -D FLTK_OPTION_CAIRO_WINDOW=ON
 
     - name: Build
       working-directory: ${{github.workspace}}/build
@@ -80,6 +82,7 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install -y \
+        libjpeg-dev \
         libasound2-dev \
         libglu1-mesa-dev \
         libcairo2-dev \
@@ -115,10 +118,11 @@ jobs:
         -D CMAKE_BUILD_TYPE=$BUILD_TYPE \
         -D CMAKE_CXX_STANDARD=11 \
         -D CMAKE_CXX_EXTENSIONS=OFF \
-        -D FLTK_BUILD_FORMS=ON \
-        -D FLTK_OPTION_CAIRO_WINDOW=ON \
         -D CMAKE_C_FLAGS_INIT="-Wall -Wunused" \
-        -D CMAKE_CXX_FLAGS_INIT="-Wall -Wunused -Wsuggest-override"
+        -D CMAKE_CXX_FLAGS_INIT="-Wall -Wunused -Wsuggest-override" \
+        -D FLTK_BUILD_SHARED_LIBS:BOOL=ON \
+        -D FLTK_BUILD_FORMS=ON \
+        -D FLTK_OPTION_CAIRO_WINDOW=ON
 
     - name: Build
       working-directory: ${{github.workspace}}/build
@@ -171,10 +175,11 @@ jobs:
         -D CMAKE_BUILD_TYPE=$BUILD_TYPE \
         -D CMAKE_CXX_STANDARD=11 \
         -D CMAKE_CXX_EXTENSIONS=OFF \
-        -D FLTK_BUILD_FORMS=ON \
-        -D FLTK_OPTION_CAIRO_WINDOW=ON \
         -D CMAKE_C_FLAGS_INIT="-Wall -Wunused" \
-        -D CMAKE_CXX_FLAGS_INIT="-Wall -Wunused -Wsuggest-override"
+        -D CMAKE_CXX_FLAGS_INIT="-Wall -Wunused -Wsuggest-override" \
+        -D FLTK_BUILD_SHARED_LIBS:BOOL=ON \
+        -D FLTK_BUILD_FORMS=ON \
+        -D FLTK_OPTION_CAIRO_WINDOW=ON
 
     - name: Build
       working-directory: ${{github.workspace}}/build
@@ -213,12 +218,12 @@ jobs:
         cmake $GITHUB_WORKSPACE \
         -G Ninja \
         -D CMAKE_BUILD_TYPE=$BUILD_TYPE \
-        -D FLTK_BUILD_SHARED_LIBS:BOOL=ON \
-        -D FLTK_BUILD_FORMS=ON \
         -D CMAKE_CXX_STANDARD=11 \
         -D CMAKE_CXX_EXTENSIONS=OFF \
         -D CMAKE_C_FLAGS_INIT="-Wall -Wunused" \
-        -D CMAKE_CXX_FLAGS_INIT="-Wall -Wunused -Wsuggest-override"
+        -D CMAKE_CXX_FLAGS_INIT="-Wall -Wunused -Wsuggest-override" \
+        -D FLTK_BUILD_SHARED_LIBS:BOOL=ON \
+        -D FLTK_BUILD_FORMS=ON
 
     - name: Build
       working-directory: ${{github.workspace}}/build
@@ -246,7 +251,7 @@ jobs:
     - name: Configure CMake
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake .. -G Ninja `
+        cmake .. `
         -D FLTK_USE_SYSTEM_LIBJPEG:BOOL=OFF `
         -D FLTK_USE_SYSTEM_LIBPNG:BOOL=OFF `
         -D FLTK_USE_SYSTEM_ZLIB:BOOL=OFF `
@@ -257,7 +262,7 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: cmake --build . --config Release
 
-  build-windows-11-arm:
+  build-windows-arm:
     # This build config has been minimized. Please see other configs for further advice.
     # We don't use the "bash" shell (defaults to PowerShell) and avoid using environment
     # variables as far as possible and useful.
@@ -276,11 +281,11 @@ jobs:
     - name: Configure CMake
       working-directory: ${{github.workspace}}/build
       run: |
-        cmake .. \
-        -D FLTK_USE_SYSTEM_LIBJPEG:BOOL=OFF \
-        -D FLTK_USE_SYSTEM_LIBPNG:BOOL=OFF \
-        -D FLTK_USE_SYSTEM_ZLIB:BOOL=OFF \
-        -D FLTK_BUILD_FORMS=ON \
+        cmake .. `
+        -D FLTK_USE_SYSTEM_LIBJPEG:BOOL=OFF `
+        -D FLTK_USE_SYSTEM_LIBPNG:BOOL=OFF `
+        -D FLTK_USE_SYSTEM_ZLIB:BOOL=OFF `
+        -D FLTK_BUILD_FORMS=ON `
         -D FLTK_BUILD_SHARED_LIBS:BOOL=ON
 
     - name: Build
