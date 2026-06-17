@@ -238,7 +238,7 @@ jobs:
     #
     # Note:
     # We *must* disable system image libs to make sure we don't find incompatible ones on
-    # GitHub Actions runners, e.g. "windows-latest" (since Nov. 22, 2022, version: 20221120.1).
+    # GitHub Actions runners for Windows.
 
     runs-on: windows-latest
 
@@ -269,7 +269,7 @@ jobs:
     #
     # Note:
     # We *must* disable system image libs to make sure we don't find incompatible ones on
-    # GitHub Actions runners, e.g. "windows-latest" (since Nov. 22, 2022, version: 20221120.1).
+    # GitHub Actions runners for Windows.
     runs-on: windows-11-arm
 
     steps:
