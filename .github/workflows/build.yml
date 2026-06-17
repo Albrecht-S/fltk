@@ -6,8 +6,10 @@ name: Build and Test
 
 on:
   push:
-  workflow_dispatch:
   schedule:
+    # Runs at 04:00 UTC every day
+    - cron: '0 4 * * *'
+  workflow_dispatch: # Allows manual execution
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -144,6 +146,7 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install -y \
+        libjpeg-dev \
         libasound2-dev \
         libglu1-mesa-dev \
         libcairo2-dev \
