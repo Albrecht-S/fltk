@@ -1,6 +1,13 @@
 name: Build and Test
 
-on: [push]
+# This CI config file is used for the following actions. Some jobs are
+# only executed for specific action type (see below, "if: ..."), whereas
+# the most basic builds are executed on all triggers, including 'push'.
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -9,12 +16,13 @@ env:
 permissions:
   contents: read #  to fetch code (actions/checkout)
 
+  # Note: the CMake configure and build commands are platform agnostic and
+  # should work equally well on all supported platforms. You can convert this
+  # to a matrix build if you need (more) cross-platform coverage.See:
+  # https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+
 jobs:
   build-linux:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: ubuntu-latest
 
     steps:
@@ -36,18 +44,18 @@ jobs:
         ninja-build
 
     - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
+      # Create a separate build directory.
       # We'll use this as our working directory for all subsequent commands
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
+      # Use a bash shell on all platforms but Windows, so we can use the same syntax
+      # for environment variable access regardless of the host operating system
       shell: bash
+      # Note the current convention is to use the -S and -B options here to specify
+      # source and build directories, but we set the working directory explicitly
       working-directory: ${{github.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source
-      # and build directories, but this is only available with CMake 3.13 and higher.
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+
       run: |
         cmake $GITHUB_WORKSPACE \
         -G Ninja \
@@ -59,12 +67,12 @@ jobs:
         -D FLTK_BACKEND_WAYLAND=OFF \
         -D FLTK_BUILD_SHARED_LIBS:BOOL=ON \
         -D FLTK_BUILD_FORMS=ON \
-        -D FLTK_OPTION_CAIRO_WINDOW=ON
+        -D FLTK_OPTION_CAIRO_WINDOW=OFF
 
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
+      # Execute the build.
       run: cmake --build . --config $BUILD_TYPE
 
     - name: Unittest
@@ -100,18 +108,12 @@ jobs:
         ninja-build
 
     - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
       shell: bash
       working-directory: ${{github.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source
-      # and build directories, but this is only available with CMake 3.13 and higher.
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+
       run: |
         cmake $GITHUB_WORKSPACE \
         -G Ninja \
@@ -127,10 +129,12 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
 
   build-wayland-arm64:
+    # Don't run this job on 'push' events:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+
     runs-on: ubuntu-24.04-arm
 
     steps:
@@ -157,18 +161,11 @@ jobs:
         ninja-build
 
     - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
       shell: bash
       working-directory: ${{github.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source
-      # and build directories, but this is only available with CMake 3.13 and higher.
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: |
         cmake $GITHUB_WORKSPACE \
         -G Ninja \
@@ -184,14 +181,9 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
 
   build-macos:
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
     runs-on: macos-latest
 
     steps:
@@ -199,23 +191,19 @@ jobs:
 
     # note: `brew install ninja` is not necessary because it's already installed
     # on current macOS CI images. Therefore the following lines are commented out.
+    # We may need this though if GitHub changes their CI runner images.
+
     # - name: Install prerequisites
     #   run: |
     #     brew install ninja
 
     - name: Create Build Environment
-      # Some projects don't allow in-source building, so create a separate build directory
-      # We'll use this as our working directory for all subsequent commands
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
-      # Use a bash shell so we can use the same syntax for environment variable
-      # access regardless of the host operating system
       shell: bash
       working-directory: ${{github.workspace}}/build
-      # Note the current convention is to use the -S and -B options here to specify source
-      # and build directories, but this is only available with CMake 3.13 and higher.
-      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+
       run: |
         cmake $GITHUB_WORKSPACE \
         -G Ninja \
@@ -230,7 +218,6 @@ jobs:
     - name: Build
       working-directory: ${{github.workspace}}/build
       shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
 
   build-windows:
@@ -239,8 +226,10 @@ jobs:
     # variables as far as possible and useful.
     #
     # Note:
-    # We *must* disable system image libs to make sure we don't find incompatible ones
-    # on GitHub Actions runners for Windows.
+    # We *must* disable system image libs for all Windows builds to make sure we don't
+    # find incompatible ones on GitHub Actions runners for Windows.
+
+    # This job must use the Visual Studio IDE and toolchain
 
     runs-on: windows-latest
 
@@ -265,13 +254,10 @@ jobs:
       run: cmake --build . --config Release
 
   build-windows-arm:
-    # This build config has been minimized. Please see other configs for further advice.
-    # We don't use the "bash" shell (defaults to PowerShell) and avoid using environment
-    # variables as far as possible and useful.
-    #
-    # Note:
-    # We *must* disable system image libs to make sure we don't find incompatible ones
-    # on GitHub Actions runners for Windows.
+    # Don't run this job on 'push' events:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+
+    # Note: For details see above (job "build-windows")
     runs-on: windows-11-arm
 
     steps:
